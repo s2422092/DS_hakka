@@ -27,76 +27,69 @@ def store_registration():
     return render_template('stores/store_registration.html')
 
 
-
-
-@store_bp.route('/info_confirmed', methods=['GET', 'POST'])
+@store_bp.route('/info_confirmed', methods=['GET'])
 def info_confirmed():
     store_info = session.get('store_info')
     if not store_info:
-        flash("セッションが切れています。再度登録を行ってください。")
+        flash("セッションが切れています")
         return redirect(url_for('store.store_registration'))
 
-    if request.method == 'POST':
-        # 営業時間と休業情報をまとめてdescriptionに格納
-        weekend_info = "休業" if store_info['weekend_closed'] == '1' else f"{store_info['weekend_open']}〜{store_info['weekend_close']}"
-        description = f"月〜金: {store_info['weekday_open']}〜{store_info['weekday_close']}, 土日祝: {weekend_info}"
-
-        # 緯度経度取得
-        geolocator = Nominatim(user_agent="store_locator")
-        try:
-            location_result = geolocator.geocode(store_info['location'], timeout=10)
-            latitude = location_result.latitude if location_result else None
-            longitude = location_result.longitude if location_result else None
-        except Exception:
-            latitude = longitude = None
-
-        try:
-            conn = sqlite3.connect('app.db')
-            cursor = conn.cursor()
-
-            # storeテーブルへ挿入
-            cursor.execute("""
-                INSERT INTO store (store_name, email, password, location, representative, description)
-                VALUES (?, ?, ?, ?, ?, ?)
-            """, (
-                store_info['store_name'],
-                store_info['email'],
-                generate_password_hash(store_info['password']),
-                store_info['location'],
-                store_info['representative'],
-                description
-            ))
-
-            store_id = cursor.lastrowid  # 挿入したstoreのIDを取得
-
-            # locationsテーブルへも登録（緯度経度ありの場合のみ）
-            if latitude is not None and longitude is not None:
-                cursor.execute("""
-                    INSERT INTO locations (location_title, travel_data_id, latitude, longitude)
-                    VALUES (?, ?, ?, ?)
-                """, (
-                    store_info['location'], store_id, latitude, longitude))
-
-            conn.commit()
-            conn.close()
-
-            flash("店舗情報が登録されました")
-            session.pop('store_info', None)  # セッション削除
-
-        except sqlite3.IntegrityError:
-            flash("このメールアドレスはすでに使用されています")
-            return redirect(url_for('store.info_confirmed'))
-        except Exception as e:
-            flash(f"エラーが発生しました: {e}")
-            return redirect(url_for('store.info_confirmed'))
-
-        # 登録完了ページへリダイレクト
-        return redirect(url_for('store.registration_complete'))
-
-    # GET時は確認画面を表示
     return render_template('stores/info_confirmed.html', store=store_info)
 
 
-@store_bp.route('/registration_complete')
+@store_bp.route('/registration_complete', methods=['POST'])
 def registration_complete():
+    store_info = session.get('store_info')
+    if not store_info:
+        flash("セッションが切れています。もう一度入力してください。")
+        return redirect(url_for('store.store_registration'))
+
+    # 営業時間説明文
+    weekend_info = "休業" if store_info['weekend_closed'] == '1' else f"{store_info['weekend_open']}〜{store_info['weekend_close']}"
+    description = f"月〜金: {store_info['weekday_open']}〜{store_info['weekday_close']}, 土日祝: {weekend_info}"
+
+    # 緯度経度取得
+    geolocator = Nominatim(user_agent="store_locator")
+    try:
+        location_result = geolocator.geocode(store_info['location'], timeout=10)
+        latitude = location_result.latitude if location_result else None
+        longitude = location_result.longitude if location_result else None
+    except:
+        latitude = longitude = None
+
+    try:
+        conn = sqlite3.connect('app.db')
+        cursor = conn.cursor()
+
+        # store テーブルに挿入
+        cursor.execute("""
+            INSERT INTO store (store_name, email, password, location, representative, description)
+            VALUES (?, ?, ?, ?, ?, ?)
+        """, (
+            store_info['store_name'],
+            store_info['email'],
+            generate_password_hash(store_info['password']),
+            store_info['location'],
+            store_info['representative'],
+            description
+        ))
+        store_id = cursor.lastrowid
+
+        # locations テーブルに挿入
+        if latitude and longitude:
+            cursor.execute("""
+                INSERT INTO locations (location_title, travel_data_id, latitude, longitude)
+                VALUES (?, ?, ?, ?)
+            """, (store_info['location'], store_id, latitude, longitude))
+
+        conn.commit()
+        conn.close()
+
+        flash("店舗情報を登録しました")
+        session.pop('store_info', None)
+
+    except sqlite3.IntegrityError:
+        flash("このメールアドレスはすでに登録されています")
+        return redirect(url_for('store.store_registration'))
+
     return render_template('stores/registration_complete.html')
