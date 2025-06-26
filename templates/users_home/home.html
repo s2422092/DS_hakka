@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>店舗情報</title>
+</head>
+<body>
+    <!-- ヘッダー部分 -->
+    <header>
+        <h1>ホーム画面</h1>
+        <div>
+            <span>
+                ログイン中ユーザー:
+                {{ user.username if user and user.username else 'ゲスト' }}
+                |
+                <!-- ユーザー情報へのリンク -->
+                <a href="{{ url_for('user_data') }}">ユーザー情報</a>
+            </span>
+            <button onclick="location.href='{{ url_for('logout') }}'">ログアウト</button>
+            <button onclick="location.href='{{ url_for('map_shop') }}'">マップ</button>
+            <button onclick="location.href='{{ url_for('payment_history') }}'">決済履歴</button>
+        </div>
+    </header>
+
+    <!-- 店舗リスト -->
+    <main>
+        <h2>各店舗の情報</h2>
+        <ul>
+            {% if stores %}
+                {% for store in stores %}
+                    <li>
+                        <h3>{{ store.name }}</h3>
+                        <p>{{ store.description }}</p>
+                    </li>
+                {% endfor %}
+            {% else %}
+                <li>店舗情報がありません。</li>
+            {% endif %}
+        </ul>
+    </main>
+</body>
+</html>
