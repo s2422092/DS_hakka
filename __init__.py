@@ -6,6 +6,9 @@ def create_app():
     
     # ルートの登録
     from routes.general.explamation import general_bp
+    from routes.stores.store import store_bp 
+
     app.register_blueprint(general_bp)
+    app.register_blueprint(store_bp)
 
     return app
