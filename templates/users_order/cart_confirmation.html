@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>カート確認 - モバおる</title>
-    <link rel="stylesheet" href="../../static/css/users_order.css">
+    <!-- Flaskのurl_forを使ってCSSファイルを正しく読み込みます -->
     <link rel="stylesheet" href="{{ url_for('static', filename='css/users_order.css') }}">
 </head>
 <body>
@@ -17,8 +17,12 @@
     </header>
 
     <div class="sub-header">
-        <a href="menu.html">戻る</a>
-        <a href="payment_selection.html">レジに進む</a>
+        <!-- リンク先をurl_forで動的に生成します。
+             第一引数の 'users_order.menu' は、
+             'users_order' という名前のBlueprintに登録された 'menu' という名前の関数を指します。
+             実際の関数名に合わせて変更してください。 -->
+        <a href="{{ url_for('users_order.menu') }}">戻る</a>
+        <a href="{{ url_for('users_order.payment_selection') }}">レジに進む</a>
     </div>
 
     <main class="container">
