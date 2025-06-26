@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>お支払い方法選択 - モバおる</title>
+    <link rel="stylesheet" href="../../static/css/users_order.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/users_order.css') }}">
+</head>
+<body>
+
+    <header class="main-header">
+        <div class="store-name">モバおる - 〇〇食堂</div>
+        <div class="user-info">
+            <span>ユーザー名</span>
+        </div>
+    </header>
+
+    <div class="sub-header">
+        <a href="cart_confirmation.html">戻る</a>
+    </div>
+
+    <main class="container">
+        <div class="store-info">
+            <span class="name">店舗名</span>
+            <span>住所</span>
+        </div>
+
+        <div class="payment-container">
+            <div class="order-summary">
+                <div class="cart-list">
+                    <!-- Sample Item 1 -->
+                    <div class="cart-item">
+                        <span>カテゴリー</span>
+                        <span>個数</span>
+                        <span>値段</span>
+                    </div>
+                    <!-- Sample Item 2 -->
+                    <div class="cart-item">
+                        <span>カテゴリー</span>
+                        <span>個数</span>
+                        <span>値段</span>
+                    </div>
+                </div>
+                <div class="cart-total">
+                    何点 合計 〜〜〜円
+                </div>
+            </div>
+
+            <div class="payment-actions">
+                <a href="pay_payment.html" class="btn btn-paypay">paypayで支払う</a>
+            </div>
+        </div>
+    </main>
+
+</body>
+</html>
