@@ -1,7 +1,7 @@
-# app.py
 from __init__ import create_app
 
 app = create_app()
 
 if __name__ == '__main__':
-    app.run(debug=True,port =5003)
+    print("アクセスURL: http://localhost:5003/general/explamation")
+    app.run(debug=True, port=5003)
