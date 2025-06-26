@@ -110,3 +110,14 @@ p {
     font-size: 1em;
     color: #555;
 }
+
+.gray-section ul li.active {
+    background-color: #ffa500; /* 目立つ色（例：オレンジ） */
+    font-weight: bold;
+    border-radius: 6px;
+}
+
+.gray-section ul li.active a {
+    color: white; /* テキストも目立つように */
+    text-decoration: underline;
+}
