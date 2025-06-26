@@ -1,70 +1,140 @@
+/* === 共通設定 === */
+body {
+    font-family: "Segoe UI", sans-serif;
+    background-color: #f9f9f9;
+    padding: 2rem;
+    text-align: center;
+}
 
-        body { /*全体のフォントや背景色を設定*/
-            font-family: sans-serif;
-            background-color: #f8f8f8;
-            margin: 0;
-            padding: 0;
-            }
+h1 {
+    text-align: center;
+    color: #333;
+    font-size: 2rem;
+    margin-bottom: 1rem;
+}
 
-        .form-container { /*フォームのコンテナを設定*/
-            width: 500px;
-            margin: 50px auto;
-            padding: 30px;
-            background-color: white;
-            border-radius: 10px;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-        }
+p {
+    color: #555;
+    font-size: 1.1rem;
+}
 
-        h1 { /*タイトルのスタイルを設定*/
-            text-align: center;
-            margin-bottom: 30px;
-        }
+/* === 入力フォーム用 === */
+form {
+    max-width: 600px;
+    margin: auto;
+    background-color: #fff;
+    padding: 2rem;
+    border-radius: 12px;
+    box-shadow: 0 0 12px rgba(0, 0, 0, 0.1);
+}
 
-        label { /*ラベルのスタイルを設定*/
-            display: block;
-            margin-top: 15px;
-            font-weight: bold;
-        }
+label {
+    display: block;
+    margin-top: 1rem;
+    font-weight: bold;
+}
 
-        input[type="text"], 
-        input[type="email"], 
-        input[type="password"], 
-        input[type="time"] {
-            width: 100%; /*入力フィールドの幅を100%に設定*/
-            padding: 10px; /*パディングを設定*/
-            font-size: 20px; /*フォントサイズを20pxに設定*/
-            margin-top: 5px; /*マージンを設定*/
-            border: 1px solid #ccc; /*ボーダーを設定*/
-            border-radius: 6px; /*ボーダーの角を丸くする*/
-            box-sizing: border-box; 
-        }
+input[type="text"],
+input[type="email"],
+input[type="password"],
+input[type="time"] {
+    width: 100%;
+    padding: 0.5rem;
+    margin-top: 0.3rem;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+}
 
-        .time-group { /*時間入力のグループを設定*/
-            display: flex;
-            gap: 10px;
-            align-items: center;
-            margin-top: 5px;
-        }
+.checkbox-inline {
+    display: flex;
+    align-items: center;
+    margin-top: 0.5rem;
+}
 
-        .weekend-options {  /*土日の営業設定を行うオプションのスタイルを設定*/
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
+button[type="submit"],
+.confirm-button {
+    margin-top: 2rem;
+    padding: 0.75rem 1.5rem;
+    width: 100%;
+    background-color: #3498db;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 1.1rem;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
 
-        button { /*ボタンのスタイルを設定*/
-            display: block;
-            width: 100%;
-            margin-top: 30px;
-            padding: 12px;
-            font-size: 16px;
-            background-color: #4CAF50;
-            color: white;
-            border: none;
-            border-radius: 6px;
-            cursor: pointer;
-        }
+button[type="submit"]:hover,
+.confirm-button:hover {
+    background-color: #2980b9;
+}
 
-        button:hover { /*ホバー時のボタンのスタイルを設定*/
-            background-color: #45a049;
-        }
+.button-area {
+    text-align: center;
+    margin-top: 2rem;
+}
+
+/* === 確認ページのテーブル === */
+.container {
+    max-width: 600px;
+    margin: auto;
+    background-color: #f9f9f9;
+    padding: 2rem;
+    border-radius: 12px;
+    box-shadow: 0 0 10px rgba(0,0,0,0.1);
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 1rem;
+    text-align: left;
+}
+
+th, td {
+    padding: 0.6rem;
+    border-bottom: 1px solid #ccc;
+}
+
+/* === 汎用リンクスタイル === */
+a {
+    display: inline-block;
+    margin: 1rem 0.5rem;
+    padding: 0.75rem 1.5rem;
+    background-color: #3498db;
+    color: white;
+    text-decoration: none;
+    border-radius: 8px;
+    font-weight: bold;
+    transition: background-color 0.3s;
+}
+
+a:hover {
+    background-color: #2980b9;
+}
+
+/* 🔸 オレンジ色の「戻る」「トップへ」ボタン */
+.back-link,
+a[href*="explamation"] {
+    background-color: #ffa500;
+    color: white;
+    font-weight: bold;
+    padding: 10px 20px;
+    border-radius: 8px;
+    text-decoration: none;
+    margin-top: 10px;
+    display: inline-block;
+}
+
+.back-link:hover,
+a[href*="explamation"]:hover {
+    background-color: #e69500;
+}
+
+/* 補足や注記用テキスト */
+.note {
+    margin-top: 20px;
+    font-size: 14px;
+    color: #8c6239;
+}
