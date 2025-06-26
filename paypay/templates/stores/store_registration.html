@@ -1,0 +1,38 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+ "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="ja" lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <title>店舗登録フォーム</title>
+</head>
+<body>
+    <h1>店舗登録フォーム</h1>
+    <form action="/register_store" method="post">
+        <label for="store_id">店舗ID:</label><br>
+        <input type="number" id="store_id" name="store_id" required><br><br>
+
+        <label for="store_name">店舗名:</label><br>
+        <input type="text" id="store_name" name="store_name" required><br><br>
+
+        <label for="email">メールアドレス:</label><br>
+        <input type="email" id="email" name="email" required><br><br>
+
+        <label for="password">パスワード:</label><br>
+        <input type="password" id="password" name="password" required><br><br>
+
+        <label for="location">所在地:</label><br>
+        <input type="text" id="location" name="location"><br><br>
+
+        <label for="representative">代表者名:</label><br>
+        <input type="text" id="representative" name="representative"><br><br>
+
+        <label for="description">店舗紹介:</label><br>
+        <input type="text" id="description" name="description"><br><br>
+
+        <label for="time">営業時間:</label><br>
+        <input type="time" id="time" name="time"><br><br>
+
+        <button type="submit">登録</button>
+    </form>
+</body>
+</html>
