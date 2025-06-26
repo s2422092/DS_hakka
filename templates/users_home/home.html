@@ -22,11 +22,6 @@
     <!-- 灰色の背景部分（ナビゲーションセクション） -->
     <div class="gray-section">
         <ul>
-<<<<<<< HEAD
-            <li><a href="">ホーム</a></li>
-            <li><a href="{{url_for('usera_home.home')}}">マップ</a></li>
-            <li><a href="">決済履歴</a></li>
-=======
             <li class="{% if request.endpoint == 'users_home.home' %}active{% endif %}">
                 <a href="{{ url_for('users_home.home') }}">ホーム</a>
             </li>
@@ -36,7 +31,7 @@
             <li class="{% if request.endpoint == 'users_home.payment_history' %}active{% endif %}">
                 <a href="{{ url_for('users_home.payment_history') }}">決済履歴</a>
             </li>
->>>>>>> c456c127c358460c459cea52e8b634d88b3de93c
+
         </ul>
     </div>
     
