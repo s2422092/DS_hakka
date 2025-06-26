@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>カート確認 - モバおる</title>
-    <!-- Flaskのurl_forを使ってCSSファイルを正しく読み込みます -->
     <link rel="stylesheet" href="{{ url_for('static', filename='css/users_order.css') }}">
 </head>
 <body>
@@ -17,17 +16,13 @@
     </header>
 
     <div class="sub-header">
-        <!-- リンク先をurl_forで動的に生成します。
-             第一引数の 'users_order.menu' は、
-             'users_order' という名前のBlueprintに登録された 'menu' という名前の関数を指します。
-             実際の関数名に合わせて変更してください。 -->
         <a href="{{ url_for('users_order.menu') }}">戻る</a>
         <a href="{{ url_for('users_order.payment_selection') }}">レジに進む</a>
     </div>
 
     <main class="container">
         <div class="cart-list">
-            <!-- Sample Cart Item 1 -->
+            <!-- (中身は変更なし) -->
             <div class="cart-item">
                 <div class="cart-item-details">
                     <span>商品名</span>
@@ -42,9 +37,7 @@
                     <span>値段</span>
                 </div>
             </div>
-
-            <!-- Sample Cart Item 2 -->
-            <div class="cart-item">
+             <div class="cart-item">
                 <div class="cart-item-details">
                     <span>商品名</span>
                     <span>カテゴリー</span>
@@ -58,8 +51,6 @@
                     <span>値段</span>
                 </div>
             </div>
-
-            <!-- Sample Cart Item 3 -->
             <div class="cart-item">
                 <div class="cart-item-details">
                     <span>商品名</span>
@@ -75,7 +66,6 @@
                 </div>
             </div>
         </div>
-
         <div class="cart-total">
             3点 合計 〜〜〜円
         </div>

@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>メニュー - モバおる</title>
-    <link rel="stylesheet" href="../../static/css/users_order.css">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/users_order.css') }}">
 </head>
 <body>
@@ -18,8 +17,9 @@
     </header>
 
     <div class="sub-header">
-        <a href="../users_home/home.html">戻る</a>
-        <a href="cart_confirmation.html">カート確認</a>
+        <!-- 「戻る」は店舗一覧ページなどへ。チームのルーティング設定に合わせて変更してください。 -->
+        <a href="#">戻る</a>
+        <a href="{{ url_for('users_order.cart_confirmation') }}">カート確認</a>
     </div>
 
     <main class="container">
@@ -32,7 +32,7 @@
         </div>
 
         <div class="menu-grid">
-            <!-- Sample Menu Item 1 -->
+            <!-- (中身は変更なし) -->
             <div class="menu-card">
                 <div class="item-name">商品名</div>
                 <div class="item-category">カテゴリー</div>
@@ -41,8 +41,6 @@
                     <div class="item-status"></div>
                 </div>
             </div>
-
-            <!-- Sample Menu Item 2 (Selected) -->
             <div class="menu-card">
                 <div class="item-name">商品名</div>
                 <div class="item-category">カテゴリー</div>
@@ -56,8 +54,6 @@
                     <div class="item-status selected"></div>
                 </div>
             </div>
-            
-            <!-- Sample Menu Item 3 -->
             <div class="menu-card">
                 <div class="item-name">商品名</div>
                 <div class="item-category">カテゴリー</div>
@@ -66,8 +62,6 @@
                     <div class="item-status"></div>
                 </div>
             </div>
-            
-             <!-- Add more items... -->
         </div>
     </main>
 
