@@ -50,3 +50,75 @@
 .back-link:hover {
     color: #007BFF;
 }
+
+
+/* --- 共通スタイルに追加 or 上書きで対応できます --- */
+
+.login-form,
+.register-form {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.login-form label,
+.register-form label {
+    font-weight: bold;
+    color: #4a2e00;
+}
+
+.login-form input,
+.register-form input {
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    font-size: 16px;
+    background-color: #fff8f0;
+}
+
+.login-button,
+.register-button {
+    background-color: #ffa500;
+    color: white;
+    padding: 12px 24px;
+    border: none;
+    border-radius: 8px;
+    font-size: 18px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.login-button:hover,
+.register-button:hover {
+    background-color: #e69500;
+}
+
+.login-form .button-area,
+.register-form .button-area {
+    text-align: right;
+}
+
+/* 🔸 オレンジ色の「戻る」ボタン風リンク */
+.back-link {
+    display: inline-block;
+    margin-top: 10px;
+    padding: 10px 20px;
+    background-color: #ffa500;
+    color: white;
+    font-weight: bold;
+    border-radius: 8px;
+    text-decoration: none;
+    transition: background-color 0.3s;
+}
+
+.back-link:hover {
+    background-color: #e69500;
+}
+
+/* お知らせテキスト用 */
+.note {
+    margin-top: 20px;
+    font-size: 14px;
+    color: #8c6239;
+}
