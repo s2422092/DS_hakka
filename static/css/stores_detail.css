@@ -76,10 +76,10 @@ body {
 
 
 /* =============================================== */
-/* 2. 複数のページで使える共通パーツ */
+/* 2. 複数のページで使える共通パーツのスタイル */
 /* =============================================== */
 
-/* ホーム、手順ページなどで使う汎用ボックス */
+/* 主に手順ページなどで使う汎用的な情報表示ボックス */
 .content-box {
     display: flex;
     justify-content: center;
@@ -102,6 +102,44 @@ body {
 /* =============================================== */
 /* 3. 各ページ"専用"のスタイル */
 /* =============================================== */
+
+/* --- ホームページ（ダッシュボード） --- */
+.stats-container {
+    display: flex;
+    gap: 25px;
+    margin-bottom: 40px;
+}
+.stat-box {
+    flex: 1;
+    background-color: #ffffff;
+    padding: 20px;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+    text-align: center;
+}
+.stat-box p {
+    margin: 0 0 10px 0;
+    font-size: 1em;
+    font-weight: 500;
+    color: #666;
+}
+.stat-box h2 {
+    margin: 0;
+    font-size: 2.2em;
+    color: #007bff;
+}
+.chart-container {
+    background-color: #ffffff;
+    padding: 30px;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+}
+.chart-container h3 {
+    margin-top: 0;
+    margin-bottom: 20px;
+    text-align: center;
+    font-size: 1.4em;
+}
 
 /* --- 商品登録ページ --- */
 .template-download-area {
@@ -130,33 +168,36 @@ body {
     gap: 40px;
     align-items: stretch;
 }
-.registration-area .content-box {
+.registration-area .content-box { /* 商品登録ページのボックスは設定を上書き */
     flex: 1;
-    padding: 40px;
+    min-height: 400px;
+    padding: 20px;
 }
-.confirmation-area {
-    display: flex;
-    justify-content: flex-end;
-    margin-top: 30px;
+.upload-zone {
+    border-style: dashed;
+    border-width: 2px;
+    background-color: #fdfdff;
 }
-.confirm-button {
-    padding: 15px 40px;
-    font-size: 1.1em;
-    font-weight: bold;
-    color: #ffffff;
-    background-color: #007bff;
-    border: none;
-    border-radius: 8px;
-    cursor: pointer;
-    transition: background-color 0.2s;
-}
-.confirm-button:hover {
-    background-color: #0056b3;
-}
+.file-input-hidden { display: none; }
+.file-drop-area { display: flex; flex-direction: column; justify-content: center; align-items: center; width: 100%; height: 100%; cursor: pointer; }
+.file-drop-area .file-icon { font-size: 4em; margin-bottom: 20px; }
+#file-msg { color: #888; font-size: 1.1em; font-weight: 500; }
+.manual-input-zone { padding: 30px 40px; align-items: flex-start; }
+.form-fields { width: 100%; }
+.form-group { margin-bottom: 20px; text-align: left; }
+.form-group label { display: block; font-weight: bold; margin-bottom: 8px; font-size: 1em; color: #333; }
+.form-group input[type="text"],
+.form-group input[type="number"],
+.form-group textarea { width: 100%; padding: 12px; border: 1px solid #ccc; border-radius: 8px; font-size: 1em; box-sizing: border-box; }
+.form-group textarea { resize: vertical; }
+.confirmation-area { display: flex; justify-content: flex-end; margin-top: 30px; }
+.confirm-button { padding: 15px 40px; font-size: 1.1em; font-weight: bold; color: #ffffff; background-color: #007bff; border: none; border-radius: 8px; cursor: pointer; transition: background-color 0.2s; }
+.confirm-button:hover { background-color: #0056b3; }
+
 
 /* --- 確認ページ --- */
 .sub-nav {
-    background-color: #708090; /* ダークなスレートグレー */
+    background-color: #708090;
     padding: 10px 30px;
     box-shadow: 0 2px 4px rgba(0,0,0,0.1);
 }
@@ -211,25 +252,56 @@ body {
 .finalize-button:hover {
     background-color: #e2e6ea;
 }
+.data-display-list { list-style: none; padding: 0; margin: 0; text-align: left; width: 80%; max-width: 500px; }
+.data-display-list li { display: flex; justify-content: space-between; align-items: center; padding: 15px 0; border-bottom: 1px solid #eee; font-size: 1.1em; }
+.data-display-list li:last-child { border-bottom: none; }
+.data-display-list .label { font-weight: bold; color: #333; margin-right: 20px; }
+.data-display-list .value { color: #555; word-break: break-all; }
+
 
 /* --- 注文リストページ --- */
 .order-list-container {
     display: flex;
-    flex-direction: column; /* 注文を縦に並べる */
-    gap: 20px; /* 各注文の間の隙間 */
+    flex-direction: column;
+    gap: 20px;
 }
 .order-item {
-    background-color: #f8f9fa; /* 少しだけグレーがかった白 */
+    background-color: #f8f9fa;
     border: 1px solid #e0e0e0;
-    border-radius: 25px; /* 角を丸く */
+    border-radius: 25px;
     padding: 25px 30px;
     box-shadow: 0 2px 8px rgba(0,0,0,0.06);
     display: flex;
-    justify-content: space-around; /* 要素を均等に配置 */
+    justify-content: space-around;
     align-items: center;
 }
 .order-item span {
     font-size: 1.1em;
     color: #555;
     font-weight: 500;
+}
+
+/* --- 手順ページ --- */
+.instructions-content {
+    text-align: left;
+    width: 100%;
+    padding: 0 20px;
+    box-sizing: border-box;
+}
+.instructions-content h2 {
+    text-align: center;
+    border-bottom: 2px solid #007bff;
+    padding-bottom: 10px;
+    margin-top: 0;
+    margin-bottom: 30px;
+}
+.instructions-content h3 {
+    border-left: 5px solid #a0e9ff;
+    padding-left: 15px;
+    margin-top: 40px;
+}
+.instructions-content p {
+    padding-left: 20px;
+    line-height: 1.8;
+    color: #333;
 }
