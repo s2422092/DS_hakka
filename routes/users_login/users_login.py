@@ -10,7 +10,7 @@ users_login_bp = Blueprint('users_login', __name__, url_prefix='/users_login')
 @users_login_bp.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
-        username = request.form['username']
+        username = request.form['u_name']
         password = request.form['password']
 
     # DB接続してユーザー確認
@@ -22,7 +22,7 @@ def login():
 
         if user and check_password_hash(user[2], password):
             session['user_id'] = user[0]
-            session['username'] = user[1]
+            session['u_name'] = user[1]
             flash("ログインに成功しました")
             return redirect(url_for('users_home.home'))  # ✅ ユーザーホームにリダイレクト
         else:
@@ -36,13 +36,13 @@ def login():
 @users_login_bp.route('/signup', methods=['GET', 'POST'])
 def signup():
     if request.method == 'POST':
-        username = request.form.get('username')
+        u_name = request.form.get('u_name')
         email = request.form.get('email')
         password1 = request.form.get('password')
         password2 = request.form.get('confirm_password')
 
         # 入力チェック
-        if not username or not email or not password1 or not password2:
+        if not u_name or not email or not password1 or not password2:
             flash("すべての項目を入力してください")
             return render_template('users_login/signup.html')
 
@@ -58,7 +58,7 @@ def signup():
             cursor.execute("""
                 INSERT INTO users_table (u_name, email, password_hash)
                 VALUES (?, ?, ?)
-            """, (username, email, password_hash))
+            """, (u_name, email, password_hash))
             conn.commit()
             conn.close()
 
