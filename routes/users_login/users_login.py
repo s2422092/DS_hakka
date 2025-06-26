@@ -38,8 +38,10 @@ def signup():
     if request.method == 'POST':
         u_name = request.form.get('u_name')
         email = request.form.get('email')
-        password1 = request.form.get('password')
-        password2 = request.form.get('confirm_password')
+        password1 = request.form.get('password1')  # ✅ HTMLと一致
+        password2 = request.form.get('password2')  # ✅ HTMLと一致
+
+
 
         # 入力チェック
         if not u_name or not email or not password1 or not password2:
