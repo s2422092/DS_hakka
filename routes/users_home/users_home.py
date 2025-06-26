@@ -10,8 +10,8 @@ def home():
         flash("ログインしてください")
         return redirect(url_for('users_login.login'))  # ログインページにリダイレクト
 
-    username = session.get('username', 'ゲスト')  # セッションからユーザー名取得（任意）
-    return render_template('users_home/home.html', username=username)
+    u_name = session.get('u_name', 'ゲスト')  # セッションからユーザー名取得（任意）
+    return render_template('users_home/home.html', u_name=u_name)
 
 
 @users_home_bp.route('/logout')
