@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>お支払い方法選択 - モバおる</title>
-    <link rel="stylesheet" href="../../static/css/users_order.css">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/users_order.css') }}">
 </head>
 <body>
@@ -17,7 +16,7 @@
     </header>
 
     <div class="sub-header">
-        <a href="cart_confirmation.html">戻る</a>
+        <a href="{{ url_for('users_order.cart_confirmation') }}">戻る</a>
     </div>
 
     <main class="container">
@@ -48,7 +47,7 @@
             </div>
 
             <div class="payment-actions">
-                <a href="pay_payment.html" class="btn btn-paypay">paypayで支払う</a>
+                <a href="{{ url_for('users_order.pay_payment') }}" class="btn btn-paypay">paypayで支払う</a>
             </div>
         </div>
     </main>
