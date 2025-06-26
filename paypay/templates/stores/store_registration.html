@@ -7,10 +7,8 @@
 </head>
 <body>
     <h1>店舗登録フォーム</h1>
-    <form action="/register_store" method="post">
-        <label for="store_id">店舗ID:</label><br>
-        <input type="number" id="store_id" name="store_id" required><br><br>
-
+    <form action="info_confirmed.html" method="post">
+        
         <label for="store_name">店舗名:</label><br>
         <input type="text" id="store_name" name="store_name" required><br><br>
 
@@ -29,8 +27,32 @@
         <label for="description">店舗紹介:</label><br>
         <input type="text" id="description" name="description"><br><br>
 
-        <label for="time">営業時間:</label><br>
-        <input type="time" id="time" name="time"><br><br>
+        
+        <label>営業時間:</label><br>
+        月〜金: 
+        <input type="time" name="weekday_open" required> 〜 
+        <input type="time" name="weekday_close" required><br>
+
+        土日祝: 
+        <input type="time" name="weekend_open" id="weekend_open" required> 〜 
+        <input type="time" name="weekend_close" id="weekend_close" required>
+        <label>
+        <input type="checkbox" id="weekend_closed" name="weekend_closed" value="1" onchange="toggleWeekendInputs()"> 休業
+        </label>
+        <br><br>
+
+        <script>
+        function toggleWeekendInputs() {
+        const closed = document.getElementById('weekend_closed').checked;
+        document.getElementById('weekend_open').disabled = closed;
+        document.getElementById('weekend_close').disabled = closed;
+        if (closed) {
+            document.getElementById('weekend_open').value = "00:00";
+            document.getElementById('weekend_close').value = "00:00";
+        }
+        }
+        </script>
+
 
         <button type="submit">登録</button>
     </form>
