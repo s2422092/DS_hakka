@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>メニュー - モバイルオーダー</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/users_order.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+
+    <div class="container mx-auto max-w-lg p-4">
+        <!-- Header -->
+        <header class="mb-6 text-center">
+            <h1 class="text-2xl font-bold text-gray-800">〇〇食堂</h1>
+            <p class="text-gray-500">メニュー一覧</p>
+        </header>
+
+        <!-- Menu Items Grid -->
+        <div class="grid grid-cols-2 md:grid-cols-3 gap-4">
+            <!-- Sample Menu Item 1 -->
+            <div class="bg-white rounded-lg shadow-md overflow-hidden transform hover:scale-105 transition-transform duration-300">
+                <img src="https://placehold.co/300x200/F3F4F6/333333?text=料理画像" alt="料理の画像" class="w-full h-32 object-cover">
+                <div class="p-4">
+                    <h3 class="font-semibold text-lg text-gray-900">唐揚げ定食</h3>
+                    <p class="text-gray-600 mt-1">¥780</p>
+                    <button class="mt-4 w-full bg-blue-500 text-white py-2 rounded-lg hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-opacity-75">
+                        カートに追加
+                    </button>
+                </div>
+            </div>
+
+            <!-- Sample Menu Item 2 -->
+            <div class="bg-white rounded-lg shadow-md overflow-hidden transform hover:scale-105 transition-transform duration-300">
+                <img src="https://placehold.co/300x200/F3F4F6/333333?text=料理画像" alt="料理の画像" class="w-full h-32 object-cover">
+                <div class="p-4">
+                    <h3 class="font-semibold text-lg text-gray-900">ラーメン</h3>
+                    <p class="text-gray-600 mt-1">¥850</p>
+                    <button class="mt-4 w-full bg-blue-500 text-white py-2 rounded-lg hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-opacity-75">
+                        カートに追加
+                    </button>
+                </div>
+            </div>
+
+            <!-- Sample Menu Item 3 -->
+            <div class="bg-white rounded-lg shadow-md overflow-hidden transform hover:scale-105 transition-transform duration-300">
+                <img src="https://placehold.co/300x200/F3F4F6/333333?text=料理画像" alt="料理の画像" class="w-full h-32 object-cover">
+                <div class="p-4">
+                    <h3 class="font-semibold text-lg text-gray-900">カレーライス</h3>
+                    <p class="text-gray-600 mt-1">¥680</p>
+                    <button class="mt-4 w-full bg-blue-500 text-white py-2 rounded-lg hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-opacity-75">
+                        カートに追加
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Add more menu items here -->
+        </div>
+
+        <!-- Floating Cart Button -->
+        <div class="fixed bottom-0 left-0 right-0 p-4 bg-white border-t border-gray-200">
+            <a href="cart_confirmation.html" class="block w-full max-w-lg mx-auto bg-green-500 text-white text-center font-bold py-3 rounded-lg hover:bg-green-600 transition-colors">
+                カートを確認 (3点)
+            </a>
+        </div>
+    </div>
+
+</body>
+</html>

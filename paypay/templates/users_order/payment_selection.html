@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>お支払い方法選択 - モバイルオーダー</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/users_order.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+    </style>
+</head>
+<body class="bg-gray-50 flex items-center justify-center min-h-screen">
+
+    <div class="container mx-auto max-w-md p-4">
+        <div class="bg-white rounded-lg shadow-lg p-8">
+            <!-- Header -->
+            <header class="mb-8 text-center">
+                 <h1 class="text-2xl font-bold text-gray-800">お支払い</h1>
+            </header>
+
+            <!-- Store Information -->
+            <div class="mb-6">
+                <h2 class="text-lg font-semibold text-gray-700 mb-2">受け取り店舗</h2>
+                <div class="bg-gray-100 p-4 rounded-lg">
+                    <p class="font-bold text-gray-900">〇〇食堂</p>
+                    <p class="text-sm text-gray-600">大学会館 2階</p>
+                </div>
+            </div>
+
+            <!-- Usage Method -->
+            <div class="mb-8">
+                <h2 class="text-lg font-semibold text-gray-700 mb-2">ご利用方法</h2>
+                <div class="bg-gray-100 p-4 rounded-lg">
+                    <p class="font-bold text-gray-900">店内でお食事</p>
+                </div>
+            </div>
+            
+            <!-- Payment Button -->
+            <div class="mt-8">
+                 <a href="pay_payment.html" class="w-full bg-red-500 text-white flex items-center justify-center py-3 rounded-lg font-bold text-lg hover:bg-red-600 transition-colors">
+                    <svg class="w-8 h-8 mr-2" viewBox="0 0 128 128" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M117.333 64c0 29.463-23.87 53.333-53.333 53.333S10.667 93.463 10.667 64 34.537 10.667 64 10.667 117.333 34.537 117.333 64z" fill="#E50012"></path><path d="M80.12 43.197c-5.467 1.954-7.42 7.042-7.42 7.042l-1.953 9.766h21.485s5.468-.781 5.468-7.421c0-6.64-5.468-10.153-5.468-10.153s-10.153-1.172-12.107.766zM42.22 81.333h44.333s5.854 0 5.854-5.466c0-5.467-4.292-6.25-4.292-6.25l-12.11-1.172-1.952 10.152-25.385.39-4.686-23.438-12.11-1.562s-5.078-.39-5.078 5.078c0 5.467 5.078 12.11 5.078 12.11l4.29 8.208z" fill="#fff"></path></svg>
+                    <span>PayPayで支払う</span>
+                </a>
+            </div>
+
+            <div class="mt-4 text-center">
+                <a href="cart_confirmation.html" class="text-gray-500 hover:text-gray-700 text-sm">
+                    カートに戻る
+                </a>
+            </div>
+        </div>
+    </div>
+
+</body>
+</html>
