@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ホーム</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/users_home.css') }}">
+</head>
+<body>
+    <!-- 水色の背景部分（ユーザー情報セクション） -->
+    <div class="water-blue-section">
+        <span class="username">
+            ログイン中: {{ user.username if user and user.username else 'ゲスト' }}
+        </span>
+        <div class="user-links">
+            <a href="">ユーザー情報</a>
+            <a href="">ログアウト</a>
+        </div>
+    </div>
+
+    <!-- 灰色の背景部分（ナビゲーションセクション） -->
+    <div class="gray-section">
+        <ul>
+            <li><a href="">ホーム</a></li>
+            <li><a href="">マップ</a></li>
+            <li><a href="">決済履歴</a></li>
+        </ul>
+    </div>
+
+    <!-- 店舗リスト -->
+    <main>
+        <h2>各店舗の情報</h2>
+        <ul>
+            {% if stores %}
+                {% for store in stores %}
+                    <li>
+                        <h3>{{ store.name }}</h3>
+                        <p>{{ store.description }}</p>
+                    </li>
+                {% endfor %}
+            {% else %}
+                <li>店舗情報がありません。</li>
+            {% endif %}
+        </ul>
+    </main>
+</body>
+</html>
