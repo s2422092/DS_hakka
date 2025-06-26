@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ストア管理 - ホーム</title>
+    <style>
+        /* ページ全体の基本設定 */
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Hiragino Sans", "Noto Sans CJK JP", "Yu Gothic", sans-serif;
+            margin: 0;
+            background-color: #f0f2f5; /* 背景を少しグレーに */
+            color: #333;
+        }
+
+        /* ヘッダー部分 */
+        .site-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 30px;
+            background-color: #ffffff;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .site-header h1 {
+            font-size: 1.6em;
+            margin: 0;
+            font-weight: 600;
+        }
+
+        .header-links a {
+            margin-left: 25px;
+            text-decoration: none;
+            color: #007bff;
+            font-size: 0.9em;
+            font-weight: 500;
+        }
+        .header-links a:hover {
+            text-decoration: underline;
+        }
+
+        /* ナビゲーションバー */
+        .main-nav {
+            background-color: #ffffff;
+            padding: 10px 30px;
+            border-bottom: 1px solid #e0e0e0;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+
+        .main-nav ul {
+            display: flex;
+            list-style: none;
+            margin: 0;
+            padding: 0;
+            gap: 10px; /* ボタン間の隙間 */
+        }
+
+        .main-nav a {
+            display: block;
+            padding: 10px 20px;
+            text-decoration: none;
+            color: #333;
+            background-color: #e9ecef; /* 通常のボタンの背景色 */
+            border-radius: 8px;
+            font-weight: 500;
+            transition: background-color 0.2s;
+        }
+        
+        .main-nav a:hover {
+            background-color: #dee2e6; /* マウスを乗せた時の色 */
+        }
+        
+        /* 現在表示しているページを示すアクティブなボタン */
+        .main-nav a.active {
+            background-color: #a0e9ff; /* 明るい水色 */
+            color: #000;
+            font-weight: bold;
+        }
+
+        /* メインコンテンツエリア */
+        .main-content {
+            padding: 40px;
+        }
+        
+        .content-box {
+            background-color: #ffffff;
+            border: 1px solid #dcdcdc;
+            border-radius: 20px; /* 角を丸くする */
+            padding: 80px 40px; /* 内側の余白を大きく */
+            max-width: 900px;
+            margin: 0 auto; /* 左右中央に配置 */
+            text-align: center;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+            line-height: 1.8; /* 行間を広げる */
+        }
+    </style>
+</head>
+<body>
+
+    <header class="site-header">
+        <h1>ストア名 － ホーム</h1>
+        <div class="header-links">
+            <a href="#">ストア情報</a>
+            <a href="#">ログアウト</a>
+        </div>
+    </header>
+
+    <nav class="main-nav">
+        <ul>
+            <li><a href="#" class="active">ホーム</a></li>
+            <li><a href="#">商品登録</a></li>
+            <li><a href="#">注文リスト</a></li>
+            <li><a href="#">paypayの紐付け</a></li>
+            <li><a href="#">手順ページ</a></li>
+        </ul>
+    </nav>
+
+    <main class="main-content">
+        <div class="content-box">
+            <p>
+                ここではそれぞれの商品ごとの日毎の売り上げ<br>
+                期間ごとの売り上げの表示など売り上げ情報を可視化する。<br>
+                悠悟が前回のゼミで作成したコードを参照
+            </p>
+        </div>
+    </main>
+
+</body>
+</html>

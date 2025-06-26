@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ストア管理 - 商品登録</title>
+    <style>
+        /* ページ全体の基本設定 (ホーム画面と同じ) */
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Hiragino Sans", "Noto Sans CJK JP", "Yu Gothic", sans-serif;
+            margin: 0;
+            background-color: #f0f2f5;
+            color: #333;
+        }
+
+        /* ヘッダー部分 (ホーム画面と同じ) */
+        .site-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 30px;
+            background-color: #ffffff;
+            border-bottom: 1px solid #e0e0e0;
+        }
+        .site-header h1 {
+            font-size: 1.6em;
+            margin: 0;
+            font-weight: 600;
+        }
+        .header-links a {
+            margin-left: 25px;
+            text-decoration: none;
+            color: #007bff;
+            font-size: 0.9em;
+            font-weight: 500;
+        }
+        .header-links a:hover {
+            text-decoration: underline;
+        }
+
+        /* ナビゲーションバー (ホーム画面と同じ) */
+        .main-nav {
+            background-color: #ffffff;
+            padding: 10px 30px;
+            border-bottom: 1px solid #e0e0e0;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+        .main-nav ul {
+            display: flex;
+            list-style: none;
+            margin: 0;
+            padding: 0;
+            gap: 10px;
+        }
+        .main-nav a {
+            display: block;
+            padding: 10px 20px;
+            text-decoration: none;
+            color: #333;
+            background-color: #e9ecef;
+            border-radius: 8px;
+            font-weight: 500;
+            transition: background-color 0.2s;
+        }
+        .main-nav a:hover {
+            background-color: #dee2e6;
+        }
+        .main-nav a.active {
+            background-color: #a0e9ff;
+            color: #000;
+            font-weight: bold;
+        }
+
+        /* メインコンテンツエリア */
+        .main-content {
+            padding: 20px 40px 40px 40px;
+        }
+
+        /* テンプレートダウンロードボタンのエリア */
+        .template-download-area {
+            display: flex;
+            justify-content: flex-end; /* 右寄せにする */
+            margin-bottom: 20px;
+        }
+        .download-button {
+            padding: 8px 15px;
+            border: 1px solid #007bff;
+            color: #007bff;
+            background-color: #ffffff;
+            border-radius: 8px;
+            text-decoration: none;
+            font-size: 0.9em;
+            font-weight: 500;
+        }
+        .download-button:hover {
+            background-color: #f0f8ff;
+        }
+
+        /* 商品登録のメインエリア */
+        .registration-area {
+            display: flex;
+            gap: 40px; /* 左右のボックスの隙間 */
+            align-items: stretch; /* 高さを揃える */
+        }
+
+        /* ファイルアップロードと項目確認のボックス共通スタイル */
+        .content-box {
+            flex: 1; /* 横幅を均等に分ける */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-color: #ffffff;
+            border: 1px solid #dcdcdc;
+            border-radius: 30px; /* 角をより丸く */
+            min-height: 400px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+            text-align: center;
+            color: #888;
+            font-size: 1.2em;
+        }
+        
+        /* 確認ボタンのエリア */
+        .confirmation-area {
+            display: flex;
+            justify-content: flex-end;
+            margin-top: 30px;
+        }
+        .confirm-button {
+            padding: 15px 40px;
+            font-size: 1.1em;
+            font-weight: bold;
+            color: #ffffff;
+            background-color: #007bff;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        .confirm-button:hover {
+            background-color: #0056b3;
+        }
+
+    </style>
+</head>
+<body>
+
+    <header class="site-header">
+        <h1>ストア名 － 商品登録</h1>
+        <div class="header-links">
+            <a href="#">ストア情報</a>
+            <a href="#">ログアウト</a>
+        </div>
+    </header>
+
+    <nav class="main-nav">
+        <ul>
+            <li><a href="#">ホーム</a></li>
+            <li><a href="#" class="active">商品登録</a></li>
+            <li><a href="#">注文リスト</a></li>
+            <li><a href="#">paypayの紐付け</a></li>
+            <li><a href="#">手順ページ</a></li>
+        </ul>
+    </nav>
+
+    <main class="main-content">
+        
+        <div class="template-download-area">
+            <a href="#" class="download-button">データ入力テンプレートファイルをダウンロードするボタン</a>
+        </div>
+
+        <div class="registration-area">
+            <div class="content-box">
+                <p>ここではファイルを<br>アップロード</p>
+            </div>
+            <div class="content-box">
+                <p>ここで入力した項目の確認</p>
+            </div>
+        </div>
+
+        <div class="confirmation-area">
+            <button class="confirm-button">確認へ</button>
+        </div>
+
+    </main>
+
+</body>
+</html>
