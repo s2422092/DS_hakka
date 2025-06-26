@@ -12,3 +12,11 @@ def home():
 
     username = session.get('username', 'ゲスト')  # セッションからユーザー名取得（任意）
     return render_template('users_home/home.html', username=username)
+
+
+@users_home_bp.route('/logout')
+def logout():
+    # セッションをクリアしてログアウト
+    session.clear()
+    flash("ログアウトしました")
+    return redirect(url_for('users_login.login'))
