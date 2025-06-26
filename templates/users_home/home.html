@@ -10,8 +10,9 @@
     <!-- 水色の背景部分（ユーザー情報セクション） -->
     <div class="water-blue-section">
         <span class="username">
-            ログイン中: {{ user.username if user and user.username else 'ゲスト' }}
+            ログイン中: {{ username if username else 'ゲスト' }}
         </span>
+        
         <div class="user-links">
             <a href="">ユーザー情報</a>
             <a href="">ログアウト</a>
