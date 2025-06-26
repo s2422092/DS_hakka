@@ -93,3 +93,32 @@ def registration_complete():
         return redirect(url_for('store.store_registration'))
 
     return render_template('stores/registration_complete.html')
+
+
+from werkzeug.security import check_password_hash
+
+@store_bp.route('/store_login', methods=['GET', 'POST'])
+def store_login():
+    if request.method == 'POST':
+        store_name = request.form.get('store_name')
+        password = request.form.get('password')
+
+        # DBから店舗名に一致するレコードを取得
+        conn = sqlite3.connect('app.db')
+        cursor = conn.cursor()
+        cursor.execute("SELECT id, password FROM store WHERE store_name = ?", (store_name,))
+        result = cursor.fetchone()
+        conn.close()
+
+        if result:
+            store_id, hashed_pw = result
+            if check_password_hash(hashed_pw, password):
+                session['store_id'] = store_id
+                flash("ログインに成功しました")
+                return redirect(url_for('store.store_dashboard'))  # ←必要に応じて定義
+            else:
+                flash("パスワードが正しくありません")
+        else:
+            flash("その店舗名は登録されていません")
+
+    return render_template("stores/store_login.html")

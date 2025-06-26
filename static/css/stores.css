@@ -1,14 +1,24 @@
+/* === 共通設定 === */
 body {
     font-family: "Segoe UI", sans-serif;
     background-color: #f9f9f9;
     padding: 2rem;
+    text-align: center;
 }
 
 h1 {
     text-align: center;
     color: #333;
+    font-size: 2rem;
+    margin-bottom: 1rem;
 }
 
+p {
+    color: #555;
+    font-size: 1.1rem;
+}
+
+/* === 入力フォーム用 === */
 form {
     max-width: 600px;
     margin: auto;
@@ -41,9 +51,10 @@ input[type="time"] {
     margin-top: 0.5rem;
 }
 
-button[type="submit"] {
+button[type="submit"],
+.confirm-button {
     margin-top: 2rem;
-    padding: 0.75rem;
+    padding: 0.75rem 1.5rem;
     width: 100%;
     background-color: #3498db;
     color: white;
@@ -51,47 +62,77 @@ button[type="submit"] {
     border-radius: 8px;
     font-size: 1.1rem;
     cursor: pointer;
+    transition: background-color 0.3s;
 }
 
-button:hover {
+button[type="submit"]:hover,
+.confirm-button:hover {
     background-color: #2980b9;
 }
 
 .button-area {
     text-align: center;
-    margin-top: 1.5rem;
+    margin-top: 2rem;
 }
 
-.back-link {
-    display: inline-block;
-    color: #555;
-    text-decoration: none;
+/* === 確認ページのテーブル === */
+.container {
+    max-width: 600px;
+    margin: auto;
+    background-color: #f9f9f9;
+    padding: 2rem;
+    border-radius: 12px;
+    box-shadow: 0 0 10px rgba(0,0,0,0.1);
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
     margin-top: 1rem;
+    text-align: left;
 }
 
-.back-link:hover {
-    text-decoration: underline;
+th, td {
+    padding: 0.6rem;
+    border-bottom: 1px solid #ccc;
 }
 
-
-/* 🔸 オレンジ色の「戻る」ボタン風リンク */
-.back-link {
+/* === 汎用リンクスタイル === */
+a {
     display: inline-block;
-    margin-top: 10px;
-    padding: 10px 20px;
-    background-color: #ffa500;
+    margin: 1rem 0.5rem;
+    padding: 0.75rem 1.5rem;
+    background-color: #3498db;
     color: white;
-    font-weight: bold;
-    border-radius: 8px;
     text-decoration: none;
+    border-radius: 8px;
+    font-weight: bold;
     transition: background-color 0.3s;
 }
 
-.back-link:hover {
+a:hover {
+    background-color: #2980b9;
+}
+
+/* 🔸 オレンジ色の「戻る」「トップへ」ボタン */
+.back-link,
+a[href*="explamation"] {
+    background-color: #ffa500;
+    color: white;
+    font-weight: bold;
+    padding: 10px 20px;
+    border-radius: 8px;
+    text-decoration: none;
+    margin-top: 10px;
+    display: inline-block;
+}
+
+.back-link:hover,
+a[href*="explamation"]:hover {
     background-color: #e69500;
 }
 
-/* お知らせテキスト用 */
+/* 補足や注記用テキスト */
 .note {
     margin-top: 20px;
     font-size: 14px;

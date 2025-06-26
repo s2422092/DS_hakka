@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <title>店舗情報確認</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/stores1.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/stores.css') }}">
 
 </head>
 <body>
@@ -28,6 +28,11 @@
             </td>
         </tr>
     </table>
+
+
+    <div class="button-area">
+        <a href="{{url_for('store.store_registration')}}" class="back-link">← 戻る</a>
+    </div>
 
     <div class="button-area">
         <form action="{{ url_for('store.registration_complete') }}" method="post">
