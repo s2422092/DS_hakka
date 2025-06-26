@@ -1,0 +1,235 @@
+/* =============================================== */
+/* 1. サイト全体の共通スタイル */
+/* (body, header, navなど全ページで使うもの) */
+/* =============================================== */
+
+/* ページ全体の基本設定 */
+body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Hiragino Sans", "Noto Sans CJK JP", "Yu Gothic", sans-serif;
+    margin: 0;
+    background-color: #f0f2f5;
+    color: #333;
+}
+
+/* ヘッダー部分 */
+.site-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px 30px;
+    background-color: #ffffff;
+    border-bottom: 1px solid #e0e0e0;
+}
+.site-header h1 {
+    font-size: 1.6em;
+    margin: 0;
+    font-weight: 600;
+}
+.header-links a {
+    margin-left: 25px;
+    text-decoration: none;
+    color: #007bff;
+    font-size: 0.9em;
+    font-weight: 500;
+}
+.header-links a:hover {
+    text-decoration: underline;
+}
+
+/* メインナビゲーションバー */
+.main-nav {
+    background-color: #ffffff;
+    padding: 10px 30px;
+    border-bottom: 1px solid #e0e0e0;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+.main-nav ul {
+    display: flex;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    gap: 10px;
+}
+.main-nav a {
+    display: block;
+    padding: 10px 20px;
+    text-decoration: none;
+    color: #333;
+    background-color: #e9ecef;
+    border-radius: 8px;
+    font-weight: 500;
+    transition: background-color 0.2s;
+}
+.main-nav a:hover {
+    background-color: #dee2e6;
+}
+.main-nav a.active {
+    background-color: #a0e9ff;
+    color: #000;
+    font-weight: bold;
+}
+
+/* メインコンテンツエリアの基本設定 */
+.main-content {
+    padding: 20px 40px 40px 40px;
+}
+
+
+/* =============================================== */
+/* 2. 複数のページで使える共通パーツ */
+/* =============================================== */
+
+/* ホーム、手順ページなどで使う汎用ボックス */
+.content-box {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: #ffffff;
+    border: 1px solid #dcdcdc;
+    border-radius: 30px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+    text-align: center;
+    color: #555;
+    font-size: 1.1em;
+    padding: 80px 40px;
+    min-height: 400px;
+    max-width: 900px;
+    margin: 0 auto;
+    line-height: 1.8;
+}
+
+
+/* =============================================== */
+/* 3. 各ページ"専用"のスタイル */
+/* =============================================== */
+
+/* --- 商品登録ページ --- */
+.template-download-area {
+    display: flex;
+    justify-content: flex-end;
+    margin-bottom: 20px;
+    max-width: 980px; /* レイアウトを合わせるため */
+    margin-left: auto;
+    margin-right: auto;
+}
+.download-button {
+    padding: 8px 15px;
+    border: 1px solid #007bff;
+    color: #007bff;
+    background-color: #ffffff;
+    border-radius: 8px;
+    text-decoration: none;
+    font-size: 0.9em;
+    font-weight: 500;
+}
+.download-button:hover {
+    background-color: #f0f8ff;
+}
+.registration-area {
+    display: flex;
+    gap: 40px;
+    align-items: stretch;
+}
+.registration-area .content-box {
+    flex: 1;
+    padding: 40px;
+}
+.confirmation-area {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 30px;
+}
+.confirm-button {
+    padding: 15px 40px;
+    font-size: 1.1em;
+    font-weight: bold;
+    color: #ffffff;
+    background-color: #007bff;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+.confirm-button:hover {
+    background-color: #0056b3;
+}
+
+/* --- 確認ページ --- */
+.sub-nav {
+    background-color: #708090; /* ダークなスレートグレー */
+    padding: 10px 30px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+.back-button {
+    display: inline-block;
+    padding: 10px 25px;
+    text-decoration: none;
+    color: #000;
+    background-color: #a0e9ff;
+    border-radius: 8px;
+    font-weight: bold;
+    transition: opacity 0.2s;
+}
+.back-button:hover {
+    opacity: 0.85;
+}
+.confirmation-box {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: #ffffff;
+    border: 1px solid #dcdcdc;
+    border-radius: 30px;
+    min-height: 500px;
+    width: 100%;
+    max-width: 900px;
+    margin: 20px auto 0 auto;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+    text-align: center;
+    color: #888;
+    font-size: 1.2em;
+}
+.action-area {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 30px;
+    max-width: 900px;
+    margin-left: auto;
+    margin-right: auto;
+}
+.finalize-button {
+    padding: 12px 35px;
+    font-size: 1.1em;
+    font-weight: 500;
+    color: #333;
+    background-color: #f8f9fa;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+.finalize-button:hover {
+    background-color: #e2e6ea;
+}
+
+/* --- 注文リストページ --- */
+.order-list-container {
+    display: flex;
+    flex-direction: column; /* 注文を縦に並べる */
+    gap: 20px; /* 各注文の間の隙間 */
+}
+.order-item {
+    background-color: #f8f9fa; /* 少しだけグレーがかった白 */
+    border: 1px solid #e0e0e0;
+    border-radius: 25px; /* 角を丸く */
+    padding: 25px 30px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+    display: flex;
+    justify-content: space-around; /* 要素を均等に配置 */
+    align-items: center;
+}
+.order-item span {
+    font-size: 1.1em;
+    color: #555;
+    font-weight: 500;
+}

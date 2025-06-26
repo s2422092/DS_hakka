@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ストア管理 - 商品登録</title>
+
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/stores_detail.css') }}">
+</head>
+<body>
+
+    <header class="site-header">
+        <h1>ストア名 － 商品登録</h1>
+        <div class="header-links">
+            <a href="#">ストア情報</a>
+            <a href="#">ログアウト</a>
+        </div>
+    </header>
+
+    <nav class="main-nav">
+        <ul>
+            <li><a href="#">ホーム</a></li>
+            <li><a href="#" class="active">商品登録</a></li>
+            <li><a href="#">注文リスト</a></li>
+            <li><a href="#">paypayの紐付け</a></li>
+            <li><a href="#">手順ページ</a></li>
+        </ul>
+    </nav>
+
+    <main class="main-content">
+        
+        <form action="/register_product" method="POST" enctype="multipart/form-data">
+
+            <div class="template-download-area">
+                <a href="/static/templates/product_template.csv" class="download-button" download>データ入力テンプレートをダウンロード</a>
+            </div>
+
+            <div class="registration-area">
+                <div class="content-box upload-zone">
+                    <input type="file" id="file-upload" name="product_csv" class="file-input-hidden">
+                    
+                    <label for="file-upload" class="file-drop-area">
+                        <span class="file-icon">📤</span>
+                        <span id="file-msg">ここにファイルをドラッグ＆ドロップ<br>またはクリックして選択</span>
+                    </label>
+                </div>
+
+                <div class="content-box manual-input-zone">
+                    <div class="form-fields">
+                        <div class="form-group">
+                            <label for="product-name">商品名</label>
+                            <input type="text" id="product-name" name="product_name" placeholder="例：日替わりランチ">
+                        </div>
+                        <div class="form-group">
+                            <label for="product-price">値段（円）</label>
+                            <input type="number" id="product-price" name="product_price" placeholder="例: 500">
+                        </div>
+                        <div class="form-group">
+                            <label for="product-description">商品説明</label>
+                            <textarea id="product-description" name="product_description" rows="4" placeholder="商品の特徴などを入力"></textarea>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="confirmation-area">
+                <button type="submit" class="confirm-button">確認へ</button>
+            </div>
+
+        </form>
+    </main>
+
+    <script>
+        const fileUploadInput = document.getElementById('file-upload');
+        const fileMsgSpan = document.getElementById('file-msg');
+
+        fileUploadInput.addEventListener('change', () => {
+            if (fileUploadInput.files.length > 0) {
+                // ファイルが選択されたら、メッセージをファイル名に変更
+                fileMsgSpan.textContent = `選択されたファイル： ${fileUploadInput.files[0].name}`;
+            } else {
+                // ファイル選択がキャンセルされたらメッセージを元に戻す
+                fileMsgSpan.innerHTML = 'ここにファイルをドラッグ＆ドロップ<br>またはクリックして選択';
+            }
+        });
+    </script>
+
+</body>
+</html>
