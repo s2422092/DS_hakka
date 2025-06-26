@@ -53,11 +53,11 @@ def signup():
         # 入力チェック
         if not username or not email or not password1 or not password2:
             flash("すべての項目を入力してください")
-            return render_template('registration.html')
+            return render_template('users_login/signup.html')
 
         if password1 != password2:
             flash("パスワードが一致しません")
-            return render_template('registration.html')
+            return render_template('users_login/signup.html')
 
         # パスワードをハッシュ化
         password_hash = generate_password_hash(password1)
