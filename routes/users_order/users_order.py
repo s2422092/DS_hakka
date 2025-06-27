@@ -45,19 +45,34 @@ def add_to_cart():
     return {'message': 'カートに追加しました'}
 
 
-@users_order_bp.route('/cart_confirmation')
-def cart_confirmation():
+@users_order_bp.route('/cart_confirmation/<int:store_id>')
+def cart_confirmation(store_id):
     cart = session.get('cart', [])
     total_quantity = sum(item['quantity'] for item in cart)
     total_price = sum(item['quantity'] * item['price'] for item in cart)
+
+    store_name = session.get('store_name', '')
+    if not store_name:
+        # store_nameがなければDBから取得
+        conn = sqlite3.connect('app.db')
+        cursor = conn.cursor()
+        cursor.execute("SELECT store_name FROM store WHERE store_id = ?", (store_id,))
+        row = cursor.fetchone()
+        conn.close()
+        if row:
+            store_name = row[0]
+            session['store_name'] = store_name
+        else:
+            flash("店舗情報が取得できませんでした。")
+            return redirect(url_for('users_home.home'))
 
     return render_template(
         'users_order/cart_confirmation.html',
         cart=cart,
         total_quantity=total_quantity,
         total_price=total_price,
-        store_name=session.get('store_name', ''),
-        store_id=session.get('store_id', 0),  # ← ここで明示的に store_id を渡す
+        store_name=store_name,
+        store_id=store_id,  # ← Jinjaテンプレートに正しく渡す
         u_name=session.get('u_name', 'ゲスト')
     )
 
