@@ -9,45 +9,49 @@
 <body>
 
     <header class="main-header">
-        <div class="store-name">モバおる - 〇〇食堂</div>
+        <div class="store-name">モバおる - {{ store_name }}</div>
         <div class="user-info">
-            <span>ユーザー名</span>
+            <span>{{ u_name if u_name else "ゲスト" }}</span>
         </div>
     </header>
 
     <div class="sub-header">
-        <a href="{{ url_for('users_home.home') }}">戻る</a>
+        <a href="{{ url_for('users_order.cart_confirmation', store_id=store_id) }}">カート確認に戻る</a>
     </div>
 
     <main class="container">
-        <div class="store-info">
-            <span class="name">店舗名</span>
-            <span>住所</span>
-        </div>
+        <h2>ご注文内容の最終確認</h2>
 
         <div class="payment-container">
             <div class="order-summary">
                 <div class="cart-list">
-                    <!-- Sample Item 1 -->
-                    <div class="cart-item">
-                        <span>カテゴリー</span>
-                        <span>個数</span>
-                        <span>値段</span>
-                    </div>
-                    <!-- Sample Item 2 -->
-                    <div class="cart-item">
-                        <span>カテゴリー</span>
-                        <span>個数</span>
-                        <span>値段</span>
-                    </div>
+                    {% if cart %}
+                        {% for item in cart %}
+                        <div class="cart-item">
+                            <div class="cart-item-details">
+                                <span class="item-name">{{ item.name }}</span>
+                                <span class="item-category">{{ item.category }}</span>
+                            </div>
+                            <div class="cart-item-quantity">
+                                <span>数量: {{ item.quantity }}</span>
+                            </div>
+                            <div class="cart-item-price">
+                                <span>{{ item.price * item.quantity }}円</span>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    {% else %}
+                        <p>カートは空です。</p>
+                    {% endif %}
                 </div>
                 <div class="cart-total">
-                    何点 合計 〜〜〜円
+                    {{ total_quantity }}点 合計 {{ total_price }}円
                 </div>
             </div>
 
             <div class="payment-actions">
-                <a href="{{ url_for('users_order.pay_payment') }}" class="btn btn-paypay">paypayで支払う</a>
+                <h3>お支払い方法</h3>
+                <a href="{{ url_for('users_order.pay_payment') }}" class="btn btn-paypay">PayPayで支払う</a>
             </div>
         </div>
     </main>

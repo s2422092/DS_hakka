@@ -17,8 +17,8 @@
 
     <div class="sub-header">
         <a href="{{ url_for('users_order.menu', store_id=store_id) }}">戻る</a>
-        <a href="{{url_for('users_order.payment_selection')}}">レジに進む</a>
-    </div>
+        <a href="{{url_for('users_order.payment_selection', store_id=store_id)}}">レジに進む</a>
+         </div>
 
     <main class="container">
         <div class="cart-list">

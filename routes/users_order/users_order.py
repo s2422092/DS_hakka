@@ -35,51 +35,12 @@ def menu(store_id):
 
 from flask import request, session, jsonify
 
-@users_order_bp.route('/add_to_cart', methods=['POST'])
-def add_to_cart():
-    data = request.get_json()
-    try:
-        menu_id = int(data.get('menu_id'))
-        name = data.get('name')
-        category = data.get('category')
-        price = int(data.get('price'))
-        quantity = int(data.get('quantity', 1))
-    except (TypeError, ValueError):
-        return jsonify({'error': '不正なデータです'}), 400
-
-    if not all([menu_id, name, category, price]):
-        return jsonify({'error': '必要なデータがありません'}), 400
-
-    cart = session.get('cart', [])
-
-    for item in cart:
-        if item['menu_id'] == menu_id:
-            item['quantity'] += quantity
-            break
-    else:
-        cart.append({
-            'menu_id': menu_id,
-            'name': name,
-            'category': category,
-            'price': price,
-            'quantity': quantity
-        })
-
-    session['cart'] = cart
-    session.modified = True
-    return jsonify({'message': 'カートに追加しました', 'cart_count': sum(i['quantity'] for i in cart)})
-
-
 @users_order_bp.route('/cart_confirmation/<int:store_id>')
 def cart_confirmation(store_id):
-    # セッションからカート情報を取得（なければ空リスト）
+    # この関数は変更ありません
     cart = session.get('cart', [])
-
-    # 合計数量と合計金額を計算
     total_quantity = sum(item['quantity'] for item in cart)
     total_price = sum(item['quantity'] * item['price'] for item in cart)
-
-    # 店舗名をセッションから取得、なければDBから取得しセッションに保存
     store_name = session.get('store_name', '')
     if not store_name:
         conn = sqlite3.connect('app.db')
@@ -93,8 +54,6 @@ def cart_confirmation(store_id):
         else:
             flash("店舗情報が取得できませんでした。")
             return redirect(url_for('users_home.home'))
-
-    # テンプレートに渡す
     return render_template(
         'users_order/cart_confirmation.html',
         cart=cart,
@@ -105,24 +64,49 @@ def cart_confirmation(store_id):
         u_name=session.get('u_name', 'ゲスト')
     )
 
-@users_order_bp.route('/payment_selection')
-def payment_selection():
-    
-    return render_template('users_order/payment_selection.html')
+@users_order_bp.route('/payment_selection/<int:store_id>') # store_idを受け取るように変更
+def payment_selection(store_id):
+    # ▼▼▼▼▼ ここを修正 ▼▼▼▼▼
+    # cart_confirmationとほぼ同じ処理を行い、セッションからカート情報を取得
+    cart = session.get('cart', [])
+
+    # カートが空なら、メニューページに戻す（親切設計）
+    if not cart:
+        flash("カートが空です。")
+        return redirect(url_for('users_order.menu', store_id=store_id))
+
+    # 合計数量と合計金額を計算
+    total_quantity = sum(item['quantity'] for item in cart)
+    total_price = sum(item['quantity'] * item['price'] for item in cart)
+
+    # テンプレートにカート情報や合計金額を渡す
+    return render_template(
+        'users_order/payment_selection.html',
+        cart=cart,
+        total_quantity=total_quantity,
+        total_price=total_price,
+        store_name=session.get('store_name', ''),
+        store_id=store_id,
+        u_name=session.get('u_name', 'ゲスト')
+    )
+    # ▲▲▲▲▲ ここまで修正 ▲▲▲▲▲
 
 
 @users_order_bp.route('/pay_payment')
-
-
-
-
-
 def pay_payment():
-    return render_template('users_order/pay_payment.html')
+    # ▼▼▼▼▼ ここを修正 ▼▼▼▼▼
+    # ここでPayPayのAPIを叩くなどの実際の支払い処理を将来的に実装する
 
+    # 注文が完了したとみなし、カートのセッションを削除
+    session.pop('cart', None)
+    
+    flash("お支払いが完了しました。")
+    # 予約番号ページへリダイレクト
+    return redirect(url_for('users_order.reservation_number'))
+    # ▲▲▲▲▲ ここまで修正 ▲▲▲▲▲
 
 
 @users_order_bp.route('/reservation_number')
 def reservation_number():
+    # この関数は変更ありません
     return render_template('users_order/reservation_number.html')
-
