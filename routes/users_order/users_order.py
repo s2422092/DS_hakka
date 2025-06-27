@@ -24,7 +24,7 @@ def menu(store_id):
     store_name = row[0]
 
     # メニュー取得（例）
-    cursor.execute("SELECT menu_id, item_name, category, price FROM menu WHERE store_id = ?", (store_id,))
+    cursor.execute("SELECT menu_id, menu_name, category, price FROM menus WHERE store_id = ?", (store_id,))
     menu_items = cursor.fetchall()
 
     cursor.close()
