@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ストア管理 - ホーム</title>
+
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/stores_detail.css') }}">
+    
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+
+    <header class="site-header">
+        <h1>ストア名 - ホーム</h1>
+        <div class="header-links">
+            <a href="{{ url_for('store_info_page') }}">ストア情報</a>
+            <a href="{{ url_for('logout') }}">ログアウト</a>
+        </div>
+    </header>
+
+    <nav class="main-nav">
+        <ul>
+            <li><a href="{{ url_for('home_page') }}" class="active">ホーム</a></li>
+            <li><a href="{{ url_for('product_registration_page') }}">商品登録</a></li>
+            <li><a href="{{ url_for('order_list_page') }}">注文リスト</a></li>
+            <li><a href="{{ url_for('link_paypay_page') }}">paypayの紐付け</a></li>
+            <li><a href="{{ url_for('procedure_page') }}">手順ページ</a></li>
+        </ul>
+    </nav>
+
+    <main class="main-content">
+        <div class="stats-container">
+            <div class="stat-box">
+                <p>本日の売上</p>
+                <h2>{{ daily_sales | default('12,500') }} 円</h2>
+            </div>
+            <div class="stat-box">
+                <p>本日の注文数</p>
+                <h2>{{ daily_orders | default('35') }} 件</h2>
+            </div>
+            <div class="stat-box">
+                <p>今月の売上</p>
+                <h2>{{ monthly_sales | default('284,000') }} 円</h2>
+            </div>
+        </div>
+
+        <div class="chart-container">
+            <h3>週間売上レポート</h3>
+            <canvas id="salesChart"></canvas>
+        </div>
+    </main>
+
+    <script>
+        // グラフを描画する要素を取得
+        const ctx = document.getElementById('salesChart').getContext('2d');
+        
+        // --- グラフのデータ (本来はFlaskから動的に渡す) ---
+        const labels = ['6/21(土)', '6/22(日)', '6/23(月)', '6/24(火)', '6/25(水)', '6/26(木)', '6/27(金)'];
+        const salesData = [8000, 7500, 11000, 13000, 12500, 15000, 18000];
+        // 例: Flaskから渡す場合
+        // const labels = {{ weekly_labels | tojson }};
+        // const salesData = {{ weekly_sales | tojson }};
+
+        new Chart(ctx, {
+            type: 'bar', // グラフの種類 (bar, line, pieなど)
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: '売上 (円)',
+                    data: salesData,
+                    backgroundColor: 'rgba(0, 123, 255, 0.5)',
+                    borderColor: 'rgba(0, 123, 255, 1)',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                }
+            }
+        });
+    </script>
+
+</body>
+</html>

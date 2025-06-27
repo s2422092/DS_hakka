@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ストア管理 - 手順ページ</title>
+
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/stores_detail.css') }}">
+</head>
+<body>
+
+    <header class="site-header">
+        <h1>ストア名 －手順ページ</h1>
+        <div class="header-links">
+            <!-- <a href="{{ url_for('store_info_page') }}">ストア情報</a> -->
+            <a href="{{ url_for('logout') }}">ログアウト</a>
+        </div>
+    </header>
+
+    <nav class="main-nav">
+        <ul>
+            <li><a href="{{ url_for('home_page') }}">ホーム</a></li>
+            <li><a href="{{ url_for('product_registration_page') }}">商品登録</a></li>
+            <li><a href="{{ url_for('order_list_page') }}">注文リスト</a></li>
+            <li><a href="{{ url_for('link_paypay_page') }}">paypayの紐付け</a></li>
+            <li><a href="{{ url_for('procedure_page') }}" class="active">手順ページ</a></li>
+        </ul>
+    </nav>
+
+    <main class="main-content">
+        <div class="content-box">
+            <div class="instructions-content">
+                <h2>この管理画面の使い方</h2>
+
+                <h3>ホーム</h3>
+                <p>
+                    このページでは、期間ごとの売上合計や、商品別の売上ランキングなどをグラフで確認することができます。経営状況の把握にお役立てください。
+                </p>
+
+                <h3>商品登録</h3>
+                <p>
+                    販売する商品を登録・編集します。CSVテンプレートをダウンロードし、複数商品を一括で登録する方法と、画面から一つずつ手動で登録する方法があります。
+                </p>
+
+                <h3>注文リスト</h3>
+                <p>
+                    お客様からの注文がリアルタイムで一覧表示されます。商品の提供状況（例：「調理中」「準備完了」など）を更新する際にも、このページを使用します。
+                </p>
+
+                <h3>PayPayの紐付け</h3>
+                <p>
+                    売上を受け取るためのPayPayアカウントとの連携設定を行います。画面の指示に従い、APIキーなどの必要な情報を入力してください。
+                </p>
+            </div>
+        </div>
+    </main>
+
+</body>
+</html>
