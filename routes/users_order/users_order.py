@@ -105,6 +105,10 @@ def cart_confirmation(store_id):
         u_name=session.get('u_name', 'ゲスト')
     )
 
+@users_order_bp.route('/payment_selection')
+def payment_selection():
+    
+    return render_template('users_order/payment_selection.html')
 
 
 @users_order_bp.route('/pay_payment')
@@ -116,9 +120,7 @@ def cart_confirmation(store_id):
 def pay_payment():
     return render_template('users_order/pay_payment.html')
 
-@users_order_bp.route('/payment_selection')
-def payment_selection():
-    return render_template('users_order/payment_selection.html')
+
 
 @users_order_bp.route('/reservation_number')
 def reservation_number():
