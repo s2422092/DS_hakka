@@ -12,24 +12,24 @@
     <header class="site-header">
         <h1>ストア名 － 商品登録</h1>
         <div class="header-links">
-            <a href="{{ url_for('store_info_page') }}">ストア情報</a>
-            <a href="{{ url_for('logout') }}">ログアウト</a>
+            <a href="">ストア情報</a>
+            <a href="{{url_for('users_home.logout')}}">ログアウト</a>
         </div>
     </header>
 
     <nav class="main-nav">
         <ul>
-            <li><a href="{{ url_for('home_page') }}">ホーム</a></li>
-            <li><a href="{{ url_for('product_registration_page') }}" class="active">商品登録</a></li>
-            <li><a href="{{ url_for('order_list_page') }}">注文リスト</a></li>
-            <li><a href="{{ url_for('link_paypay_page') }}">paypayの紐付け</a></li>
-            <li><a href="{{ url_for('procedure_page') }}">手順ページ</a></li>
+            <li><a href="{{ url_for('stores_detail.store_home') }}">ホーム</a></li>
+            <li><a href="{{ url_for('stores_detail.menu_registration') }}" class="active">商品登録</a></li>
+            <li><a href="">注文リスト</a></li>
+            <li><a href="">paypayの紐付け</a></li>
+            <li><a href="">手順ページ</a></li>
         </ul>
     </nav>
 
     <main class="main-content">
         
-        <form action="/register_product" method="POST" enctype="multipart/form-data">
+        <form action="" method="POST" enctype="multipart/form-data">
 
             <div class="template-download-area">
                 <a href="/static/templates/product_template.csv" class="download-button" download>データ入力テンプレートをダウンロード</a>
@@ -70,20 +70,7 @@
         </form>
     </main>
 
-    <script>
-        const fileUploadInput = document.getElementById('file-upload');
-        const fileMsgSpan = document.getElementById('file-msg');
 
-        fileUploadInput.addEventListener('change', () => {
-            if (fileUploadInput.files.length > 0) {
-                // ファイルが選択されたら、メッセージをファイル名に変更
-                fileMsgSpan.textContent = `選択されたファイル： ${fileUploadInput.files[0].name}`;
-            } else {
-                // ファイル選択がキャンセルされたらメッセージを元に戻す
-                fileMsgSpan.innerHTML = 'ここにファイルをドラッグ＆ドロップ<br>またはクリックして選択';
-            }
-        });
-    </script>
 
 </body>
 </html>
