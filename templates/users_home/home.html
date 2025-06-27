@@ -41,15 +41,18 @@
             {% if stores %}
                 {% for store in stores %}
                     <li>
-                        <h3>{{ store.name }}</h3>
+                        <h3>
+                            <a href="{{ url_for('users_order.menu', store_id=store.id) }}">{{ store.name }}</a>
+
+                        </h3>
                         <p>{{ store.description }}</p>
-                    
                     </li>
                 {% endfor %}
             {% else %}
                 <li>店舗情報がありません。</li>
             {% endif %}
         </ul>
+        
     </main>
 </body>
 </html>
