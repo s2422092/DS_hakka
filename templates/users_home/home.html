@@ -1,8 +1,8 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ja">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>ホーム</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/users_home.css') }}">
 </head>
@@ -14,8 +14,8 @@
         </span>
         
         <div class="user-links">
-            <a href="">ユーザー情報</a>
-            <a href="{{url_for('general.explamation')}}">ログアウト</a>
+            <a href="#">ユーザー情報</a>
+            <a href="{{ url_for('users_home.logout') }}">ログアウト</a>
         </div>
     </div>
 
@@ -31,11 +31,9 @@
             <li class="{% if request.endpoint == 'users_home.payment_history' %}active{% endif %}">
                 <a href="{{ url_for('users_home.payment_history') }}">決済履歴</a>
             </li>
-
         </ul>
     </div>
     
-
     <!-- 店舗リスト -->
     <main>
         <h2>各店舗の情報</h2>
@@ -43,8 +41,10 @@
             {% if stores %}
                 {% for store in stores %}
                     <li>
-                        <h3>{{ store.name }}</h3>
+                        <h3>{{ store.store_name }}</h3>
                         <p>{{ store.description }}</p>
+                        <p>所在地: {{ store.location_title or '不明' }}</p>
+                        <p>緯度: {{ store.latitude or 'なし' }}, 経度: {{ store.longitude or 'なし' }}</p>
                     </li>
                 {% endfor %}
             {% else %}
