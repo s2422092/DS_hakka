@@ -63,10 +63,6 @@ def paypay_linking():
 
     return render_template('stores_detail/paypay_linking.html')
 
-@stores_detail_bp.route('/paypay_linking')
-def paypay_linking():
-
-    return render_template('stores_detail/paypay_linking.html')
 
 @stores_detail_bp.route('/store_info')
 def store_info():
@@ -78,10 +74,3 @@ def store_info():
     return render_template('stores_detail/store_info.html')
 
 
-# 🔴 ログアウト機能追加
-@stores_detail_bp.route('/logout')
-def logout():
-    session.pop('store_id', None)
-    session.pop('store_name', None)
-    flash("ログアウトしました")
-    return redirect(url_for('store.store_login'))
