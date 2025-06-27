@@ -21,7 +21,7 @@ def login():
         conn.close()
 
         if user and check_password_hash(user[2], password):
-            session['user_id'] = user[0]
+            session['id'] = user[0]
             session['u_name'] = user[1]
             flash("ログインに成功しました")
             return redirect(url_for('users_home.home'))  # ✅ ユーザーホームにリダイレクト
