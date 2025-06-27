@@ -11,7 +11,8 @@ def get_db_connection():
     # app.dbのパスを適切に設定してください。プロジェクトのルートディレクトリにあると仮定します。
     # 例: os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', '..', 'app.db')
     # または、アプリの起動スクリプトで設定された絶対パスを使用する
-    conn = sqlite3.connect('app.db') # このパスを環境に合わせて調整してください
+    # ユーザーが指定した絶対パスを使用
+    conn = sqlite3.connect('/Users/namboshunsuke/ds_hakka/DS_hakka/app.db') # このパスを環境に合わせて調整してください
     conn.row_factory = sqlite3.Row
     return conn
 
