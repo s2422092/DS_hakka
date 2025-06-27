@@ -1,7 +1,6 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-<<<<<<< HEAD
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ストア管理 - ホーム</title>
@@ -15,18 +14,18 @@
     <header class="site-header">
         <h1>ストア名 - ホーム</h1>
         <div class="header-links">
-            <a href="{{ url_for('store_info_page') }}">ストア情報</a>
-            <a href="{{ url_for('logout') }}">ログアウト</a>
+            <a href="">ストア情報</a>
+            <a href="{{url_for('general.explamation')}}">ログアウト</a>
         </div>
     </header>
 
     <nav class="main-nav">
         <ul>
-            <li><a href="{{ url_for('home_page') }}" class="active">ホーム</a></li>
-            <li><a href="{{ url_for('product_registration_page') }}">商品登録</a></li>
-            <li><a href="{{ url_for('order_list_page') }}">注文リスト</a></li>
-            <li><a href="{{ url_for('link_paypay_page') }}">paypayの紐付け</a></li>
-            <li><a href="{{ url_for('procedure_page') }}">手順ページ</a></li>
+            <li><a href="" class="active">ホーム</a></li>
+            <li><a href="">商品登録</a></li>
+            <li><a href="">注文リスト</a></li>
+            <li><a href="">paypayの紐付け</a></li>
+            <li><a href="">手順ページ</a></li>
         </ul>
     </nav>
 
@@ -52,69 +51,7 @@
         </div>
     </main>
 
-    <script>
-        // グラフを描画する要素を取得
-        const ctx = document.getElementById('salesChart').getContext('2d');
-        
-        // --- グラフのデータ (本来はFlaskから動的に渡す) ---
-        const labels = ['6/21(土)', '6/22(日)', '6/23(月)', '6/24(火)', '6/25(水)', '6/26(木)', '6/27(金)'];
-        const salesData = [8000, 7500, 11000, 13000, 12500, 15000, 18000];
-        // 例: Flaskから渡す場合
-        // const labels = {{ weekly_labels | tojson }};
-        // const salesData = {{ weekly_sales | tojson }};
-
-        new Chart(ctx, {
-            type: 'bar', // グラフの種類 (bar, line, pieなど)
-            data: {
-                labels: labels,
-                datasets: [{
-                    label: '売上 (円)',
-                    data: salesData,
-                    backgroundColor: 'rgba(0, 123, 255, 0.5)',
-                    borderColor: 'rgba(0, 123, 255, 1)',
-                    borderWidth: 1
-                }]
-            },
-            options: {
-                responsive: true,
-                scales: {
-                    y: {
-                        beginAtZero: true
-                    }
-                }
-            }
-        });
-    </script>
+  
 
 </body>
 </html>
-=======
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>ホーム</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/users_home.css') }}">
-</head>
-<body>
-    <!-- 水色の背景部分（ユーザー情報セクション） -->
-    <div class="water-blue-section">
-        <span class="username">
-            ログイン中: {{ u_name if u_name else 'ゲスト' }}
-        </span>
-        
-        <div class="user-links">
-            <a href="#">ユーザー情報</a>
-            <a href="{{ url_for('users_home.logout') }}">ログアウト</a>
-        </div>
-    </div>
-
-    <!-- 灰色の背景部分（ナビゲーションセクション） -->
-
-    
-    <!-- 店舗リスト -->
-    <main>
-        <h2>各店舗の情報</h2>
-       
-    </main>
-</body>
-</html>
->>>>>>> home_yugo

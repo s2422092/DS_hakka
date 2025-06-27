@@ -115,7 +115,7 @@ def store_login():
             if check_password_hash(hashed_pw, password):
                 session['store_id'] = store_id
                 flash("ログインに成功しました")
-                return redirect(url_for('store.store_dashboard'))  # ←必要に応じて定義
+                return redirect(url_for('stores_detail.store_home'))  # ←必要に応じて定義
             else:
                 flash("パスワードが正しくありません")
         else:

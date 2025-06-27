@@ -7,7 +7,7 @@ users_home_bp = Blueprint('users_home', __name__, url_prefix='/users_home')
 def logout():
     session.clear()
     flash("ログアウトしました")
-    return redirect(url_for('users_login.login'))
+    return redirect(url_for('general.explamation'))
 
 @users_home_bp.route('/home')
 def home():
