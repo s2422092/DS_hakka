@@ -1,41 +1,67 @@
-# routes/general/explamation.py
-from flask import Blueprint, render_template
+from flask import Blueprint, render_template, request, redirect, url_for, session, flash
 import sqlite3
-from flask import session, redirect, url_for, flash
 
+users_order_bp = Blueprint('users_order', __name__)
 
-users_order_bp = Blueprint('users_order', __name__, url_prefix='/users_order')
+@users_order_bp.route('/menu/<int:store_id>', methods=['GET'])
+def menu(store_id):
+    conn = sqlite3.connect('app.db')
+    cursor = conn.cursor()
+    cursor.execute("SELECT store_name FROM store WHERE store_id = ?", (store_id,))
+    store_name = cursor.fetchone()[0]
+
+    cursor.execute("""
+        SELECT menu_id, menu_name, category, price 
+        FROM menus 
+        WHERE store_id = ?
+    """, (store_id,))
+    menu_items = cursor.fetchall()
+    conn.close()
+
+    return render_template(
+        'users_order/menu.html',
+        store_id=store_id,
+        store_name=store_name,
+        menu_items=menu_items,
+        u_name=session.get('u_name', 'ゲスト')
+    )
+
+# 🔽 商品追加用のルート（JavaScriptからPOSTされる）
+@users_order_bp.route('/add_to_cart', methods=['POST'])
+def add_to_cart():
+    item = request.json
+    cart = session.get('cart', [])
+    
+    # 同じ商品があるか確認して数量加算
+    for cart_item in cart:
+        if cart_item['menu_id'] == item['menu_id']:
+            cart_item['quantity'] += 1
+            break
+    else:
+        item['quantity'] = 1
+        cart.append(item)
+    
+    session['cart'] = cart
+    return {'message': 'カートに追加しました'}
+
 
 @users_order_bp.route('/cart_confirmation')
 def cart_confirmation():
-    return render_template('users_order/cart_confirmation.html')
+    cart = session.get('cart', [])
+    total_quantity = sum(item['quantity'] for item in cart)
+    total_price = sum(item['quantity'] * item['price'] for item in cart)
 
-@users_order_bp.route('/menu/<int:store_id>')
-def menu(store_id):
-    if 'id' not in session:
-        flash("ログインしてください")
-        return redirect(url_for('users_login.login'))
-    u_name = session.get('u_name', 'ゲスト')
-    conn = sqlite3.connect('app.db')
-    cursor = conn.cursor()
+    return render_template(
+        'users_order/cart_confirmation.html',
+        cart=cart,
+        total_quantity=total_quantity,
+        total_price=total_price,
+        store_name=session.get('store_name', ''),
+        store_id=session.get('store_id', 0),  # ← ここで明示的に store_id を渡す
+        u_name=session.get('u_name', 'ゲスト')
+    )
 
-    # 店舗名取得
-    cursor.execute("SELECT store_name FROM store WHERE store_id = ?", (store_id,))
-    row = cursor.fetchone()
-    if row is None:
-        cursor.close()
-        conn.close()
-        return "店舗が見つかりません", 404
-    store_name = row[0]
 
-    # メニュー取得（例）
-    cursor.execute("SELECT menu_id, menu_name, category, price FROM menus WHERE store_id = ?", (store_id,))
-    menu_items = cursor.fetchall()
-
-    cursor.close()
-    conn.close()
-
-    return render_template('users_order/menu.html', store_name=store_name, menu_items=menu_items, u_name=u_name)
 
 
 @users_order_bp.route('/pay_payment')
