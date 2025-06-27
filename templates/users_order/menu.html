@@ -20,7 +20,7 @@
 
 <div class="sub-header">
     <a href="{{ url_for('users_home.home') }}">戻る</a>
-    <a href="{{ url_for('users_order.cart_confirmation') }}">カート確認</a>
+    <a href="{{ url_for('users_order.cart_confirmation', store_id=store_id) }}">カート確認</a>
 </div>
 
 <main class="container">
