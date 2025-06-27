@@ -17,19 +17,27 @@
 
     <div class="sub-header">
         <a href="{{ url_for('users_order.menu', store_id=store_id) }}">戻る</a>
-        <a href="">レジに進む</a>
+        <a href="{{url_for('users_order.payment_selection')}}">レジに進む</a>
     </div>
 
     <main class="container">
         <div class="cart-list">
             {% if cart %}
-                <ul>
+            <ul>
                 {% for item in cart %}
-                    <li>
-                        {{ item.name }} - {{ item.category }} - 数量: {{ item.quantity }} - 合計金額: {{ item.price * item.quantity }}円
+                    <li class="cart-item">
+                        <div class="cart-item-details">
+                            <span>{{ item.name }}</span>
+                            <span>{{ item.category }}</span>
+                            <span>数量: {{ item.quantity }}</span>
+                        </div>
+                        <div class="cart-item-price">
+                            {{ item.price * item.quantity }}円
+                        </div>
                     </li>
                 {% endfor %}
                 </ul>
+                
             {% else %}
                 <p>カートは空です。</p>
             {% endif %}
