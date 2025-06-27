@@ -9,7 +9,7 @@ stores_detail_bp = Blueprint('stores_detail', __name__, url_prefix='/stores')
 # データベース接続をヘルパー関数として定義
 def get_db_connection():
     # ユーザーが指定した絶対パスを使用
-    conn = sqlite3.connect('/Users/namboshunsuke/ds_hakka/DS_hakka/app.db')
+    conn = sqlite3.connect('DS_hakka/app.db')
     conn.row_factory = sqlite3.Row
     return conn
 
@@ -25,6 +25,7 @@ def store_home():
 
 @stores_detail_bp.route('/menu-registration', methods=['GET', 'POST'])
 def menu_registration():
+    # ログインチェック
     if 'store_id' not in session:
         flash("ログインしてください")
         return redirect(url_for('store.store_login'))
@@ -36,7 +37,6 @@ def menu_registration():
 
     if request.method == 'POST':
         # CSVファイルアップロードの処理
-        # HTMLのinput name="product_csv" に合わせる
         file = request.files.get('product_csv') 
 
         # ファイルが選択され、かつファイル名がある場合、CSVとして処理
@@ -69,7 +69,6 @@ def menu_registration():
                 # CSVの各行を処理し、データベースに挿入
                 for i, row_dict in enumerate(csv_data):
                     menu_name = row_dict.get('menu_name')
-                    # HTMLのdescriptionをcategoryとして扱うため、CSVのcategoryもそのままcategoryとして利用
                     category = row_dict.get('category', '')
                     price_str = row_dict.get('price')
                     soldout_str = row_dict.get('soldout', '0')
@@ -127,7 +126,6 @@ def menu_registration():
         else: 
             product_name = request.form.get('product_name')
             product_price_str = request.form.get('product_price')
-            # 商品説明をcategoryカラムとして扱う
             product_description = request.form.get('product_description', '') 
 
             # 手動入力の必須フィールドチェック
@@ -188,22 +186,48 @@ def menu_check():
 
 @stores_detail_bp.route('/order-list')
 def order_list():
-    # この関数は変更なし
+    # ログインチェック
+    if 'store_id' not in session:
+        flash("ログインしてください")
+        return redirect(url_for('store.store_login'))
+
     return render_template('stores_detail/order_list.html')
 
 
 @stores_detail_bp.route('/procedure')
 def procedure():
-    # この関数は変更なし
+    # ログインチェック
+    if 'store_id' not in session:
+        flash("ログインしてください")
+        return redirect(url_for('store.store_login'))
+
     return render_template('stores_detail/procedure.html')
 
 
 @stores_detail_bp.route('/paypay_linking')
 def paypay_linking():
-    # この関数は変更なし
+    # ログインチェック
+    if 'store_id' not in session:
+        flash("ログインしてください")
+        return redirect(url_for('store.store_login'))
+
     return render_template('stores_detail/paypay_linking.html')
 
-@stores_detail_bp.route('/store_info_page')
-def store_info_page():
-    # この関数は変更なし
-    return render_template('stores_detail/store_info_page.html')
+
+@stores_detail_bp.route('/store_info')
+def store_info():
+    # ログインチェック
+    if 'store_id' not in session:
+        flash("ログインしてください")
+        return redirect(url_for('store.store_login'))
+
+    return render_template('stores_detail/store_info.html')
+
+
+# 🔴 ログアウト機能追加
+@stores_detail_bp.route('/logout')
+def logout():
+    session.pop('store_id', None)
+    session.pop('store_name', None)
+    flash("ログアウトしました")
+    return redirect(url_for('store.store_login'))
