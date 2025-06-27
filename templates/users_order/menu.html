@@ -1,69 +1,55 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>メニュー - モバおる</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/users_order.css') }}">
 </head>
 <body>
 
-    <header class="main-header">
-        <div class="store-name">モバおる - 〇〇食堂</div>
-        <div class="user-info">
-            <span>ユーザー名</span>
-            <a href="#" class="btn btn-danger btn-sm">ログアウト</a>
-        </div>
-    </header>
+<header class="main-header">
+    <div class="store-name">モバおる - {{ store_name }}</div>
+    <div class="user-info">
+        <span>ユーザー名</span>
+        <a href="#" class="btn btn-danger btn-sm">ログアウト</a>
+    </div>
+</header>
 
-    <div class="sub-header">
-        <!-- 「戻る」は店舗一覧ページなどへ。チームのルーティング設定に合わせて変更してください。 -->
-        <a href="#">戻る</a>
-        <a href="{{ url_for('users_order.cart_confirmation') }}">カート確認</a>
+<div class="sub-header">
+    <a href="{{ url_for('users_home.home') }}">戻る</a>
+    <a href="{{ url_for('users_order.cart_confirmation') }}">カート確認</a>
+</div>
+
+<main class="container">
+    <div class="filter-bar">
+        <button class="btn category-btn">全て</button>
+        <button class="btn category-btn active">カテゴリー1</button>
+        <button class="btn category-btn">カテゴリー2</button>
+        <button class="btn category-btn">カテゴリー3</button>
+        <input type="text" class="search-box" placeholder="ここで検索をする（条件を入力する）">
     </div>
 
-    <main class="container">
-        <div class="filter-bar">
-            <button class="btn category-btn">全て</button>
-            <button class="btn category-btn active">カテゴリー1</button>
-            <button class="btn category-btn">カテゴリー2</button>
-            <button class="btn category-btn">カテゴリー3</button>
-            <input type="text" class="search-box" placeholder="ここで検索をする（条件を入力する）">
-        </div>
-
-        <div class="menu-grid">
-            <!-- (中身は変更なし) -->
-            <div class="menu-card">
-                <div class="item-name">商品名</div>
-                <div class="item-category">カテゴリー</div>
-                <div class="item-selection">
-                    <div class="item-price">値段</div>
-                    <div class="item-status"></div>
+    <div class="menu-grid">
+        {% for item in menu_items %}
+        <div class="menu-card">
+            <div class="item-name">{{ item[1] }}</div>
+            <div class="item-category">{{ item[2] }}</div>
+            <div class="item-selection">
+                <div class="item-price">{{ item[3] }}円</div>
+                <div class="quantity-selector">
+                    <button>△</button>
+                    <input type="text" value="1" readonly>
+                    <button>▽</button>
                 </div>
-            </div>
-            <div class="menu-card">
-                <div class="item-name">商品名</div>
-                <div class="item-category">カテゴリー</div>
-                <div class="item-selection">
-                    <div class="item-price">値段</div>
-                    <div class="quantity-selector">
-                        <button>△</button>
-                        <input type="text" value="1" readonly>
-                        <button>▽</button>
-                    </div>
-                    <div class="item-status selected"></div>
-                </div>
-            </div>
-            <div class="menu-card">
-                <div class="item-name">商品名</div>
-                <div class="item-category">カテゴリー</div>
-                <div class="item-selection">
-                    <div class="item-price">値段</div>
-                    <div class="item-status"></div>
-                </div>
+                <div class="item-status"></div>
             </div>
         </div>
-    </main>
+        {% else %}
+        <p>メニューがありません。</p>
+        {% endfor %}
+    </div>
+</main>
 
 </body>
 </html>

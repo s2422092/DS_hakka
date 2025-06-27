@@ -41,16 +41,19 @@
             {% if stores %}
                 {% for store in stores %}
                     <li>
-                        <h3>{{ store.name }}</h3>
+                        <h3>
+                            <a href="{{ url_for('users_order.menu', store_id=store.id) }}">{{ store.name }}</a>
+
+
+                        </h3>
                         <p>{{ store.description }}</p>
-                        <p>緯度: {{ store.latitude if store.latitude else '未登録' }}</p>
-                        <p>経度: {{ store.longitude if store.longitude else '未登録' }}</p>
                     </li>
                 {% endfor %}
             {% else %}
                 <li>店舗情報がありません。</li>
             {% endif %}
         </ul>
+        
     </main>
 </body>
 </html>

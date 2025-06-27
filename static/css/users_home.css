@@ -156,3 +156,33 @@ p {
     border-radius: 5px;
     box-sizing: border-box; /* 幅計算をpadding込みに */
 }
+
+
+/* 店舗リストのリンク部分 */
+main ul li a {
+    display: inline-block;
+    font-size: 1.3em;
+    font-weight: bold;
+    color: #ed7112; /* オレンジ系の文字色 */
+    text-decoration: none;
+    margin-bottom: 5px;
+}
+
+main ul li a:hover {
+    text-decoration: underline;
+}
+
+/* 店舗説明文のスタイル */
+main ul li p {
+    font-size: 1em;
+    color: #555;
+    margin-top: 3px;
+    line-height: 1.4;
+}
+
+/* 店舗リストのliに少し余白を追加 */
+main ul li {
+    margin-bottom: 20px;
+    border-bottom: 1px solid #ddd;
+    padding-bottom: 15px;
+}
