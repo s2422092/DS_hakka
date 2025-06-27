@@ -34,22 +34,21 @@
 
     <div class="menu-grid">
         {% for item in menu_items %}
-        <div class="menu-card">
-            <div class="item-name">{{ item[1] }}</div>
-            <div class="item-category">{{ item[2] }}</div>
-            <div class="item-selection">
-                <div class="item-price">{{ item[3] }}円</div>
-                <div class="quantity-selector">
-                    <button>△</button>
-                    <input type="text" value="1" readonly>
-                    <button>▽</button>
+            <div class="menu-card" data-menu-id="{{ item[0] }}" data-name="{{ item[1] }}" data-category="{{ item[2] }}" data-price="{{ item[3] }}">
+                <div class="item-name">{{ item[1] }}</div>
+                <div class="item-category">{{ item[2] }}</div>
+                <div class="item-selection">
+                    <div class="item-price">{{ item[3] }}円</div>
+                    <div class="quantity-selector">
+                        <button class="qty-up-btn">△</button>
+                        <input type="text" class="qty-input" value="1" readonly>
+                        <button class="qty-down-btn">▽</button>
+                    </div>
+                    <button class="add-to-cart-btn">カートに追加</button>
+                    <div class="item-status"></div>
                 </div>
-                <div class="item-status"></div>
             </div>
-        </div>
-        {% else %}
-        <p>メニューがありません。</p>
-        {% endfor %}
+            {% endfor %}
     </div>
 </main>
 

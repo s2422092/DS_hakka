@@ -1,6 +1,8 @@
 from flask import Blueprint, render_template, request, redirect, url_for, session, flash
 import sqlite3
 
+
+
 users_order_bp = Blueprint('users_order', __name__)
 
 @users_order_bp.route('/menu/<int:store_id>', methods=['GET'])
@@ -31,18 +33,20 @@ from flask import request, session, jsonify
 @users_order_bp.route('/add_to_cart', methods=['POST'])
 def add_to_cart():
     data = request.get_json()
-    menu_id = data.get('menu_id')
-    name = data.get('name')
-    category = data.get('category')
-    price = data.get('price')
-    quantity = data.get('quantity', 1)
+    try:
+        menu_id = int(data.get('menu_id'))
+        name = data.get('name')
+        category = data.get('category')
+        price = int(data.get('price'))
+        quantity = int(data.get('quantity', 1))
+    except (TypeError, ValueError):
+        return jsonify({'error': '不正なデータです'}), 400
 
     if not all([menu_id, name, category, price]):
         return jsonify({'error': '必要なデータがありません'}), 400
 
     cart = session.get('cart', [])
 
-    # 既に同じ商品があれば数量を加算
     for item in cart:
         if item['menu_id'] == menu_id:
             item['quantity'] += quantity
@@ -63,13 +67,16 @@ def add_to_cart():
 
 @users_order_bp.route('/cart_confirmation/<int:store_id>')
 def cart_confirmation(store_id):
+    # セッションからカート情報を取得（なければ空リスト）
     cart = session.get('cart', [])
+
+    # 合計数量と合計金額を計算
     total_quantity = sum(item['quantity'] for item in cart)
     total_price = sum(item['quantity'] * item['price'] for item in cart)
 
+    # 店舗名をセッションから取得、なければDBから取得しセッションに保存
     store_name = session.get('store_name', '')
     if not store_name:
-        # store_nameがなければDBから取得
         conn = sqlite3.connect('app.db')
         cursor = conn.cursor()
         cursor.execute("SELECT store_name FROM store WHERE store_id = ?", (store_id,))
@@ -82,16 +89,16 @@ def cart_confirmation(store_id):
             flash("店舗情報が取得できませんでした。")
             return redirect(url_for('users_home.home'))
 
+    # テンプレートに渡す
     return render_template(
         'users_order/cart_confirmation.html',
         cart=cart,
         total_quantity=total_quantity,
         total_price=total_price,
         store_name=store_name,
-        store_id=store_id,  # ← Jinjaテンプレートに正しく渡す
+        store_id=store_id,
         u_name=session.get('u_name', 'ゲスト')
     )
-
 
 
 

@@ -23,31 +23,23 @@
     <main class="container">
         <div class="cart-list">
             {% if cart %}
+                <ul>
                 {% for item in cart %}
-                <div class="cart-item">
-                    <div class="cart-item-details">
-                        <span>{{ item.name }}</span>
-                        <span>{{ item.category }}</span>
-                    </div>
-                    <div class="cart-item-details">
-                        <div class="quantity-selector">
-                            <button class="increase-btn" data-id="{{ item.menu_id }}">△</button>
-                            <input type="text" value="{{ item.quantity }}" readonly>
-                            <button class="decrease-btn" data-id="{{ item.menu_id }}">▽</button>
-                        </div>
-                        <span>{{ item.price * item.quantity }}円</span>
-                    </div>
-                </div>
+                    <li>
+                        {{ item.name }} - {{ item.category }} - 数量: {{ item.quantity }} - 合計金額: {{ item.price * item.quantity }}円
+                    </li>
                 {% endfor %}
+                </ul>
             {% else %}
                 <p>カートは空です。</p>
             {% endif %}
         </div>
-
+    
         <div class="cart-total">
             {{ total_quantity }}点 合計 {{ total_price }}円
         </div>
     </main>
+    
 
 </body>
 </html>
