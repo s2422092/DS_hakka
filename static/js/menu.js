@@ -7,11 +7,13 @@ document.addEventListener("DOMContentLoaded", function () {
         const quantityInput = card.querySelector(".qty-input");
         const addToCartBtn = card.querySelector(".add-to-cart-btn");
 
+        // ▲ ボタンで数量を増やす
         upBtn.addEventListener("click", () => {
             let value = parseInt(quantityInput.value);
             quantityInput.value = value + 1;
         });
 
+        // ▼ ボタンで数量を減らす
         downBtn.addEventListener("click", () => {
             let value = parseInt(quantityInput.value);
             if (value > 1) {
@@ -19,47 +21,43 @@ document.addEventListener("DOMContentLoaded", function () {
             }
         });
 
+        // カートに追加ボタン
         addToCartBtn.addEventListener("click", () => {
-            const menuId = card.dataset.menuId;
+            const menuId = parseInt(card.dataset.menuId);
             const name = card.dataset.name;
             const category = card.dataset.category;
             const price = parseInt(card.dataset.price);
             const quantity = parseInt(quantityInput.value);
 
+            const payload = {
+                menu_id: menuId,
+                name: name,
+                category: category,
+                price: price,
+                quantity: quantity
+            };
+
             fetch('/add_to_cart', {
                 method: 'POST',
                 headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRFToken': getCookie('csrf_token')  // Flask-WTF使用時のみ
+                    'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({ menu_id: parseInt(menuId), name, category, price, quantity })
+                body: JSON.stringify(payload)
             })
             .then(res => res.json())
             .then(data => {
                 if (data.error) {
+                    alert("エラー: " + data.error);
                 } else {
                     addToCartBtn.classList.add("added");
                     addToCartBtn.textContent = "追加済み";
                     addToCartBtn.disabled = true;
                 }
             })
-            .catch(() => alert('通信エラーが発生しました'));
+            .catch((error) => {
+                console.error("通信エラー:", error);
+                alert('通信エラーが発生しました');
+            });
         });
     });
-
-    // CSRFトークンをCookieから取得する補助関数
-    function getCookie(name) {
-        let cookieValue = null;
-        if (document.cookie && document.cookie !== '') {
-            const cookies = document.cookie.split(';');
-            for (let i = 0; i < cookies.length; i++) {
-                const cookie = cookies[i].trim();
-                if (cookie.substring(0, name.length + 1) === (name + '=')) {
-                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-                    break;
-                }
-            }
-        }
-        return cookieValue;
-    }
 });
