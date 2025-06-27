@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ユーザー情報</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/users_home.css') }}">
+</head>
+<body>
+    <!-- 水色の背景部分（ユーザー情報セクション） -->
+    <div class="water-blue-section">
+        <span class="username">
+            ログイン中: {{ u_name if u_name else 'ゲスト' }}
+        </span>
+        
+        <div class="user-links">
+            <a href="users_information">ユーザー情報</a>
+            <a href="{{url_for('general.explamation')}}">ログアウト</a>
+        </div>
+    </div>
+
+    <!-- 灰色の背景部分（ナビゲーションセクション） -->
+    <div class="gray-section">
+        <ul>
+            <li class="{% if request.endpoint == 'users_home.home' %}active{% endif %}">
+                <a href="{{ url_for('users_home.home') }}">ホーム</a>
+            </li>
+            <li class="{% if request.endpoint == 'users_home.map_shop' %}active{% endif %}">
+                <a href="{{ url_for('users_home.map_shop') }}">マップ</a>
+            </li>
+            <li class="{% if request.endpoint == 'users_home.payment_history' %}active{% endif %}">
+                <a href="{{ url_for('users_home.payment_history') }}">決済履歴</a>
+            </li>
+        </ul>
+    </div>
+
+    <!-- ユーザーリスト -->
+    <main>
+        <h2>ユーザー情報</h2>
+        <ul>
+            {% if users %}
+                {% for user in users %}
+                    <li>
+                        <h3>名前: {{ user.username }}</h3>
+                        <p>メール: {{ user.email }}</p>
+                        <p>登録年月日: {{ user.registration_date }}</p>
+                    </li>
+                {% endfor %}
+            {% else %}
+                <li>ユーザー情報がありません。</li>
+            {% endif %}
+        </ul>
+    </main>
+</body>
+</html>

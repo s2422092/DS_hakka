@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ストア管理 - 確認</title>
+
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/stores_detail.css') }}">
+</head>
+<body>
+
+    <header class="site-header">
+        <h1>ストア名 －商品登録 －確認</h1>
+    </header>
+
+    <nav class="sub-nav">
+        <a href="javascript:history.back()" class="back-button">戻る</a>
+    </nav>
+
+    <main class="main-content">
+        
+        <form action="/finalize_product" method="POST">
+            <div class="confirmation-box">
+                
+                <ul class="data-display-list">
+                    <li>
+                        <span class="label">商品名:</span>
+                        <span class="value">{{ product_name }}</span>
+                    </li>
+                    <li>
+                        <span class="label">値段:</span>
+                        <span class="value">{{ price }} 円</span>
+                    </li>
+                    <li>
+                        <span class="label">商品説明:</span>
+                        <span class="value">{{ description }}</span>
+                    </li>
+                    {% if filename %}
+                    <li>
+                        <span class="label">アップロードファイル:</span>
+                        <span class="value">{{ filename }}</span>
+                    </li>
+                    {% endif %}
+                </ul>
+
+                <input type="hidden" name="product_name" value="{{ product_name }}">
+                <input type="hidden" name="price" value="{{ price }}">
+                <input type="hidden" name="description" value="{{ description }}">
+                {% if filename %}
+                <input type="hidden" name="filename" value="{{ filename }}">
+                {% endif %}
+
+            </div>
+
+            <div class="action-area">
+                <button type="submit" class="finalize-button">確定</button>
+            </div>
+        </form>
+
+    </main>
+
+</body>
+</html>

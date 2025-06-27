@@ -8,7 +8,7 @@
 </head>
 <body>
     <h1>店舗登録フォーム</h1>
-    <form action="/store/info_confirmed" method="post">
+    <form action="{{ url_for('store.store_registration') }}" method="post">
         <label for="store_name">店舗名:</label><br>
         <input type="text" id="store_name" name="store_name" required><br><br>
 
@@ -52,6 +52,11 @@
 
         <button type="submit">確認</button>
     </form>
+
+    <div class="button-area">
+        <a href="{{ url_for('general.explamation') }}" class="back-link">← 戻る</a>
+    </div>
+    
 </body>
 </html>
 
