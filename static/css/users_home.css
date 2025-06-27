@@ -186,3 +186,33 @@ main ul li {
     border-bottom: 1px solid #ddd;
     padding-bottom: 15px;
 }
+
+
+.custom-link {
+    display: block;
+    background-color: #ffffff;
+    padding: 15px;
+    border: 1px solid #ddd;
+    border-radius: 10px;
+    margin-bottom: 20px;
+    text-decoration: none;
+    color: #333;
+    transition: background-color 0.3s, box-shadow 0.3s;
+}
+
+.custom-link:hover {
+    background-color: #f8f8f8;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    text-decoration: none;
+}
+
+.custom-link h3 {
+    font-size: 1.3em;
+    margin-bottom: 8px;
+    color: #ed7112;
+}
+
+.custom-link p {
+    font-size: 1em;
+    color: #555;
+}
