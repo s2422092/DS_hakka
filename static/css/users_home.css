@@ -121,3 +121,13 @@ p {
     color: white; /* テキストも目立つように */
     text-decoration: underline;
 }
+
+
+#map {
+    height: 650px;             /* 地図の高さ */
+    width: 70%;                /* 横幅を90%にして左右に余白 */
+    margin: 20px auto 20px 20px;  /* 上：20px, 右：auto, 下：20px, 左：20px */
+    border: 2px solid #ccc;
+    border-radius: 10px;
+    display: block;
+}

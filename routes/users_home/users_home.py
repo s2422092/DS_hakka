@@ -33,14 +33,16 @@ def home():
     conn.close()
     return render_template('users_home/home.html', stores=stores, u_name=session.get('u_name', 'ゲスト'))
 
-
 @users_home_bp.route('/map_shop')
 def map_shop():
     if 'user_id' not in session:
         flash("ログインしてください")
         return redirect(url_for('users_login.login'))
+
     u_name = session.get('u_name', 'ゲスト')
-    return render_template('users_home/map_shop.html', u_name=u_name)
+    return render_template('users_home/map_shop.html', u_name=u_name)  # ← locations を渡さない
+
+
 
 @users_home_bp.route('/payment_history')
 def payment_history():

@@ -15,8 +15,8 @@
             ログイン中: {{ u_name if u_name else 'ゲスト' }}
         </span>
         <div class="user-links">
-            <a href="{{ url_for('users_home.users_data')}}">ユーザー情報</a>
-            <a href="">ログアウト</a>
+            <a href="">ユーザー情報</a>
+            <a href="{{url_for('users_home.logout')}}">ログアウト</a>
         </div>
     </div>
 
@@ -36,27 +36,18 @@
     </div>
     
 
-    <!-- 地図表示部分 -->
-    <main>
-        <h2>店舗位置の地図</h2>
-        <div id="map"></div>
-    </main>
+    <!-- 地図の表示エリア -->
+    <div id="map"></div>
 
-    <!-- JavaScriptでLeaflet.jsを使用して地図を表示 -->
-    <script>
-        // 地図を初期化
-        const map = L.map('map').setView([35.6895, 139.6917], 13); // 初期地: 東京
 
-        // Wikimedia Maps APIを利用して地図タイルを表示
-        L.tileLayer('https://maps.wikimedia.org/osm-intl/{z}/{x}/{y}.png', {
-            attribution: '&copy; Wikimedia contributors',
-            maxZoom: 18,
-        }).addTo(map);
+    <diV class="sidebar">
+        <h1>近くの店舗一覧</h1>
+        <input type="search" name="query" placeholder="検索…">
+        </form>
+    </diV>
 
-        // ピンを追加（例：東京の位置）
-        L.marker([35.6895, 139.6917]).addTo(map)
-            .bindPopup('東京<br>ウィキペディアのマップ')
-            .openPopup();
-    </script>
+    <!-- 外部JSファイルの読み込み -->
+    <script src="{{ url_for('static', filename='js/map_shop.js') }}"></script>
+
 </body>
 </html>
