@@ -16,16 +16,19 @@
     </header>
 
     <div class="sub-header">
-        <a href="{{ url_for('users_order.payment_selection') }}">戻る</a>
-        <span>リンクページ</span>
+        <p>リンクページ</p>
     </div>
 
-    <main class="container">
+    <div class="under-hedder">
+        <a href="{{ url_for('users_order.payment_selection') }}">戻る</a>
         <a href="{{ url_for('users_order.reservation_number') }}" style="text-decoration:none; color: inherit;">
             <div class="link-display">
                 リンク表示
             </div>
         </a>
+    </div>
+
+    <main class="container">
 
         <div class="store-info">
             <span class="name">店舗名</span>

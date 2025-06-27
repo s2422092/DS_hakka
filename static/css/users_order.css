@@ -341,3 +341,23 @@ body {
     flex-direction: column; /* ← 商品名・カテゴリ・数量を縦に並べたい場合はこちら */
     gap: 5px;
 }
+
+.under-hedder {
+    position: fixed;
+    bottom: 0;
+    width: 100%;
+    background-color: #f39c12; /* オレンジ */
+    color: white;
+    text-align: center;
+    padding: 10px 0;
+    font-weight: bold;
+    z-index: 1000;
+    box-shadow: 0 -2px 5px rgba(0,0,0,0.1);
+}
+
+.under-hedder a {
+    color: white;
+    text-decoration: none;
+    font-size: 1.1em;
+}
+
