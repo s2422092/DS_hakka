@@ -8,7 +8,6 @@ stores_detail_bp = Blueprint('stores_detail', __name__, url_prefix='/stores')
 
 # --- 各ページへのルート（道案内）を定義 ---
 
-# /stores/home にアクセスされた時に呼ばれる
 @stores_detail_bp.route('/store_home')
 def store_home():
     if 'store_id' not in session:

@@ -113,6 +113,7 @@ def store_login():
             store_id, hashed_pw = result
             if check_password_hash(hashed_pw, password):
                 session['store_id'] = store_id
+                session['store_name'] = store_name  # ←★ 追加
                 flash("ログインに成功しました")
                 return redirect(url_for('stores_detail.store_home'))
             else:
