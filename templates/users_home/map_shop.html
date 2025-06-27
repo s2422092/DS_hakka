@@ -36,15 +36,15 @@
     </div>
     
 
-    <!-- 地図の表示エリア -->
-    <div id="map"></div>
-
-
-    <diV class="sidebar">
-        <h1>近くの店舗一覧</h1>
-        <input type="search" name="query" placeholder="検索…">
-        </form>
-    </diV>
+    <div class="map-wrapper">
+        <div id="map"></div>
+    
+        <div class="sidebar">
+            <h1>近くの店舗一覧</h1>
+            <input type="search" name="query" placeholder="検索…">
+        </div>
+    </div>
+    
 
     <!-- 外部JSファイルの読み込み -->
     <script src="{{ url_for('static', filename='js/map_shop.js') }}"></script>
