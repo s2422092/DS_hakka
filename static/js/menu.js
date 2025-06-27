@@ -30,24 +30,24 @@ document.addEventListener("DOMContentLoaded", function () {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    'X-CSRFToken': getCookie('csrf_token')  // CSRF対策があるなら
+                    'X-CSRFToken': getCookie('csrf_token')  // Flask-WTF使用時のみ
                 },
                 body: JSON.stringify({ menu_id: parseInt(menuId), name, category, price, quantity })
             })
             .then(res => res.json())
             .then(data => {
-                if(data.error){
-                    alert('カート追加に失敗しました');
+                if (data.error) {
                 } else {
-                    alert('カートに追加しました！');
-                    // ここでカート数表示更新などがあれば行う
+                    addToCartBtn.classList.add("added");
+                    addToCartBtn.textContent = "追加済み";
+                    addToCartBtn.disabled = true;
                 }
             })
             .catch(() => alert('通信エラーが発生しました'));
         });
     });
 
-    // CSRFトークンをCookieから取得する補助関数（Flask-WTF使っている場合）
+    // CSRFトークンをCookieから取得する補助関数
     function getCookie(name) {
         let cookieValue = null;
         if (document.cookie && document.cookie !== '') {
