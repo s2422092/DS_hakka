@@ -1,15 +1,10 @@
-
 from flask import Blueprint, render_template, request, redirect, url_for, flash, session
 import sqlite3
 
-# Blueprintを定義
-# url_prefixは、これらのページのURLがすべて /stores から始まることを意味します
 stores_detail_bp = Blueprint('stores_detail', __name__, url_prefix='/stores')
 
-# --- 各ページへのルート（道案内）を定義 ---
 
-# /stores/home にアクセスされた時に呼ばれる
-@stores_detail_bp.route('/home')
+@stores_detail_bp.route('/store_home')
 def store_home():
     if 'store_id' not in session:
         flash("ログインしてください")
@@ -19,45 +14,70 @@ def store_home():
     return render_template('stores_detail/store_home.html', store_name=store_name)
 
 
-# /stores/menu-registration にアクセスされた時に呼ばれる
 @stores_detail_bp.route('/menu-registration', methods=['GET', 'POST'])
 def menu_registration():
-    # もしフォームが送信されたら
-    if request.method == 'POST':
-        # ここでフォームから送られたデータを受け取り、DBに保存する処理を書く
-        # 例：
-        menu_name = request.form.get('menu_name')
-        print(f"新しいメニューが登録されました：{menu_name}")
-        
-        # 登録後はメニュー確認ページなどにリダイレクト（自動で移動）
-        return redirect(url_for('stores_detail.menu_check'))
+    # ログインチェック
+    if 'store_id' not in session:
+        flash("ログインしてください")
+        return redirect(url_for('store.store_login'))
 
-    # 通常のアクセスなら、メニュー登録ページを表示
-    # templates/stores_detail/menu_registration.html を表示
     return render_template('stores_detail/menu_registration.html')
 
-# /stores/menu-check にアクセスされた時に呼ばれる
+
 @stores_detail_bp.route('/menu-check')
 def menu_check():
-    # templates/stores_detail/menu_check.html を表示
+    # ログインチェック
+    if 'store_id' not in session:
+        flash("ログインしてください")
+        return redirect(url_for('store.store_login'))
+
     return render_template('stores_detail/menu_check.html')
 
-# /stores/order-list にアクセスされた時に呼ばれる
+
 @stores_detail_bp.route('/order-list')
 def order_list():
-    # templates/stores_detail/order_list.html を表示
+    # ログインチェック
+    if 'store_id' not in session:
+        flash("ログインしてください")
+        return redirect(url_for('store.store_login'))
+
     return render_template('stores_detail/order_list.html')
 
-# /stores/procedure にアクセスされた時に呼ばれる
+
 @stores_detail_bp.route('/procedure')
 def procedure():
-    # templates/stores_detail/procedure.html を表示
+    # ログインチェック
+    if 'store_id' not in session:
+        flash("ログインしてください")
+        return redirect(url_for('store.store_login'))
+
     return render_template('stores_detail/procedure.html')
 
 
+@stores_detail_bp.route('/paypay_linking')
+def paypay_linking():
+    # ログインチェック
+    if 'store_id' not in session:
+        flash("ログインしてください")
+        return redirect(url_for('store.store_login'))
+
+    return render_template('stores_detail/paypay_linking.html')
 
 
-@stores_detail_bp.route('/store_info_page')
-def store_info_page():
-    # templates/stores_detail/store_info_page.html を表示
-    return render_template('stores_detail/store_info_page.html')
+@stores_detail_bp.route('/store_info')
+def store_info():
+    # ログインチェック
+    if 'store_id' not in session:
+        flash("ログインしてください")
+        return redirect(url_for('store.store_login'))
+
+    return render_template('stores_detail/store_info.html')
+
+
+# 🔴 ログアウト機能追加
+@stores_detail_bp.route('/logout')
+def logout():
+    session.pop('store_id', None)
+    session.pop('store_name', None)
+    flash("ログアウトしました")
+    return redirect(url_for('store.store_login'))
