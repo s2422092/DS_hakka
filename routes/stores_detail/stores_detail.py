@@ -29,108 +29,133 @@ def menu_registration():
         flash("ログインしてください")
         return redirect(url_for('store.store_login'))
 
+    store_id = session.get('store_id')
+    if not store_id:
+        flash("ストアIDが見つかりません。ログインし直してください。", 'error')
+        return redirect(url_for('store.store_login'))
+
     if request.method == 'POST':
-        if 'csv_file' not in request.files:
-            flash('ファイルが選択されていません', 'error')
-            return redirect(request.url)
+        # CSVファイルアップロードの処理
+        # HTMLのinput name="product_csv" に合わせる
+        file = request.files.get('product_csv') 
 
-        file = request.files['csv_file']
-
-        if file.filename == '':
-            flash('ファイルが選択されていません', 'error')
-            return redirect(request.url)
-
-        if file and file.filename.endswith('.csv'):
-            # ファイルを一時的に保存せず、直接読み込む
-            try:
-                # UTF-8 BOM付きの可能性も考慮してdecode
-                stream = file.stream.read().decode("utf-8-sig")
-            except UnicodeDecodeError:
-                flash('CSVファイルの文字コードがUTF-8ではありません。UTF-8形式のCSVをアップロードしてください。', 'error')
-                return redirect(request.url)
-
-            # DictReaderを使用すると、ヘッダー名でデータにアクセスでき、順序に依存しないためより堅牢
-            csv_data = csv.DictReader(stream.splitlines())
-
-            # 期待するヘッダーを厳密にチェック
-            # CSVから読み取られたヘッダーをセットに変換
-            csv_headers_set = set(csv_data.fieldnames)
-            
-            # 必須ヘッダー
-            required_headers = {'menu_name', 'price'}
-            # オプションヘッダー
-            optional_headers = {'category', 'soldout', 'store_id', 'menu_id'} # store_idとmenu_idもオプションとして認識
-
-            # 必須ヘッダーがすべて存在するかチェック
-            if not required_headers.issubset(csv_headers_set):
-                missing_headers = required_headers - csv_headers_set
-                flash(f'CSVファイルのヘッダーが無効です。必須ヘッダーが不足しています: {", ".join(missing_headers)}', 'error')
-                return redirect(request.url)
-
-            store_id = session.get('store_id')
-            if not store_id:
-                flash("ストアIDが見つかりません。ログインし直してください。", 'error')
-                return redirect(url_for('store.store_login'))
-
-            conn = get_db_connection()
-            cursor = conn.cursor()
-            inserted_count = 0
-            error_rows = []
-
-            # enumerateで行番号も取得し、エラーメッセージに含める
-            for i, row_dict in enumerate(csv_data):
-                # DictReaderなので、row_dictは既に辞書形式
-                menu_name = row_dict.get('menu_name')
-                category = row_dict.get('category', '') # categoryがなくてもエラーにしない (空文字列をデフォルト)
-                price_str = row_dict.get('price')
-                soldout_str = row_dict.get('soldout', '0') # soldoutがない場合はデフォルトで'0'
-
-                # 必須フィールドのチェック
-                if not menu_name or not price_str:
-                    error_rows.append(f"行 {i+2}: 必須フィールド (menu_name, price) が不足しているか空です。")
-                    continue
-
+        # ファイルが選択され、かつファイル名がある場合、CSVとして処理
+        if file and file.filename != '': 
+            if file.filename.endswith('.csv'):
                 try:
-                    price = int(price_str)
-                except ValueError:
-                    error_rows.append(f"行 {i+2}: 価格が無効な数値です ('{price_str}')。")
-                    continue
+                    # UTF-8 BOM付きの可能性も考慮してdecode
+                    stream = file.stream.read().decode("utf-8-sig")
+                except UnicodeDecodeError:
+                    flash('CSVファイルの文字コードがUTF-8ではありません。UTF-8形式のCSVをアップロードしてください。', 'error')
+                    return redirect(request.url)
+
+                # CSVデータをDictReaderで読み込み
+                csv_data = csv.DictReader(stream.splitlines())
+
+                # CSVヘッダーの存在チェック
+                csv_headers_set = set(csv_data.fieldnames if csv_data.fieldnames else []) 
+                required_headers = {'menu_name', 'price'}
+
+                if not required_headers.issubset(csv_headers_set):
+                    missing_headers = required_headers - csv_headers_set
+                    flash(f'CSVファイルのヘッダーが無効です。必須ヘッダーが不足しています: {", ".join(missing_headers)}', 'error')
+                    return redirect(request.url)
+
+                conn = get_db_connection()
+                cursor = conn.cursor()
+                inserted_count = 0
+                error_rows = []
+
+                # CSVの各行を処理し、データベースに挿入
+                for i, row_dict in enumerate(csv_data):
+                    menu_name = row_dict.get('menu_name')
+                    # HTMLのdescriptionをcategoryとして扱うため、CSVのcategoryもそのままcategoryとして利用
+                    category = row_dict.get('category', '')
+                    price_str = row_dict.get('price')
+                    soldout_str = row_dict.get('soldout', '0')
+
+                    # 必須フィールドの存在チェック
+                    if not menu_name or not price_str:
+                        error_rows.append(f"行 {i+2}: 必須フィールド (menu_name, price) が不足しているか空です。")
+                        continue
+
+                    # 価格の型変換とバリデーション
+                    try:
+                        price = int(price_str)
+                    except ValueError:
+                        error_rows.append(f"行 {i+2}: 価格が無効な数値です ('{price_str}')。")
+                        continue
+                    
+                    # soldoutの型変換とバリデーション
+                    try:
+                        soldout = int(soldout_str)
+                        if soldout not in [0, 1]:
+                            raise ValueError("0または1ではありません")
+                    except ValueError:
+                        error_rows.append(f"行 {i+2}: soldoutが無効な値です ('{soldout_str}')。0または1を入力してください。")
+                        continue
+
+                    # データベースへの挿入
+                    try:
+                        cursor.execute(
+                            "INSERT INTO menus (store_id, menu_name, category, price, soldout) VALUES (?, ?, ?, ?, ?)",
+                            (store_id, menu_name, category, price, soldout)
+                        )
+                        inserted_count += 1
+                    except sqlite3.Error as e:
+                        error_rows.append(f"行 {i+2}: データベースエラーが発生しました - {e}")
                 
-                try:
-                    soldout = int(soldout_str)
-                    if soldout not in [0, 1]:
-                        raise ValueError("0または1ではありません")
-                except ValueError:
-                    error_rows.append(f"行 {i+2}: soldoutが無効な値です ('{soldout_str}')。0または1を入力してください。")
-                    continue
+                conn.commit() # トランザクションをコミット
+                conn.close()
 
+                # 登録結果のフラッシュメッセージ
+                if inserted_count > 0:
+                    flash(f'{inserted_count}件のメニューを登録しました。', 'success')
+                if error_rows:
+                    for err in error_rows:
+                        flash(err, 'warning')
+                    if inserted_count == 0:
+                        flash('メニューの登録に失敗しました。詳細を警告メッセージで確認してください。', 'error')
+                
+                return redirect(url_for('stores_detail.menu_check'))
+
+            else:
+                flash('CSVファイルを選択してください。', 'error')
+                return redirect(request.url)
+
+        # CSVファイルがアップロードされていない場合、手動入力を試みる
+        else: 
+            product_name = request.form.get('product_name')
+            product_price_str = request.form.get('product_price')
+            # 商品説明をcategoryカラムとして扱う
+            product_description = request.form.get('product_description', '') 
+
+            # 手動入力の必須フィールドチェック
+            if product_name and product_price_str: 
                 try:
+                    product_price = int(product_price_str)
+                except ValueError:
+                    flash('値段が無効な数値です。', 'error')
+                    return redirect(request.url)
+
+                conn = get_db_connection()
+                cursor = conn.cursor()
+                try:
+                    # データベースへの挿入 (soldoutはデフォルト0)
                     cursor.execute(
                         "INSERT INTO menus (store_id, menu_name, category, price, soldout) VALUES (?, ?, ?, ?, ?)",
-                        (store_id, menu_name, category, price, soldout)
+                        (store_id, product_name, product_description, product_price, 0) 
                     )
-                    inserted_count += 1
+                    conn.commit()
+                    flash(f'メニュー「{product_name}」を登録しました。', 'success')
+                    return redirect(url_for('stores_detail.menu_check'))
                 except sqlite3.Error as e:
-                    error_rows.append(f"行 {i+2}: データベースエラーが発生しました - {e}")
-                    # 個別の行エラーが発生しても、トランザクション全体を失敗させないためにコミットはループの外で行う
-                    # ただし、一貫性を保つため、エラー行は挿入せず、残りを挿入する
-                    # SQLiteでは個別のINSERTのエラーはトランザクションを中断しない
-            
-            conn.commit() # ループ終了後にまとめてコミット
-            conn.close()
-
-            if inserted_count > 0:
-                flash(f'{inserted_count}件のメニューを登録しました。', 'success')
-            if error_rows:
-                for err in error_rows:
-                    flash(err, 'warning') # 警告として表示
-                if inserted_count == 0:
-                    flash('メニューの登録に失敗しました。詳細を警告メッセージで確認してください。', 'error')
-
-            return redirect(url_for('stores_detail.menu_check')) # 登録後、メニュー確認ページにリダイレクト
-
-        else:
-            flash('CSVファイルを選択してください。', 'error')
+                    flash(f"メニューの登録中にデータベースエラーが発生しました: {e}", 'error')
+                finally:
+                    conn.close()
+            else:
+                flash('CSVファイルを選択するか、手動で商品名と値段を入力してください。', 'error')
+                return redirect(request.url)
 
     return render_template('stores_detail/menu_registration.html')
 
