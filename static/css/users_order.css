@@ -319,3 +319,25 @@ body {
     color: white;
     border: 1px solid #218838;
 }
+
+
+.cart-list {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.cart-item {
+    background-color: #f1f3f5;
+    border-radius: 10px;
+    padding: 15px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.cart-item-details {
+    display: flex;
+    flex-direction: column; /* ← 商品名・カテゴリ・数量を縦に並べたい場合はこちら */
+    gap: 5px;
+}
