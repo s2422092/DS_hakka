@@ -291,3 +291,18 @@ body {
     padding-top: 20px;
     border-top: 1px solid #ced4da;
 }
+
+.item-status {
+    width: 20px;
+    height: 20px;
+    border: 1px solid #ccc;
+    border-radius: 50%;
+    background-color: #eee;
+    cursor: pointer;
+    transition: background-color 0.3s;
+    margin-top: 5px;
+}
+
+.item-status.active {
+    background-color: #4caf50;  /* 緑に変化 */
+}
