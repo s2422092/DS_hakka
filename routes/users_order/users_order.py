@@ -5,6 +5,11 @@ import sqlite3
 
 users_order_bp = Blueprint('users_order', __name__)
 
+@users_order_bp.route('/home_clear_cart')
+def home_clear_cart():
+    session.pop('cart', None)  # カート情報を消す
+    return redirect(url_for('users_home.home'))
+
 @users_order_bp.route('/menu/<int:store_id>', methods=['GET'])
 def menu(store_id):
     conn = sqlite3.connect('app.db')
