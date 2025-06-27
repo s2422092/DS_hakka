@@ -37,7 +37,8 @@
     
     <!-- マップ -->
     <div class="map-wrapper">
-        <div id="map"></div>
+        <div id="map" data-locations='{{ stores | tojson }}' style="height: 650px;"></div>
+
     
         <!-- 店舗一覧 -->
         <div class="sidebar">
