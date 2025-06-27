@@ -10,15 +10,14 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
-
-    <header class="site-header">
-        <h1>{{ store_name }} - ホーム</h1>
-        <div class="header-links">
-            <a href="">ストア情報</a>
-            <a href="{{ url_for('general.explamation') }}">ログアウト</a>
-        </div>
-    </header>
-    
+        <header class="site-header">
+            <h1>{{ store_name }} - ホーム</h1>
+            <div class="header-links">
+                <div class="store-name">ログイン中: {{ store_name if store_name else 'ゲスト' }}</div>
+                <a href="{{ url_for('stores_detail.store_info') }}">ストア情報</a>
+                <a href="{{ url_for('general.explamation') }}">ログアウト</a>
+            </div>
+        </header>
 
     <nav class="main-nav">
         <ul>

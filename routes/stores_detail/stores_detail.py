@@ -10,7 +10,7 @@ def store_home():
         flash("ログインしてください")
         return redirect(url_for('store.store_login'))
 
-    store_name = session.get('store_name', '未登録')
+    store_name = session.get('store_name', 'ゲスト')
     return render_template('stores_detail/store_home.html', store_name=store_name)
 
 
@@ -63,10 +63,8 @@ def paypay_linking():
 
     return render_template('stores_detail/paypay_linking.html')
 
-@stores_detail_bp.route('/paypay_linking')
-def paypay_linking():
 
-    return render_template('stores_detail/paypay_linking.html')
+
 
 @stores_detail_bp.route('/store_info')
 def store_info():
@@ -75,13 +73,14 @@ def store_info():
         flash("ログインしてください")
         return redirect(url_for('store.store_login'))
 
-    return render_template('stores_detail/store_info.html')
+    store_name = session.get('store_name', 'ゲスト')
 
+    # SQLiteからストア情報を取得
+    conn = sqlite3.connect('app.db')
+    conn.row_factory = sqlite3.Row  # dictのようにアクセスできる
+    cur = conn.cursor()
+    cur.execute("SELECT store_name, email, location, representative, description, created_at FROM store")
+    stores = cur.fetchall()
+    conn.close()
 
-# 🔴 ログアウト機能追加
-@stores_detail_bp.route('/logout')
-def logout():
-    session.pop('store_id', None)
-    session.pop('store_name', None)
-    flash("ログアウトしました")
-    return redirect(url_for('store.store_login'))
+    return render_template('stores_detail/store_info.html', store_name=store_name, stores=stores)
