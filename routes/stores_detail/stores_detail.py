@@ -53,3 +53,11 @@ def order_list():
 def procedure():
     # templates/stores_detail/procedure.html を表示
     return render_template('stores_detail/procedure.html')
+
+
+
+
+@stores_detail_bp.route('/store_info_page')
+def store_info_page():
+    # templates/stores_detail/store_info_page.html を表示
+    return render_template('stores_detail/store_info_page.html')
