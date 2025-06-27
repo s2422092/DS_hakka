@@ -103,7 +103,6 @@ def store_login():
         store_name = request.form.get('store_name')
         password = request.form.get('password')
 
-        # DBから店舗名に一致するレコードを取得
         conn = sqlite3.connect('app.db')
         cursor = conn.cursor()
         cursor.execute("SELECT store_id, password FROM store WHERE store_name = ?", (store_name,))
@@ -115,7 +114,7 @@ def store_login():
             if check_password_hash(hashed_pw, password):
                 session['store_id'] = store_id
                 flash("ログインに成功しました")
-                return redirect(url_for('stores_detail.store_home'))  # ←必要に応じて定義
+                return redirect(url_for('stores_detail.store_home'))
             else:
                 flash("パスワードが正しくありません")
         else:
