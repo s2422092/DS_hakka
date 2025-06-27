@@ -12,6 +12,11 @@ def menu():
     return render_template('users_order/menu.html')
 
 @users_order_bp.route('/pay_payment')
+
+
+
+
+
 def pay_payment():
     return render_template('users_order/pay_payment.html')
 
