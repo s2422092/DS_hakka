@@ -24,11 +24,12 @@ def home():
     """)
     stores = [
         {
-            'name': row[0],
-            'description': row[1],
-            'latitude': row[2],
-            'longitude': row[3]
-        } for row in cursor.fetchall()
+        'id': row[0],          # ここを追加
+        'name': row[1],
+        'description': row[2],
+        'latitude': row[3],
+        'longitude': row[4]
+    } for row in cursor.fetchall()
     ]
     conn.close()
     return render_template(
