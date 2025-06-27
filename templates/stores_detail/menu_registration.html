@@ -21,9 +21,9 @@
         <ul>
             <li><a href="{{ url_for('stores_detail.store_home') }}">ホーム</a></li>
             <li><a href="{{ url_for('stores_detail.menu_registration') }}" class="active">商品登録</a></li>
-            <li><a href="">注文リスト</a></li>
-            <li><a href="">paypayの紐付け</a></li>
-            <li><a href="">手順ページ</a></li>
+            <li><a href="{{ url_for('stores_detail.order_list') }}">注文リスト</a></li>
+            <li><a href="{{ url_for('stores_detail.paypay_linking') }}">paypayの紐付け</a></li>
+            <li><a href="{{ url_for('stores_detail.procedure') }}">手順ページ</a></li>
         </ul>
     </nav>
 

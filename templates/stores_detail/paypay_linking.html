@@ -12,18 +12,18 @@
     <header class="site-header">
         <h1>ストア名 －手順ページ</h1>
         <div class="header-links">
-            <!-- <a href="{{ url_for('store_info_page') }}">ストア情報</a> -->
-            <a href="{{ url_for('logout') }}">ログアウト</a>
+            <a href="">ストア情報</a>
+            <a href="{{ url_for('general.explamation') }}">ログアウト</a>
         </div>
     </header>
 
     <nav class="main-nav">
         <ul>
-            <li><a href="{{ url_for('home_page') }}">ホーム</a></li>
-            <li><a href="{{ url_for('product_registration_page') }}">商品登録</a></li>
-            <li><a href="{{ url_for('order_list_page') }}">注文リスト</a></li>
-            <li><a href="{{ url_for('link_paypay_page') }}">paypayの紐付け</a></li>
-            <li><a href="{{ url_for('procedure_page') }}" class="active">手順ページ</a></li>
+            <li><a href="{{ url_for('stores_detail.store_home') }}">ホーム</a></li>
+            <li><a href="{{ url_for('stores_detail.menu_registration') }}">商品登録</a></li>
+            <li><a href="{{ url_for('stores_detail.order_list') }}">注文リスト</a></li>
+            <li><a href="{{ url_for('stores_detail.paypay_linking') }}" class="active">paypayの紐付け</a></li>
+            <li><a href="{{ url_for('stores_detail.procedure') }}">手順ページ</a></li>
         </ul>
     </nav>
 
