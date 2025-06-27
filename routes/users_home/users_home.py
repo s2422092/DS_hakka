@@ -15,6 +15,7 @@ def home():
         flash("ログインしてください")
         return redirect(url_for('users_login.login'))
 
+    # データベース接続
     conn = sqlite3.connect('app.db')
     cursor = conn.cursor()
     cursor.execute("""
@@ -33,17 +34,33 @@ def home():
 
     return render_template('users_home/home.html', stores=stores, u_name=session.get('u_name', 'ゲスト'))
 
-
 @users_home_bp.route('/map_shop')
 def map_shop():
     if 'id' not in session:
         flash("ログインしてください")
         return redirect(url_for('users_login.login'))
 
+    # データベース接続
+    conn = sqlite3.connect('app.db')
+    cursor = conn.cursor()
+    cursor.execute("""
+        SELECT store_id, store_name, description
+        FROM store
+        ORDER BY store_id
+    """)
+    stores = [
+        {
+            'id': row[0],
+            'name': row[1],
+            'description': row[2],
+        } for row in cursor.fetchall()
+    ]
+    conn.close()
+
     u_name = session.get('u_name', 'ゲスト')
-    return render_template('users_home/map_shop.html', u_name=u_name)  # ← locations を渡さない
 
-
+    # storesをテンプレートに渡す
+    return render_template('users_home/map_shop.html', stores=stores, u_name=u_name)
 
 @users_home_bp.route('/payment_history')
 def payment_history():
