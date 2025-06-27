@@ -25,20 +25,11 @@ def store_home():
 
 @stores_detail_bp.route('/menu-registration', methods=['GET', 'POST'])
 def menu_registration():
-<<<<<<< HEAD
-<<<<<<< HEAD
     # ログインチェック
-=======
->>>>>>> upload-nambo
-=======
-    # ログインチェック
->>>>>>> upload-nambo
     if 'store_id' not in session:
         flash("ログインしてください")
         return redirect(url_for('store.store_login'))
 
-<<<<<<< HEAD
-=======
     store_id = session.get('store_id')
     if not store_id:
         flash("ストアIDが見つかりません。ログインし直してください。", 'error')
@@ -164,17 +155,12 @@ def menu_registration():
                 flash('CSVファイルを選択するか、手動で商品名と値段を入力してください。', 'error')
                 return redirect(request.url)
 
->>>>>>> upload-nambo
     return render_template('stores_detail/menu_registration.html')
 
 
 @stores_detail_bp.route('/menu-check')
 def menu_check():
-<<<<<<< HEAD
-    # ログインチェック
-=======
     # ストアIDがセッションにない場合はログインページにリダイレクト
->>>>>>> upload-nambo
     if 'store_id' not in session:
         flash("ログインしてください")
         return redirect(url_for('store.store_login'))
@@ -200,30 +186,16 @@ def menu_check():
 
 @stores_detail_bp.route('/order-list')
 def order_list():
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
->>>>>>> upload-nambo
     # ログインチェック
     if 'store_id' not in session:
         flash("ログインしてください")
         return redirect(url_for('store.store_login'))
 
-<<<<<<< HEAD
-=======
-    # この関数は変更なし
->>>>>>> upload-nambo
-=======
->>>>>>> upload-nambo
     return render_template('stores_detail/order_list.html')
 
 
 @stores_detail_bp.route('/procedure')
 def procedure():
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
->>>>>>> upload-nambo
     # ログインチェック
     if 'store_id' not in session:
         flash("ログインしてください")
@@ -239,26 +211,9 @@ def paypay_linking():
         flash("ログインしてください")
         return redirect(url_for('store.store_login'))
 
-<<<<<<< HEAD
-    return render_template('stores_detail/paypay_linking.html')
-
-=======
-    # この関数は変更なし
-    return render_template('stores_detail/procedure.html')
-
-
->>>>>>> upload-nambo
-@stores_detail_bp.route('/paypay_linking')
-def paypay_linking():
-    # この関数は変更なし
-    return render_template('stores_detail/paypay_linking.html')
-
-<<<<<<< HEAD
-=======
     return render_template('stores_detail/paypay_linking.html')
 
 
->>>>>>> upload-nambo
 @stores_detail_bp.route('/store_info')
 def store_info():
     # ログインチェック
@@ -275,14 +230,4 @@ def logout():
     session.pop('store_id', None)
     session.pop('store_name', None)
     flash("ログアウトしました")
-<<<<<<< HEAD
     return redirect(url_for('store.store_login'))
-=======
-@stores_detail_bp.route('/store_info_page')
-def store_info_page():
-    # この関数は変更なし
-    return render_template('stores_detail/store_info_page.html')
->>>>>>> upload-nambo
-=======
-    return redirect(url_for('store.store_login'))
->>>>>>> upload-nambo
