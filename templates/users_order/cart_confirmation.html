@@ -9,67 +9,37 @@
 <body>
 
     <header class="main-header">
-        <div class="store-name">モバおる - 〇〇食堂</div>
+        <div class="store-name">モバおる - {{ store_name }}</div>
         <div class="user-info">
-            <span>ユーザー名</span>
+            <span>{{ u_name if u_name else "ゲスト" }}</span>
         </div>
     </header>
 
     <div class="sub-header">
-        <a href="{{ url_for('users_order.menu') }}">戻る</a>
-        <a href="{{ url_for('users_order.payment_selection') }}">レジに進む</a>
+        <a href="{{ url_for('users_order.menu', store_id=store_id) }}">戻る</a>
+        <a href="">レジに進む</a>
     </div>
 
     <main class="container">
         <div class="cart-list">
-            <!-- (中身は変更なし) -->
-            <div class="cart-item">
-                <div class="cart-item-details">
-                    <span>商品名</span>
-                    <span>カテゴリー</span>
-                </div>
-                <div class="cart-item-details">
-                    <div class="quantity-selector">
-                        <button>△</button>
-                        <input type="text" value="1" readonly>
-                        <button>▽</button>
-                    </div>
-                    <span>値段</span>
-                </div>
-            </div>
-             <div class="cart-item">
-                <div class="cart-item-details">
-                    <span>商品名</span>
-                    <span>カテゴリー</span>
-                </div>
-                <div class="cart-item-details">
-                    <div class="quantity-selector">
-                        <button>△</button>
-                        <input type="text" value="2" readonly>
-                        <button>▽</button>
-                    </div>
-                    <span>値段</span>
-                </div>
-            </div>
-            <div class="cart-item">
-                <div class="cart-item-details">
-                    <span>商品名</span>
-                    <span>カテゴリー</span>
-                </div>
-                <div class="cart-item-details">
-                    <div class="quantity-selector">
-                        <button>△</button>
-                        <input type="text" value="1" readonly>
-                        <button>▽</button>
-                    </div>
-                    <span>値段</span>
-                </div>
-            </div>
+            {% if cart %}
+                <ul>
+                {% for item in cart %}
+                    <li>
+                        {{ item.name }} - {{ item.category }} - 数量: {{ item.quantity }} - 合計金額: {{ item.price * item.quantity }}円
+                    </li>
+                {% endfor %}
+                </ul>
+            {% else %}
+                <p>カートは空です。</p>
+            {% endif %}
         </div>
+    
         <div class="cart-total">
-            3点 合計 〜〜〜円
+            {{ total_quantity }}点 合計 {{ total_price }}円
         </div>
     </main>
+    
 
 </body>
 </html>

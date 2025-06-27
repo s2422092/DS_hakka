@@ -11,14 +11,16 @@
 <header class="main-header">
     <div class="store-name">モバおる - {{ store_name }}</div>
     <div class="user-info">
-        <span>ユーザー名</span>
+        <span class="username">
+            ログイン中: {{ u_name if u_name else 'ゲスト' }}
+        </span>
         <a href="{{url_for('users_home.logout')}}" class="btn btn-danger btn-sm">ログアウト</a>
     </div>
 </header>
 
 <div class="sub-header">
-    <a href="{{ url_for('users_home.home') }}">戻る</a>
-    <a href="{{ url_for('users_order.cart_confirmation') }}">カート確認</a>
+    <a href="{{ url_for('users_order.home_clear_cart') }}">戻る</a>
+    <a href="{{ url_for('users_order.cart_confirmation', store_id=store_id) }}">カート確認</a>
 </div>
 
 <main class="container">
@@ -32,24 +34,27 @@
 
     <div class="menu-grid">
         {% for item in menu_items %}
-        <div class="menu-card">
+        <div class="menu-card" data-menu-id="{{ item[0] }}" data-name="{{ item[1] }}" data-category="{{ item[2] }}" data-price="{{ item[3] }}">
             <div class="item-name">{{ item[1] }}</div>
             <div class="item-category">{{ item[2] }}</div>
             <div class="item-selection">
                 <div class="item-price">{{ item[3] }}円</div>
                 <div class="quantity-selector">
-                    <button>△</button>
-                    <input type="text" value="1" readonly>
-                    <button>▽</button>
+                    <button class="qty-up-btn">△</button>
+                    <input type="text" class="qty-input" value="1" readonly>
+                    <button class="qty-down-btn">▽</button>
                 </div>
-                <div class="item-status"></div>
+                <button class="add-to-cart-btn">カートに追加</button>
             </div>
         </div>
-        {% else %}
-        <p>メニューがありません。</p>
         {% endfor %}
+        
     </div>
 </main>
+
+        <script src="{{ url_for('static', filename='js/menu.js') }}"></script>
+
+        
 
 </body>
 </html>

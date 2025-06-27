@@ -291,3 +291,31 @@ body {
     padding-top: 20px;
     border-top: 1px solid #ced4da;
 }
+
+.added {
+    background-color: #28a745; /* 緑色 */
+    color: white;
+    pointer-events: none; /* 連打防止 */
+    transition: background-color 0.3s ease;
+  }
+  
+  /* 通知ポップアップ */
+  #cart-notification {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    background-color: #28a745;
+    color: white;
+    padding: 10px 20px;
+    border-radius: 5px;
+    display: none;
+    z-index: 9999;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+  }
+
+  
+  .add-to-cart-btn.added {
+    background-color: #28a745;  /* 緑色など分かりやすい色に */
+    color: white;
+    border: 1px solid #218838;
+}
