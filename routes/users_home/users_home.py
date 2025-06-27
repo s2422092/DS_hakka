@@ -72,6 +72,7 @@ def payment_history():
 
 @users_home_bp.route('/users_data')
 def users_data():
+    # セッションチェック
     if 'id' not in session:
         flash("ログインしてください")
         return redirect(url_for('users_login.login'))
@@ -85,15 +86,15 @@ def users_data():
         SELECT u_name, email, created_at
         FROM users_table
         WHERE id = ?
-    """, (session['id'],))
+    """, (session['id'],))  # セッションから取得したユーザーIDを使用
     user_data = cursor.fetchone()
     conn.close()
 
-    # ユーザー情報の処理
+    # データが存在する場合に辞書として構築
     user = None
     if user_data:
         user = {
-            'u_name': user_data[0],
+            'username': user_data[0],
             'email': user_data[1],
             'registration_date': user_data[2]
         }
@@ -101,6 +102,6 @@ def users_data():
     # 必要な情報をテンプレートに渡す
     return render_template(
         'users_home/users_data.html',
-        user=user,
+        user=user,  # 単一のユーザーデータを渡す
         u_name=u_name
     )

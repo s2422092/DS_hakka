@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ja">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -14,8 +14,8 @@
         </span>
         
         <div class="user-links">
-            <a href="{{url_for('users_home.users_data')}}">ユーザー情報</a>
-            <a href="{{url_for('users_home.logout')}}">ログアウト</a>
+            <a href="{{ url_for('users_home.users_data')}}">ユーザー情報</a>
+            <a href="{{ url_for('users_home.logout')}}">ログアウト</a>
         </div>
     </div>
 
@@ -34,22 +34,18 @@
         </ul>
     </div>
 
-    <!-- ユーザーリスト -->
+    <!-- ユーザー情報 -->
     <main>
         <h2>ユーザー情報</h2>
-        <ul>
-            {% if users %}
-                {% for user in users %}
-                    <li>
-                        <h3>名前: {{ user.username }}</h3>
-                        <p>メール: {{ user.email }}</p>
-                        <p>登録年月日: {{ user.registration_date }}</p>
-                    </li>
-                {% endfor %}
+        <div>
+            {% if user %}
+                <p><strong>名前:</strong> {{ user.username }}</p>
+                <p><strong>メールアドレス:</strong> {{ user.email }}</p>
+                <p><strong>登録日:</strong> {{ user.registration_date }}</p>
             {% else %}
-                <li>ユーザー情報がありません。</li>
+                <p>ユーザー情報がありません。</p>
             {% endif %}
-        </ul>
+        </div>
     </main>
 </body>
 </html>
