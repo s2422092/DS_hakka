@@ -1,5 +1,5 @@
 CREATE TABLE orders (
-    order_id INT PRIMARY KEY AUTOINCREMENT,
+    order_id INT PRIMARY KEY,
     user_id INT NOT NULL,
     store_id INT NOT NULL,
     status TEXT CHECK (status IN ('pending', 'completed', 'canceled')),
