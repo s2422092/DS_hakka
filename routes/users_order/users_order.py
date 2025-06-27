@@ -26,23 +26,39 @@ def menu(store_id):
         u_name=session.get('u_name', 'ゲスト')
     )
 
-# 🔽 商品追加用のルート（JavaScriptからPOSTされる）
+from flask import request, session, jsonify
+
 @users_order_bp.route('/add_to_cart', methods=['POST'])
 def add_to_cart():
-    item = request.json
+    data = request.get_json()
+    menu_id = data.get('menu_id')
+    name = data.get('name')
+    category = data.get('category')
+    price = data.get('price')
+    quantity = data.get('quantity', 1)
+
+    if not all([menu_id, name, category, price]):
+        return jsonify({'error': '必要なデータがありません'}), 400
+
     cart = session.get('cart', [])
-    
-    # 同じ商品があるか確認して数量加算
-    for cart_item in cart:
-        if cart_item['menu_id'] == item['menu_id']:
-            cart_item['quantity'] += 1
+
+    # 既に同じ商品があれば数量を加算
+    for item in cart:
+        if item['menu_id'] == menu_id:
+            item['quantity'] += quantity
             break
     else:
-        item['quantity'] = 1
-        cart.append(item)
-    
+        cart.append({
+            'menu_id': menu_id,
+            'name': name,
+            'category': category,
+            'price': price,
+            'quantity': quantity
+        })
+
     session['cart'] = cart
-    return {'message': 'カートに追加しました'}
+    session.modified = True
+    return jsonify({'message': 'カートに追加しました', 'cart_count': sum(i['quantity'] for i in cart)})
 
 
 @users_order_bp.route('/cart_confirmation/<int:store_id>')
