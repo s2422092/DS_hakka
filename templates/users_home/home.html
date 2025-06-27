@@ -41,10 +41,10 @@
             {% if stores %}
                 {% for store in stores %}
                     <li>
-                        <h3>{{ store.store_name }}</h3>
+                        <h3>{{ store.name }}</h3>
                         <p>{{ store.description }}</p>
-                        <p>所在地: {{ store.location_title or '不明' }}</p>
-                        <p>緯度: {{ store.latitude or 'なし' }}, 経度: {{ store.longitude or 'なし' }}</p>
+                        <p>緯度: {{ store.latitude if store.latitude else '未登録' }}</p>
+                        <p>経度: {{ store.longitude if store.longitude else '未登録' }}</p>
                     </li>
                 {% endfor %}
             {% else %}

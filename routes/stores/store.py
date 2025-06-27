@@ -106,7 +106,7 @@ def store_login():
         # DBから店舗名に一致するレコードを取得
         conn = sqlite3.connect('app.db')
         cursor = conn.cursor()
-        cursor.execute("SELECT id, password FROM store WHERE store_name = ?", (store_name,))
+        cursor.execute("SELECT store_id, password FROM store WHERE store_name = ?", (store_name,))
         result = cursor.fetchone()
         conn.close()
 

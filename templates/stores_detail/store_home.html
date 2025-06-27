@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
+<<<<<<< HEAD
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ストア管理 - ホーム</title>
@@ -87,3 +88,33 @@
 
 </body>
 </html>
+=======
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>ホーム</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/users_home.css') }}">
+</head>
+<body>
+    <!-- 水色の背景部分（ユーザー情報セクション） -->
+    <div class="water-blue-section">
+        <span class="username">
+            ログイン中: {{ u_name if u_name else 'ゲスト' }}
+        </span>
+        
+        <div class="user-links">
+            <a href="#">ユーザー情報</a>
+            <a href="{{ url_for('users_home.logout') }}">ログアウト</a>
+        </div>
+    </div>
+
+    <!-- 灰色の背景部分（ナビゲーションセクション） -->
+
+    
+    <!-- 店舗リスト -->
+    <main>
+        <h2>各店舗の情報</h2>
+       
+    </main>
+</body>
+</html>
+>>>>>>> home_yugo

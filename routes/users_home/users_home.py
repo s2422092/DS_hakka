@@ -15,36 +15,23 @@ def home():
         flash("ログインしてください")
         return redirect(url_for('users_login.login'))
 
-    u_name = session.get('u_name', 'ゲスト')
-
     conn = sqlite3.connect('app.db')
     cursor = conn.cursor()
-
     cursor.execute("""
-        SELECT
-            s.store_name,
-            s.description,
-            l.location_title,
-            l.latitude,
-            l.longitude
+        SELECT s.store_name, s.description, l.latitude, l.longitude
         FROM store s
         LEFT JOIN locations l ON s.store_id = l.travel_data_id
     """)
-
     stores = [
         {
-            'store_name': row[0],
+            'name': row[0],
             'description': row[1],
-            'location_title': row[2],
-            'latitude': row[3],
-            'longitude': row[4],
-        }
-        for row in cursor.fetchall()
+            'latitude': row[2],
+            'longitude': row[3]
+        } for row in cursor.fetchall()
     ]
-
     conn.close()
-
-    return render_template('users_home/home.html', u_name=u_name, stores=stores)
+    return render_template('users_home/home.html', stores=stores, u_name=session.get('u_name', 'ゲスト'))
 
 
 @users_home_bp.route('/map_shop')
