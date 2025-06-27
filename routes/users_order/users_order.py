@@ -1,6 +1,7 @@
 # routes/general/explamation.py
 from flask import Blueprint, render_template
 import sqlite3
+from flask import session, redirect, url_for, flash
 
 
 users_order_bp = Blueprint('users_order', __name__, url_prefix='/users_order')
@@ -11,6 +12,10 @@ def cart_confirmation():
 
 @users_order_bp.route('/menu/<int:store_id>')
 def menu(store_id):
+    if 'id' not in session:
+        flash("ログインしてください")
+        return redirect(url_for('users_login.login'))
+    u_name = session.get('u_name', 'ゲスト')
     conn = sqlite3.connect('app.db')
     cursor = conn.cursor()
 
@@ -30,7 +35,7 @@ def menu(store_id):
     cursor.close()
     conn.close()
 
-    return render_template('users_order/menu.html', store_name=store_name, menu_items=menu_items)
+    return render_template('users_order/menu.html', store_name=store_name, menu_items=menu_items, u_name=u_name)
 
 
 @users_order_bp.route('/pay_payment')
