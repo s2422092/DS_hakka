@@ -18,25 +18,21 @@ def home():
     conn = sqlite3.connect('app.db')
     cursor = conn.cursor()
     cursor.execute("""
-        SELECT s.store_name, s.description, l.latitude, l.longitude
-        FROM store s
-        LEFT JOIN locations l ON s.store_id = l.travel_data_id
+        SELECT store_id, store_name, description
+        FROM store
+        ORDER BY store_id
     """)
     stores = [
         {
-        'id': row[0],          # ここを追加
-        'name': row[1],
-        'description': row[2],
-        'latitude': row[3],
-        'longitude': row[4]
-    } for row in cursor.fetchall()
+            'id': row[0],
+            'name': row[1],
+            'description': row[2],
+        } for row in cursor.fetchall()
     ]
     conn.close()
-    return render_template(
-        'users_home/home.html',
-        stores=stores,
-        u_name=session.get('u_name', 'ゲスト')
-    )
+
+    return render_template('users_home/home.html', stores=stores, u_name=session.get('u_name', 'ゲスト'))
+
 
 @users_home_bp.route('/map_shop')
 def map_shop():
