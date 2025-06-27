@@ -31,15 +31,11 @@ def home():
         } for row in cursor.fetchall()
     ]
     conn.close()
-<<<<<<< HEAD
-    return render_template('users_home/home.html', stores=stores, u_name=session.get('u_name', 'ゲスト'))
-=======
     return render_template(
         'users_home/home.html',
         stores=stores,
         u_name=session.get('u_name', 'ゲスト')
     )
->>>>>>> tera_6
 
 @users_home_bp.route('/map_shop')
 def map_shop():
