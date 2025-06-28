@@ -22,15 +22,26 @@ def store_home():
     store_name = session.get('store_name', 'ゲスト')
     return render_template('stores_detail/store_home.html', store_name=store_name)
 
+
 @stores_detail_bp.route('/store_home_menu')
 def store_home_menu():
-    # ログインチェック
     if 'store_id' not in session:
         flash("ログインしてください")
         return redirect(url_for('store.store_login'))
 
     store_name = session.get('store_name', 'ゲスト')
-    return render_template('stores_detail/store_home_menu.html', store_name=store_name)
+    store_id = session.get('store_id')
+
+    # 商品一覧を取得
+    conn = sqlite3.connect('app.db')
+    conn.row_factory = sqlite3.Row
+    cur = conn.cursor()
+    cur.execute("SELECT menu_name, price, category, soldout FROM menus WHERE store_id = ?", (store_id,))
+    menus = cur.fetchall()
+    conn.close()
+
+    return render_template('stores_detail/store_home_menu.html', store_name=store_name , menus=menus)
+
 
 
 @stores_detail_bp.route('/menu-registration', methods=['GET', 'POST'])
