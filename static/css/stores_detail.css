@@ -305,3 +305,29 @@ body {
     line-height: 1.8;
     color: #333;
 }
+
+/* サブナビゲーション（ホーム＆登録ページのリンク） */
+.sub-navigation {
+    display: flex;
+    justify-content: flex-start;  /* ← 左寄せに変更 */
+    gap: 15px;
+    background-color: #f8f9fa;
+    padding: 5px 20px; /* 左に余白追加 */
+    border-bottom: 1px solid #ddd;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.04);
+}
+
+.shortcut-link {
+    text-decoration: none;
+    color: #007bff;
+    font-weight: bold;
+    font-size: 1em;
+    background-color: #e6f2ff;
+    padding: 10px 20px;
+    border-radius: 8px;
+    transition: background-color 0.2s;
+}
+
+.shortcut-link:hover {
+    background-color: #d0e7ff;
+}
