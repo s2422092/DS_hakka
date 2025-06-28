@@ -57,7 +57,7 @@ def map_shop():
     stores = stores = [
     {
         'id': row[0],  # ←ここを 'id' に変更
-        'store_name': row[1],
+        'name': row[1],
         'description': row[2],
         'email': row[3],
         'representative': row[4],
