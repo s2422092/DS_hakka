@@ -22,6 +22,16 @@ def store_home():
     store_name = session.get('store_name', 'ゲスト')
     return render_template('stores_detail/store_home.html', store_name=store_name)
 
+@stores_detail_bp.route('/store_home_menu')
+def store_home_menu():
+    # ログインチェック
+    if 'store_id' not in session:
+        flash("ログインしてください")
+        return redirect(url_for('store.store_login'))
+
+    store_name = session.get('store_name', 'ゲスト')
+    return render_template('stores_detail/store_home_menu.html', store_name=store_name)
+
 
 @stores_detail_bp.route('/menu-registration', methods=['GET', 'POST'])
 def menu_registration():
