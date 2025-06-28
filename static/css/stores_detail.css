@@ -315,6 +315,9 @@ body {
     padding: 5px 20px; /* 左に余白追加 */
     border-bottom: 1px solid #ddd;
     box-shadow: 0 2px 4px rgba(0,0,0,0.04);
+    position: sticky;  /* ← これがスクロール時に上部に固定するポイント */
+    top: 0;
+    z-index: 1000;  /* ヘッダーなどに重ならないように */
 }
 
 .shortcut-link {
