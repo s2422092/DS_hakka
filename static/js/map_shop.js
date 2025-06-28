@@ -5,6 +5,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
     const map = L.map('map').setView([35.6769, 139.7661], 10);
 
+    // タイルレイヤー
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
         attribution: '© OpenStreetMap contributors'
     }).addTo(map);
@@ -12,17 +13,19 @@ document.addEventListener('DOMContentLoaded', function () {
     const markers = [];
 
     locations.forEach(loc => {
-        const detailUrl = `/store/${loc.store_id}`;
+        const menuUrl = `/menu/${loc.id}`;
 
+        // ポップアップの内容（装飾と絵文字付き）
         const popupContent = `
-            <div>
-                <a href="${detailUrl}" style="font-weight:bold; color:blue;">
+            <div style="font-size: 1em; line-height: 1.5; max-width: 220px;">
+                <div style="font-size: 1.5em;">📍</div>
+                <a href="${menuUrl}" style="font-weight:bold; color:#007bff; text-decoration: none;">
                     ${loc.store_name || '店舗名未登録'}
                 </a><br>
-                メール: ${loc.email || '未登録'}<br>
-                担当者: ${loc.representative || '不明'}<br>
-                説明: ${loc.description || 'なし'}<br>
-                <small>クリックで店舗詳細ページへ</small>
+                <span style="color:#444;">メール: ${loc.email || '未登録'}</span><br>
+                <span style="color:#444;">担当者: ${loc.representative || '不明'}</span><br>
+                <span style="color:#444;">説明: ${loc.description || 'なし'}</span><br>
+                <span style="font-size: 0.8em; color: gray;">※クリックでメニュー画面へ</span>
             </div>
         `;
 
@@ -30,15 +33,19 @@ document.addEventListener('DOMContentLoaded', function () {
             .addTo(map)
             .bindPopup(popupContent);
 
+        // ホバーで開く
         marker.on('mouseover', function () {
             this.openPopup();
         });
+
+        // ホバー外れると閉じる
         marker.on('mouseout', function () {
             this.closePopup();
         });
 
+        // クリックでメニュー画面へ
         marker.on('click', function () {
-            window.location.href = detailUrl;
+            window.location.href = menuUrl;
         });
 
         markers.push(marker);

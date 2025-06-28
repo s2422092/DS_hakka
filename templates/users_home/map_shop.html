@@ -9,7 +9,7 @@
     <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
 </head>
 <body>
-    <!-- 水色の背景部分（ユーザー情報セクション） -->
+    <!-- 水色の背景部分 -->
     <div class="water-blue-section">
         <span class="username">
             ログイン中: {{ u_name if u_name else 'ゲスト' }}
@@ -20,7 +20,7 @@
         </div>
     </div>
 
-    <!-- 灰色の背景部分（ナビゲーションセクション） -->
+    <!-- 灰色のナビゲーション部分 -->
     <div class="gray-section">
         <ul>
             <li class="{% if request.endpoint == 'users_home.home' %}active{% endif %}">
@@ -34,12 +34,11 @@
             </li>
         </ul>
     </div>
-    
-    <!-- マップ -->
+
+    <!-- マップ表示 -->
     <div class="map-wrapper">
         <div id="map" data-locations='{{ stores | tojson }}' style="height: 650px;"></div>
 
-    
         <!-- 店舗一覧 -->
         <div class="sidebar">
             <h2>近くの店舗一覧</h2>
@@ -60,7 +59,7 @@
         </div>
     </div>
 
-    <!-- 外部JSファイルの読み込み -->
+    <!-- 外部JS -->
     <script src="{{ url_for('static', filename='js/map_shop.js') }}"></script>
 </body>
 </html>
