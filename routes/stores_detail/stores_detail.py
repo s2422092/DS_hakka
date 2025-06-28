@@ -52,6 +52,7 @@ def menu_registration():
         return redirect(url_for('store.store_login'))
 
     store_id = session.get('store_id')
+    store_name = session.get('store_name', 'ゲスト')
     if not store_id:
         flash("ストアIDが見つかりません。ログインし直してください。", 'error')
         return redirect(url_for('store.store_login'))
@@ -176,7 +177,7 @@ def menu_registration():
                 flash('CSVファイルを選択するか、手動で商品名と値段を入力してください。', 'error')
                 return redirect(request.url)
 
-    return render_template('stores_detail/menu_registration.html')
+    return render_template('stores_detail/menu_registration.html',store_name=store_name)
 
 
 @stores_detail_bp.route('/menu-check')
