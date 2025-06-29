@@ -129,72 +129,106 @@ body {
     flex-grow: 1;
 }
 
+
+/* --- メニューカードのグリッド全体 --- */
 .menu-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-    gap: 20px;
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: 25px;
+    padding: 20px;
 }
 
+/* --- 各商品カードの見た目 --- */
 .menu-card {
-    background-color: #f1f3f5;
-    border: 1px solid #dee2e6;
-    border-radius: 15px;
-    padding: 15px;
-    text-align: center;
+    background-color: #fff;
+    border: 1px solid #ddd;
+    border-radius: 16px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+    padding: 20px;
     display: flex;
     flex-direction: column;
     justify-content: space-between;
+    transition: transform 0.2s ease;
+}
+.menu-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.1);
 }
 
-.menu-card .item-name {
+.item-name {
     font-size: 1.2em;
     font-weight: bold;
-    margin-bottom: 10px;
+    margin-bottom: 8px;
+    color: #333;
 }
 
-.menu-card .item-category {
-    color: #6c757d;
-    margin-bottom: 15px;
+.item-category {
+    font-size: 0.9em;
+    color: #777;
+    margin-bottom: 12px;
 }
 
-.menu-card .item-price {
-    font-size: 1.1em;
-    font-weight: bold;
-    color: #343a40;
-}
-
+/* --- 金額 + 数量 + カートボタン --- */
 .item-selection {
     display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-top: 15px;
+    flex-direction: column;
+    gap: 10px;
 }
 
+.item-price {
+    font-size: 1.1em;
+    font-weight: bold;
+    color: #ff6600;
+}
+
+/* --- 数量選択 --- */
 .quantity-selector {
     display: flex;
+    justify-content: center;
     align-items: center;
-    gap: 5px;
+    gap: 6px;
 }
 
-.quantity-selector input {
+.qty-input {
     width: 40px;
     text-align: center;
+    font-size: 1em;
+    padding: 5px;
     border: 1px solid #ccc;
-    border-radius: 4px;
+    border-radius: 6px;
+    background-color: #fdfdfd;
 }
 
-.item-status {
-    width: 24px;
-    height: 24px;
-    border-radius: 50%;
-    border: 2px solid #adb5bd;
+.qty-up-btn, .qty-down-btn {
+    background-color: #e0e0e0;
+    border: none;
+    border-radius: 6px;
+    padding: 5px 10px;
+    font-size: 1em;
     cursor: pointer;
+    transition: background-color 0.2s ease;
 }
 
-.item-status.selected {
-    background-color: #28a745; /* 緑 */
-    border-color: #28a745;
+.qty-up-btn:hover, .qty-down-btn:hover {
+    background-color: #ccc;
 }
+
+/* --- カートに追加ボタン --- */
+.add-to-cart-btn {
+    background-color: #28a745;
+    color: white;
+    border: none;
+    padding: 10px 15px;
+    border-radius: 8px;
+    font-size: 1em;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+}
+.add-to-cart-btn:hover {
+    background-color: #218838;
+}
+
 
 
 /* --- cart_confirmation.html --- */
