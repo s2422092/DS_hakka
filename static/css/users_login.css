@@ -134,7 +134,7 @@ h1 {
 
 /* ボタンを右寄せするコンテナ */
 .button-area {
-    text-align: right;
+    text-align: center;
     margin-top: 20px;
 }
 
