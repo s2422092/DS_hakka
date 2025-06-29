@@ -43,24 +43,35 @@ def map_shop():
     # データベース接続
     conn = sqlite3.connect('app.db')
     cursor = conn.cursor()
+
+    # store テーブルと locations テーブルを JOIN
     cursor.execute("""
-        SELECT store_id, store_name, description
-        FROM store
-        ORDER BY store_id
+        SELECT s.store_id, s.store_name, s.description,
+               s.email, s.representative,
+               l.latitude, l.longitude
+        FROM store s
+        JOIN locations l ON s.store_id = l.travel_data_id
+        ORDER BY s.store_id
     """)
-    stores = [
-        {
-            'id': row[0],
-            'name': row[1],
-            'description': row[2],
-        } for row in cursor.fetchall()
-    ]
+
+    stores = stores = [
+    {
+        'id': row[0],  # ←ここを 'id' に変更
+        'name': row[1],
+        'description': row[2],
+        'email': row[3],
+        'representative': row[4],
+        'lat': row[5],
+        'lng': row[6]
+    } for row in cursor.fetchall()
+]
+
     conn.close()
 
     u_name = session.get('u_name', 'ゲスト')
 
-    # storesをテンプレートに渡す
     return render_template('users_home/map_shop.html', stores=stores, u_name=u_name)
+
 
 @users_home_bp.route('/payment_history')
 def payment_history():

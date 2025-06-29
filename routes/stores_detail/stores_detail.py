@@ -23,6 +23,27 @@ def store_home():
     return render_template('stores_detail/store_home.html', store_name=store_name)
 
 
+@stores_detail_bp.route('/store_home_menu')
+def store_home_menu():
+    if 'store_id' not in session:
+        flash("ログインしてください")
+        return redirect(url_for('store.store_login'))
+
+    store_name = session.get('store_name', 'ゲスト')
+    store_id = session.get('store_id')
+
+    # 商品一覧を取得
+    conn = sqlite3.connect('app.db')
+    conn.row_factory = sqlite3.Row
+    cur = conn.cursor()
+    cur.execute("SELECT menu_name, price, category, soldout FROM menus WHERE store_id = ?", (store_id,))
+    menus = cur.fetchall()
+    conn.close()
+
+    return render_template('stores_detail/store_home_menu.html', store_name=store_name , menus=menus)
+
+
+
 @stores_detail_bp.route('/menu-registration', methods=['GET', 'POST'])
 def menu_registration():
     # ログインチェック
@@ -31,6 +52,7 @@ def menu_registration():
         return redirect(url_for('store.store_login'))
 
     store_id = session.get('store_id')
+    store_name = session.get('store_name', 'ゲスト')
     if not store_id:
         flash("ストアIDが見つかりません。ログインし直してください。", 'error')
         return redirect(url_for('store.store_login'))
@@ -155,7 +177,7 @@ def menu_registration():
                 flash('CSVファイルを選択するか、手動で商品名と値段を入力してください。', 'error')
                 return redirect(request.url)
 
-    return render_template('stores_detail/menu_registration.html')
+    return render_template('stores_detail/menu_registration.html',store_name=store_name)
 
 
 @stores_detail_bp.route('/menu-check')

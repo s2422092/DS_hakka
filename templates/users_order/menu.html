@@ -19,6 +19,10 @@
 </header>
 
 <div class="sub-header">
+    <p>メニュー画面</p>
+</div>
+
+<div class="under-hedder">
     <a href="{{ url_for('users_order.home_clear_cart') }}">戻る</a>
     <a href="{{ url_for('users_order.cart_confirmation', store_id=store_id) }}">カート確認</a>
 </div>
@@ -35,8 +39,14 @@
     <div class="menu-grid">
         {% for item in menu_items %}
         <div class="menu-card" data-menu-id="{{ item[0] }}" data-name="{{ item[1] }}" data-category="{{ item[2] }}" data-price="{{ item[3] }}">
-            <div class="item-name">{{ item[1] }}</div>
-            <div class="item-category">{{ item[2] }}</div>
+            
+            <!-- 左側：商品名とカテゴリ -->
+            <div class="item-info">
+                <div class="item-name">{{ item[1] }}</div>
+                <div class="item-category">{{ item[2] }}</div>
+            </div>
+            
+            <!-- 右側：価格、数量、カート追加 -->
             <div class="item-selection">
                 <div class="item-price">{{ item[3] }}円</div>
                 <div class="quantity-selector">
@@ -46,10 +56,11 @@
                 </div>
                 <button class="add-to-cart-btn">カートに追加</button>
             </div>
+    
         </div>
         {% endfor %}
-        
     </div>
+    
 </main>
 
         <script src="{{ url_for('static', filename='js/menu.js') }}"></script>
