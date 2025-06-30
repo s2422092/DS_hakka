@@ -1,23 +1,20 @@
-// static/js/menu.js
+document.addEventListener('DOMContentLoaded', function () {
 
-document.addEventListener('DOMContentLoaded', function() {
-    
-    // APIのURLをHTMLの属性から取得（ハードコーディングを避けるため）
-    // この方法はHTMLに <div id="api-urls" data-add-cart-url="..."> のような要素を置く必要がありますが、
-    // 今回は簡単のため、直接URLを記述します。
     const addCartUrl = '/users_order/add_to_cart';
 
-    // 全てのメニューカードにイベントリスナーを設定
-    document.querySelectorAll('.menu-card').forEach(card => {
+    const categoryButtons = document.querySelectorAll('.category-btn');
+    const searchInput = document.getElementById('menu-search');
+    const menuCards = document.querySelectorAll('.menu-card');
+
+    // --- 数量操作・カート追加機能 ---
+    menuCards.forEach(card => {
         const menuId = card.dataset.menuId;
         const qtyInput = card.querySelector('.qty-input');
-        
-        // 数量を増やすボタン
+
         card.querySelector('.qty-up-btn').addEventListener('click', () => {
             qtyInput.value = parseInt(qtyInput.value) + 1;
         });
 
-        // 数量を減らすボタン
         card.querySelector('.qty-down-btn').addEventListener('click', () => {
             let currentQty = parseInt(qtyInput.value);
             if (currentQty > 1) {
@@ -25,11 +22,8 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
 
-        // カートに追加ボタン
         card.querySelector('.add-to-cart-btn').addEventListener('click', () => {
             const quantity = parseInt(qtyInput.value);
-            
-            // バックエンドAPIを呼び出す
             fetch(addCartUrl, {
                 method: 'POST',
                 headers: {
@@ -46,7 +40,6 @@ document.addEventListener('DOMContentLoaded', function() {
                     displayFlashMessage(data.error, 'error');
                 } else {
                     displayFlashMessage(data.message, 'success');
-                    // ヘッダーのカート数を更新
                     document.getElementById('cart-count').textContent = data.cart_count;
                 }
             })
@@ -57,7 +50,48 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 
-    // メッセージを画面に表示するためのヘルパー関数
+    // --- カテゴリ・検索によるフィルタ ---
+    function filterMenuItems() {
+        const activeCategory = document.querySelector('.category-btn.active')?.dataset.category || "all";
+        const keyword = searchInput.value.trim().toLowerCase();
+
+        menuCards.forEach(card => {
+            const category = card.querySelector('.item-category').textContent.trim();
+            const name = card.querySelector('.item-name').textContent.trim().toLowerCase();
+
+            const matchesCategory = activeCategory === "all" || category === activeCategory;
+            const matchesSearch = name.includes(keyword);
+
+            if (matchesCategory && matchesSearch) {
+                card.style.display = "";
+            } else {
+                card.style.display = "none";
+            }
+        });
+    }
+
+    // カテゴリーボタンにクリックイベントを追加
+    categoryButtons.forEach(btn => {
+        btn.addEventListener('click', () => {
+            categoryButtons.forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            filterMenuItems();
+        });
+    });
+
+    // 検索バーの入力でフィルタを実行
+    if (searchInput) {
+        searchInput.addEventListener('input', filterMenuItems);
+    }
+
+    // 初期化：最初に「すべて」ボタンを選択状態にしておく
+    const allBtn = document.querySelector(".category-btn[data-category='all']");
+    if (allBtn) {
+        allBtn.classList.add("active");
+    }
+    filterMenuItems();
+
+    // --- フラッシュメッセージ表示用関数 ---
     function displayFlashMessage(message, category) {
         const container = document.getElementById('flash-message-container');
         const messageDiv = document.createElement('div');
@@ -65,7 +99,6 @@ document.addEventListener('DOMContentLoaded', function() {
         messageDiv.textContent = message;
         container.appendChild(messageDiv);
 
-        // 3秒後にメッセージを消す
         setTimeout(() => {
             messageDiv.style.opacity = '0';
             setTimeout(() => {

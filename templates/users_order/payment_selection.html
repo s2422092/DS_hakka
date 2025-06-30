@@ -2,34 +2,64 @@
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
-    <title>お支払い方法の選択</title>
-    </head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>お支払い方法の選択 - モバおる</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/users_order.css') }}">
+</head>
 <body>
-    <h1>ご注文内容の最終確認</h1>
-    <h2>{{ store_name }}</h2>
 
-    <h3>ご注文商品</h3>
-    <ul>
-        {% for item in cart %}
-            <li>{{ item.name }} x {{ item.quantity }} ... {{ item.price * item.quantity }}円</li>
-        {% endfor %}
-    </ul>
-    <hr>
-    <h3>お支払い合計: <strong>{{ total_price }}円</strong></h3>
+    <header class="main-header">
+        <div class="store-name">モバおる - {{ store_name }}</div>
+        <div class="user-info">
+            <span>{{ username }}</span>
+        </div>
+    </header>
 
-    <hr>
+    <div class="sub-header">
+        <p>注文最終確認</p>
+        <a href="{{ url_for('users_order.back_to_home_and_clear_cart') }}">ホームに戻る</a>
+    </div>
 
-    <h3>お支払い方法</h3>
-    <div>
-        <p>PayPay</p>
+    <main class="container">
+        <div class="store-info">
+            <span class="name">{{ store_name }}</span>
         </div>
 
-    <form action="{{ url_for('users_order.create_order') }}" method="POST">
-        <p>上記の内容でよろしければ、注文を確定してください。</p>
-        <button type="submit">この内容で注文を確定する</button>
-    </form>
+        <div class="order-summary">
+            <div class="cart-list">
+                {% for item in cart %}
+                    <div class="cart-item">
+                        <div class="cart-item-details">
+                            <span>{{ item.name }}</span>
+                            <span>{{ item.quantity }} 個</span>
+                        </div>
+                        <span>{{ item.price * item.quantity }}円</span>
+                    </div>
+                {% endfor %}
+            </div>
+            <div class="cart-total">
+                合計: {{ total_price }}円
+            </div>
+        </div>
 
-    <br>
-    <a href="{{ url_for('users_order.cart_confirmation') }}">カートに戻る</a>
+        <div class="payment-actions">
+            <h3>お支払い方法</h3>
+            <button class="btn btn-paypay" disabled>PayPay</button>
+        </div>
+
+        <form action="{{ url_for('users_order.create_order') }}" method="POST">
+            <p>上記の内容でよろしければ、注文を確定してください。</p>
+            <button type="submit" class="btn btn-primary">この内容で注文を確定する</button>
+        </form>
+
+        <br>
+        <a href="{{ url_for('users_order.cart_confirmation') }}" class="btn btn-secondary">カートに戻る</a>
+    </main>
+
+    <div class="under-hedder">
+        <a href="{{ url_for('users_order.cart_confirmation') }}">戻る</a>
+        <a href="{{ url_for('users_order.reservation_number') }}" style="text-decoration:none; color: inherit;">リンク表示</a>
+    </div>
+
 </body>
 </html>
