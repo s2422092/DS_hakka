@@ -76,3 +76,36 @@ def signup():
             return render_template('users_login/signup.html')
 
     return render_template('users_login/signup.html')
+# メールアドレス入力ページ
+import logging  # ログを記録するためのモジュール
+
+@users_login_bp.route('/re_enrollment', methods=['GET', 'POST'])
+def re_enrollment():
+    if request.method == 'POST':
+        email = request.form.get('email')
+
+        # 入力チェック
+        if not email:
+            flash("メールアドレスを入力してください", "error")
+            return render_template('users_login/re_enrollment.html')
+
+        try:
+            conn = sqlite3.connect('app.db')
+            cursor = conn.cursor()
+            cursor.execute("SELECT u_name FROM users_table WHERE email = ?", (email,))
+            user = cursor.fetchone()
+            conn.close()
+
+            if user:
+                flash(f"ユーザー名: {user[0]} で再登録が可能です。", "success")
+                return redirect(url_for('users_login.login'))
+            else:
+                flash("このメールアドレスは登録されていません", "error")
+                return render_template('users_login/re_enrollment.html')
+
+        except Exception as ex:
+            logging.error(f"エラー発生: {ex}")  # ログにエラーを記録
+            flash("システムエラーが発生しました。後ほどお試しください。", "error")
+            return render_template('users_login/re_enrollment.html')
+
+    return render_template('users_login/re_enrollment.html')
