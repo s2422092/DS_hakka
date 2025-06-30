@@ -9,7 +9,6 @@
     <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
 </head>
 <body>
-    <!-- 水色の背景部分 -->
     <div class="water-blue-section">
         <span class="username">
             ログイン中: {{ u_name if u_name else 'ゲスト' }}
@@ -20,7 +19,6 @@
         </div>
     </div>
 
-    <!-- 灰色のナビゲーション部分 -->
     <div class="gray-section">
         <ul>
             <li class="{% if request.endpoint == 'users_home.home' %}active{% endif %}">
@@ -35,23 +33,21 @@
         </ul>
     </div>
 
-    <!-- マップ表示 -->
     <div class="map-wrapper">
-        <div id="map" data-locations='{{ stores | tojson }}' style="height: 650px;"></div>
+        <div id="map"
+             data-locations='{{ stores | tojson }}'
+             data-menu-url-template="{{ url_for('users_order.menu', store_id=0) }}"
+             style="height: 650px;"></div>
 
-        <!-- 店舗一覧 -->
         <div class="sidebar">
-            
             <input type="search" id="store-search" placeholder="店舗名で検索..." />
-
             <h2>近くの店舗一覧</h2>
             <ul class="store-list">
                 {% if stores %}
                     {% for store in stores %}
                         <li>
                             <a href="{{ url_for('users_order.menu', store_id=store.id) }}" class="custom-link">
-                                <h3>{{ store.name }}</h3>
-                                <p>{{ store.description }}</p>
+                                <h3>{{ store.store_name }}</h3> <p>{{ store.description }}</p>
                             </a>
                         </li>
                     {% endfor %}
@@ -62,7 +58,6 @@
         </div>
     </div>
 
-    <!-- 外部JS -->
     <script src="{{ url_for('static', filename='js/map_shop.js') }}"></script>
 </body>
 </html>
