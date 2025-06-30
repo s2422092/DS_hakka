@@ -1,7 +1,14 @@
 from flask import Blueprint, render_template, session, redirect, url_for, flash
 import sqlite3
+import os
 
 users_home_bp = Blueprint('users_home', __name__, url_prefix='/users_home')
+
+def get_db_connection():
+    db_path = os.path.join(os.path.dirname(__file__), '..', '..', 'app.db')
+    conn = sqlite3.connect(db_path)
+    conn.row_factory = sqlite3.Row
+    return conn
 
 @users_home_bp.route('/logout')
 def logout():
@@ -15,21 +22,22 @@ def home():
         flash("ログインしてください")
         return redirect(url_for('users_login.login'))
 
-    # データベース接続
+    # get_db_connection() を使うように統一するのが望ましいですが、
+    # まずは動かすために元のコードを修正します。
     conn = sqlite3.connect('app.db')
+    # ★★★ row_factory を設定すると、カラム名でアクセスできて便利です ★★★
+    conn.row_factory = sqlite3.Row 
     cursor = conn.cursor()
+
     cursor.execute("""
-        SELECT store_id, store_name, description
+        SELECT 
+            store_id AS id, 
+            store_name AS name, 
+            description
         FROM store
         ORDER BY store_id
     """)
-    stores = [
-        {
-            'id': row[0],
-            'name': row[1],
-            'description': row[2],
-        } for row in cursor.fetchall()
-    ]
+    stores = cursor.fetchall()
     conn.close()
 
     return render_template('users_home/home.html', stores=stores, u_name=session.get('u_name', 'ゲスト'))
@@ -78,8 +86,42 @@ def payment_history():
     if 'id' not in session:
         flash("ログインしてください")
         return redirect(url_for('users_login.login'))
+
+    user_id = session['id']
     u_name = session.get('u_name', 'ゲスト')
-    return render_template('users_home/payment_history.html', u_name=u_name)
+
+    conn = get_db_connection()
+    # 必要な情報をJOINで取得するクエリは変更なし
+# payment_history 関数内の query 変数
+
+    query = """
+        SELECT
+            o.order_id,
+            o.datetime,
+            o.total_amount,
+            o.status,
+            s.store_name,
+            m.menu_name,
+            oi.quantity,
+            oi.price_at_order
+        FROM orders AS o
+        JOIN store AS s ON o.store_id = s.store_id
+        JOIN order_items AS oi ON o.order_id = oi.order_id
+        JOIN menus AS m ON oi.menu_id = m.menu_id
+        WHERE o.user_id = ?
+        ORDER BY o.datetime DESC, o.order_id ASC; -- ★★★ order_idも並び替え条件に追加 ★★★
+    """
+    # DBから取得したデータをそのままリストとして取得
+    payment_history_list = conn.execute(query, (user_id,)).fetchall()
+    conn.close()
+
+    # 以前行っていた注文ごとのグループ化処理を削除し、
+    # DBから取得した生のリストをそのままテンプレートに渡す
+    return render_template(
+        'users_home/payment_history.html', 
+        u_name=u_name,
+        history=payment_history_list # ★★★ 整形せず、そのまま渡す ★★★
+    )
 
 @users_home_bp.route('/users_data')
 def users_data():
