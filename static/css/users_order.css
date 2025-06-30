@@ -413,3 +413,23 @@ body {
     border-radius: 6px;
     width: 250px;
 }
+
+.category-buttons {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+    margin-top: 5px;
+}
+
+.category-btn {
+    background-color: #eee;
+    border: 1px solid #ccc;
+    padding: 4px 8px;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.category-btn:hover {
+    background-color: #ddd;
+}
+

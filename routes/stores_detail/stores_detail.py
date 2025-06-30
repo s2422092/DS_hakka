@@ -177,7 +177,7 @@ def menu_registration():
                 flash('CSVファイルを選択するか、手動で商品名と値段を入力してください。', 'error')
                 return redirect(request.url)
 
-    return render_template('stores_detail/menu_registration.html',store_name=store_name)
+    return render_template('stores_detail/menu_registration.html' ,store_name=store_name)
 
 
 @stores_detail_bp.route('/menu-check')
