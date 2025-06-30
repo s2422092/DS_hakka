@@ -23,7 +23,7 @@
 </div>
 
 <div class="under-hedder">
-    <a href="{{ url_for('users_home.home') }}">戻る</a>
+    <a href="{{ url_for('users_order.back_to_home_and_clear_cart') }}">戻る</a>
     <a href="{{ url_for('users_order.cart_confirmation') }}">カート確認 (<span id="cart-count">{{ cart.values()|sum(attribute='quantity') }}</span>)</a>
 </div>
 
