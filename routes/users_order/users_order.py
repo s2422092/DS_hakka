@@ -393,11 +393,10 @@ def paypay_create_payment():
         flash("金額が0円のため、PayPay決済は行えません。")
         return redirect(url_for('users_order.payment_selection'))
 
-    # PayPay APIのエンドポイント
     url_path = "/v2/payments"
     full_url = "https://stg-api.paypay.ne.jp" + url_path
-
     merchant_payment_id = str(uuid.uuid4())
+
     payload = {
         "merchantPaymentId": merchant_payment_id,
         "amount": {
@@ -407,16 +406,17 @@ def paypay_create_payment():
         "codeType": "ORDER_QR",
         "orderDescription": "モバおるのご注文",
         "isAuthorization": False,
-        "redirectUrl": url_for('users_order.paypay_confirm', _external=True),
+        "redirectUrl": url_for('users_order.paypay_confirm', _external=True, merchantPaymentId=merchant_payment_id),
         "redirectType": "WEB_LINK"
     }
-    body_str = json.dumps(payload, separators=(',', ':'))
+    body_str = json.dumps(payload, separators=(',', ':'), ensure_ascii=False)
 
+    # 署名の生成
     nonce = str(int(time.time()))
     data_to_sign = f"{nonce}{url_path}{body_str}"
     hmac_digest = hmac.new(
-        TEST_API_SECRET.encode(),
-        msg=data_to_sign.encode(),
+        TEST_API_SECRET.encode('utf-8'),
+        msg=data_to_sign.encode('utf-8'),
         digestmod=hashlib.sha256
     ).digest()
     signature = base64.b64encode(hmac_digest).decode()
@@ -426,12 +426,17 @@ def paypay_create_payment():
         "X-Api-Key": TEST_API_KEY,
         "X-Request-ID": merchant_payment_id,
         "X-Requested-With": TEST_API_KEY,
-        "X-Assume-Merchant": TEST_MERCHANT_ID,
-        "X-Authorization": signature,
         "X-Timestamp": nonce,
+        "Authorization": signature
     }
 
-    response = requests.post(full_url, headers=headers, data=body_str)
+    # --- デバッグログ ---
+    print("送信先:", full_url)
+    print("送信ヘッダー:", headers)
+    print("署名対象文字列:", data_to_sign)
+    print("送信ボディ:", body_str)
+
+    response = requests.post(full_url, headers=headers, data=body_str.encode('utf-8'))
 
     if response.status_code == 201:
         data = response.json()
