@@ -215,6 +215,7 @@ def payment_selection():
     )
 
 # ★★★ ここからPayPay決済ロジックを統合 ★★★
+
 @users_order_bp.route('/paypay/create-qr', methods=['POST'])
 @login_required
 def paypay_create_qr():
