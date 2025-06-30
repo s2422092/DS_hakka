@@ -4,16 +4,14 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ストア管理 - 注文リスト</title>
-
     <link rel="stylesheet" href="{{ url_for('static', filename='css/stores_detail.css') }}">
 </head>
 <body>
-
     <header class="site-header">
-        <h1>ストア名 －注文リスト</h1>
+        <h1>{{ store_name }} － 注文リスト</h1>
         <div class="header-links">
-            <a href="">ストア情報</a>
-            <a href="{{ url_for('general.explamation') }}">ログアウト</a>
+            <a href="{{ url_for('stores_detail.store_info') }}">ストア情報</a>
+            <a href="{{url_for('users_home.logout')}}">ログアウト</a>
         </div>
     </header>
 
@@ -28,40 +26,36 @@
     </nav>
 
     <main class="main-content">
-        
         <div class="order-list-container">
-            <div class="order-item">
-                <span>予約id</span>
-                <span>商品名</span>
-                <span>予約者名</span>
-                <span>予約番号</span>
-                <span>値段</span>
-                <span>商品の状況</span>
-                <span>予約時間</span>
+            <div class="order-item order-header">
+                <span>注文ID</span>
+                <span>注文商品 (数量)</span>
+                <span>注文者名</span>
+                <span>合計金額</span>
+                <span>注文状況</span>
+                <span>注文時間</span>
             </div>
 
+            {% for order in orders %}
             <div class="order-item">
-                <span>予約id</span>
-                <span>商品名</span>
-                <span>予約者名</span>
-                <span>予約番号</span>
-                <span>値段</span>
-                <span>商品の状況</span>
-                <span>予約時間</span>
+                <span>{{ order.id }}</span>
+                <td>
+                    <ul>
+                    {% for item in order.items_list %}  <li>{{ item.name }} ({{ item.quantity }}個)</li>
+                    {% endfor %}
+                    </ul>
+                </td>
+                <span>{{ order.user_name }}</span>
+                <span>{{ order.total_amount }}円</span>
+                <span>{{ order.status }}</span>
+                <span>{{ order.datetime }}</span>
             </div>
-
-            <div class="order-item">
-                <span>予約id</span>
-                <span>商品名</span>
-                <span>予約者名</span>
-                <span>予約番号</span>
-                <span>値段</span>
-                <span>商品の状況</span>
-                <span>予約時間</span>
+            {% else %}
+            <div class="order-item no-orders">
+                <p>現在、新しい注文はありません。</p>
             </div>
+            {% endfor %}
         </div>
-
     </main>
-
 </body>
 </html>

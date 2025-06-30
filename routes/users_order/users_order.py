@@ -233,3 +233,25 @@ def clear_cart():
     else:
         # 万が一店舗IDがセッションになければホームへ
         return redirect(url_for('users_home.home'))
+    
+@users_order_bp.route('/back_to_home')
+@login_required
+def back_to_home_and_clear_cart():
+    """
+    現在の店舗のカート情報をクリアし、ホーム画面に戻るためのルート
+    """
+    # セッションに現在見ている店舗IDがあるか確認
+    if 'current_store_id' in session:
+        store_id_str = str(session['current_store_id'])
+        
+        # 全体のカート情報（carts）があるか確認
+        if 'carts' in session and store_id_str in session['carts']:
+            # 現在の店舗のカート情報だけを削除
+            del session['carts'][store_id_str]
+            session.modified = True # セッションの変更をFlaskに通知
+    
+    # current_store_idもセッションから削除して、完全に店舗選択から抜ける
+    session.pop('current_store_id', None)
+    
+    # ユーザーのホーム画面にリダイレクト
+    return redirect(url_for('users_home.home'))
