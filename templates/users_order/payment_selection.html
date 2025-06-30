@@ -37,9 +37,9 @@
         <button type="button" class="btn btn-primary" id="start-paypay-button"
                 data-cart-data='{{ cart | tojson }}'
                 data-total-amount="{{ total_price }}"
-                {# ★★★ ここを修正！ FlaskバックエンドのベースURLを指定 ★★★ #}
+                {# ★★★ 変更箇所: 正しいバックエンドのベースURLを指定 ★★★ #}
                 data-api-base-url="http://127.0.0.1:5003"
-                {# ★★★ 修正ここまで ★★★ #}
+                {# ★★★ 変更ここまで ★★★ #}
                 data-callback-merchant-id="{{ session.pop('paypay_callback_merchant_id', '') }}">
             PayPayで支払う
         </button>
