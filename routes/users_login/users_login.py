@@ -92,14 +92,20 @@ def re_enrollment():
         try:
             conn = sqlite3.connect('app.db')
             cursor = conn.cursor()
+
+            # メールアドレスに基づくデータを取得
             cursor.execute("SELECT u_name FROM users_table WHERE email = ?", (email,))
             user = cursor.fetchone()
             conn.close()
 
             if user:
-                flash(f"ユーザー名: {user[0]} で再登録が可能です。", "success")
-                return redirect(url_for('users_login.login'))
+                # メールアドレスが存在する場合、セッションに保存してパスワード変更ページへリダイレクト
+                session['email'] = email  # セッションに登録したメールアドレスを保存
+                flash("メールアドレスが認証されました。パスワード変更画面へ移動します。", "success")
+                return redirect(url_for('users_login.password_input'))  # パスワード変更ページに移動
+                
             else:
+                # メールアドレスが存在しない場合
                 flash("このメールアドレスは登録されていません", "error")
                 return render_template('users_login/re_enrollment.html')
 
@@ -113,29 +119,76 @@ def re_enrollment():
 @users_login_bp.route('/password_input', methods=['GET', 'POST'])
 def password_input():
     if request.method == 'POST':
-        email = request.form.get('email')
+        # セッションからメールアドレスを取得
+        email = session.get('email')
+
+        # セッションが無効な場合の処理
+        if not email:
+            flash("セッションが切れています。最初からやり直してください。", "error")
+            return redirect(url_for('users_login.re_enrollment'))
+
+        # フォームからパスワードの入力を取得
+        password1 = request.form.get('password1')
+        password2 = request.form.get('password2')
 
         # 入力チェック
-        if not email:
-            flash("メールアドレスを入力してください", "error")
+        if not password1 or not password2:
+            flash("すべての項目を入力してください。", "error")
             return render_template('users_login/password_input.html')
+
+        if password1 != password2:
+            flash("入力されたパスワードが一致しません。", "error")
+            return render_template('users_login/password_input.html')
+
+        # パスワードをハッシュ化
+        password_hash = generate_password_hash(password1)
 
         try:
             conn = sqlite3.connect('app.db')
             cursor = conn.cursor()
-            cursor.execute("SELECT u_name FROM users_table WHERE email = ?", (email,))
-            user = cursor.fetchone()
-            conn.close()
 
-            if user:
-                session['email'] = email  # セッションにメールアドレスを保存
-                flash("パスワード変更画面へ移動します。", "success")
-                return redirect(url_for('users_login.password_change'))
+            # DEBUG: 確認のため SELECT を実行
+            cursor.execute("SELECT email FROM users_table WHERE email = ?", (email,))
+            existing_user = cursor.fetchone()
+            if not existing_user:
+                flash("指定されたメールアドレスのユーザーが見つかりません。", "error")
+                logging.warning(f"パスワード変更に失敗しました。該当するメールアドレスが存在しません: {email}")
+                return render_template('users_login/password_input.html')
             else:
-                flash("このメールアドレスは登録されていません", "error")
+                logging.info(f"メールアドレスがデータベースで確認されました: {email}")
+
+            # パスワードを更新
+            cursor.execute("""
+                UPDATE users_table
+                SET password_hash = ?
+                WHERE email = ?
+            """, (password_hash, email))
+
+            # 更新処理が成功したか確認
+            if cursor.rowcount > 0:  # `rowcount` は更新された行数を返します
+                conn.commit()
+                flash("パスワードが正常に変更されました。ログインしてください。", "success")
+                logging.info(f"ユーザー {email} のパスワードが正常に変更されました。")
+                return redirect(url_for('users_login.login'))
+            else:
+                flash("パスワードの変更に失敗しました。もう一度お試しください。", "error")
+                logging.warning(f"ユーザー {email} のパスワード変更がデータベースで確認できませんでした。")
                 return render_template('users_login/password_input.html')
 
+        except sqlite3.DatabaseError as db_err:
+            # データベース関連のエラー記録
+            logging.error(f"データベースエラー発生: {db_err}")
+            flash("データベースエラーが発生しました。後ほどお試しください。", "error")
+            return render_template('users_login/password_input.html')
+
         except Exception as ex:
-            logging.error(f"エラー発生: {ex}")  # ログにエラーを記録
+            # 予期せぬエラー記録
+            logging.error(f"予期せぬエラー発生: {ex}")
             flash("システムエラーが発生しました。後ほどお試しください。", "error")
             return render_template('users_login/password_input.html')
+
+        finally:
+            conn.close()
+
+    # GETメソッドの場合の処理
+    return render_template('users_login/password_input.html')
