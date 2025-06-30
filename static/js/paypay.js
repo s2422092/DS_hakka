@@ -1,6 +1,5 @@
 // static/js/paypay.js の内容
-
-const API_BASE_URL = 'http://127.0.0.1:5010'; // FlaskバックエンドのURLに合わせて変更してください
+const API_BASE_URL = 'http://127.0.0.1:5003'; // FlaskバックエンドのURLに合わせて変更してください
 
 // HTML要素の取得
 // cart-related elements are not needed here if this is payment_selection.html
@@ -116,7 +115,7 @@ if (startPaypayButton) { // ボタンが存在するか確認
                         <p style="word-break: break-all; font-size: 0.9em; margin-top: 10px;">
                             または直接リンク: <a href="${data.data.url}" target="_blank" rel="noopener noreferrer">${data.data.url}</a>
                         </p>
-                    `;
+                    `;const API_BASE_URL = 'http://127.0.0.1:5003/users_order/payment_selection';
                     qrInstruction.textContent = "スマホでPayPayアプリから開くか、QRコードをスキャンして支払いを完了してください。";
                     qrInstruction.style.display = 'block';
                     paymentStatusMessage.textContent = "PayPayアプリで支払い中...";

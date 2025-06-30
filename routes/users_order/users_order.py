@@ -12,7 +12,7 @@ import uuid
 
 # サードパーティライブラリ
 from dotenv import load_dotenv
-import paypayopa # ★★★ これが重要！PayPay OPA SDKのインポート ★★★
+import paypayopa
 
 # Flask関連のインポート
 from flask import (
@@ -30,7 +30,8 @@ from flask import (
 load_dotenv()
 
 # ロギング設定
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+# DEBUGレベルのログも出力するように変更
+logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
 
 # 環境変数の取得と検証
@@ -41,7 +42,9 @@ MERCHANT_ID = os.environ.get("MERCHANT_ID")
 # FRONTEND_BASE_URL (旧 FRONTEND_PATH) を使用します。
 # これがPayPayがリダイレクトする際のベースURLになります。
 # 5003はモバイルオーダーアプリのポートであると仮定します。
-FRONTEND_BASE_URL = os.environ.get("FRONTEND_BASE_URL", default="http://127.0.0.1:5003") # ★ポートを5003に合わせる
+# 注意: PayPayのコールバックURLは通常、パスを含まないベースURLで設定し、
+# その後で動的なパスを追加します。 payment_selection まで含めない方が汎用性があります。
+FRONTEND_BASE_URL = os.environ.get("FRONTEND_BASE_URL", default="http://127.0.0.1:5003")
 
 # 必須環境変数のチェック (これはapp.pyから移植)
 if not API_KEY:
@@ -60,7 +63,6 @@ client = paypayopa.Client(
     production_mode=False)
 client.set_assume_merchant(MERCHANT_ID)
 
-# (Blueprint定義、get_db_connection, login_requiredデコレータは変更なし)
 users_order_bp = Blueprint('users_order', __name__, url_prefix='/users_order')
 
 def get_db_connection():
@@ -79,8 +81,6 @@ def login_required(f):
 
 # --- Routes ---
 
-# (menu, add_to_cart, cart_confirmation, payment_selection は変更なし)
-# payment_selection ルートはそのままにして、JavaScriptでPayPay処理をトリガーします。
 @users_order_bp.route('/menu/<int:store_id>')
 @login_required
 def menu(store_id):
@@ -172,10 +172,6 @@ def cart_confirmation():
         u_name=session.get('u_name', 'ゲスト')
     )
 
-# routes/users_order/users_order.py
-
-# ... (前略) ...
-
 @users_order_bp.route('/payment_selection')
 @login_required
 def payment_selection():
@@ -198,7 +194,6 @@ def payment_selection():
     store = conn.execute("SELECT store_name FROM store WHERE store_id = ?", (store_id,)).fetchone()
     conn.close()
 
-    # ★★★ ここを修正します ★★★
     # PayPay APIのorderItems形式に合うようにデータを変換します
     cart_for_js = []
     for item_key, item_value in current_cart.items():
@@ -217,21 +212,22 @@ def payment_selection():
 
     return render_template(
         'users_order/payment_selection.html',
-        cart=cart_for_js, # ★ 変換後のリストをテンプレートに渡す ★
+        cart=cart_for_js, # 変換後のリストをテンプレートに渡す
         total_price=total_price,
         store_name=store['store_name'],
         u_name=session.get('u_name', 'ゲスト')
     )
-
-# ... (後略) ...
-
-# ★★★ ここからPayPay決済ロジックを統合 ★★★
 
 @users_order_bp.route('/paypay/create-qr', methods=['POST'])
 @login_required
 def paypay_create_qr():
     req = request.json
     logger.info(f"Received create-qr request: {req}")
+
+    # ★★★ 追加したデバッグログ ★★★
+    logger.debug(f"Received orderItems from JS: {req.get('orderItems')}")
+    logger.debug(f"Received amount from JS: {req.get('amount')}")
+    # ★★★ ここまで追加 ★★★
 
     store_id = session.get('current_store_id')
     if not store_id:
@@ -258,10 +254,20 @@ def paypay_create_qr():
 
         order_id = cursor.lastrowid
 
-        order_items_data = [
-            (order_id, item['menu_id'], item['quantity'], item['unitPrice']['amount'])
-            for item in req["orderItems"]
-        ]
+        # order_items テーブルへの挿入部分を修正:
+        # req["orderItems"] には menu_id が含まれていません。
+        # ここでは便宜的に None を使用するか、
+        # もし order_items に menu_id が必須であれば、別途カート情報から取得するロジックが必要です。
+        # 現在のコードでは payment_selection で menu_id を含めない変換をしているため、
+        # ここでも menu_id は None として扱います。
+        # もし menu_id が必須で、かつ orders テーブルに紐付ける必要がある場合は、
+        # cart_for_js を生成する際に menu_id も含めるように再検討が必要です。
+        order_items_data = []
+        for item in req["orderItems"]:
+            # item.unitPrice.amount を price_at_order にマッピング
+            order_items_data.append(
+                (order_id, None, item['quantity'], item['unitPrice']['amount']) 
+            )
         
         cursor.executemany("""
             INSERT INTO order_items (order_id, menu_id, quantity, price_at_order)
@@ -384,7 +390,16 @@ def paypay_callback(merchant_payment_id):
     session.modified = True
     return redirect(url_for('users_order.payment_selection'))
 
-# (既存の create_order ルートは今回は直接使わないため、PayPay決済フローとは切り離して考える)
+# ★★★ 新しいエラーログエンドポイント ★★★
+@users_order_bp.route('/log_error', methods=['POST'])
+def log_error():
+    error_data = request.json
+    # 受け取ったエラーデータをログにDEBUGレベルで出力
+    # `json.dumps` を使うことで、ネストされたデータもきれいに整形されて表示されます
+    logger.debug(f"Frontend Error Log (from JS): {json.dumps(error_data, indent=2)}")
+    return jsonify({"status": "success"}), 200
+# ★★★ 新しいエラーログエンドポイントここまで ★★★
+
 @users_order_bp.route('/create_order', methods=['POST'])
 @login_required
 def create_order():
@@ -447,7 +462,6 @@ def create_order():
         conn.close()
 
 
-# (reservation_number, clear_cart, back_to_home_and_clear_cart, update_cart_item, delete_cart_item は変更なし)
 @users_order_bp.route('/reservation_number')
 @login_required
 def reservation_number():

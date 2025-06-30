@@ -18,9 +18,7 @@
                 <div class="cart-item">
                     <span class="item-name">{{ item.name }}</span>
                     <span class="item-quantity">{{ item.quantity }}個</span>
-                    {# ★★★ ここを修正 ★★★ #}
                     <span class="item-price">{{ item.unitPrice.amount * item.quantity }}円</span>
-                    {# ★★★ 修正ここまで ★★★ #}
                 </div>
                 {% endfor %}
             </div>
@@ -34,12 +32,14 @@
         <div class="payment-actions">
             <h3>お支払い方法</h3>
         </div>
-            <!-- ★ formタグ削除して、buttonを普通のボタンに -->
+            
         <p>上記の内容でよろしければ、PayPayで支払いを確定してください。</p>
         <button type="button" class="btn btn-primary" id="start-paypay-button"
-                data-cart-data="{{ cart | tojson | safe }}"
+                data-cart-data='{{ cart | tojson }}'
                 data-total-amount="{{ total_price }}"
-                data-api-base-url="{{ url_for('users_order.paypay_create_qr').split('/paypay/create-qr')[0] }}"
+                {# ★★★ ここを修正！ FlaskバックエンドのベースURLを指定 ★★★ #}
+                data-api-base-url="http://127.0.0.1:5003"
+                {# ★★★ 修正ここまで ★★★ #}
                 data-callback-merchant-id="{{ session.pop('paypay_callback_merchant_id', '') }}">
             PayPayで支払う
         </button>
@@ -66,7 +66,6 @@
         </div>
     </div>
     
-    {# ★ ここを修正: JavaScriptファイルを読み込む #}
     <script src="{{ url_for('static', filename='js/paypay.js') }}"></script>
 </body>
 </html>
