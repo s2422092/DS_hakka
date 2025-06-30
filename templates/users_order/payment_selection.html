@@ -32,16 +32,16 @@
         <div class="payment-actions">
             <h3>お支払い方法</h3>
         </div>
-    
-        <form id="confirm-order-form" action="#" method="POST">
-            <p>上記の内容でよろしければ、PayPayで支払いを確定してください。</p>
-            <button type="submit" class="btn btn-primary" id="start-paypay-button"
-                    data-cart-data="{{ cart | tojson | safe }}" {# ★ 追加: カートデータをJSON文字列として渡す #}
-                    data-total-amount="{{ total_price }}"      {# ★ 追加: 合計金額を数値として渡す #}
-                    data-api-base-url="{{ url_for('users_order.paypay_create_qr').split('/paypay/create-qr')[0] }}" {# ★ 追加: APIベースURL #}
-                    data-callback-merchant-id="{{ session.pop('paypay_callback_merchant_id', '') }}" {# ★ 追加: リダイレクト後のID #}
-                    >PayPayで支払う</button>
-        </form>
+            <!-- ★ formタグ削除して、buttonを普通のボタンに -->
+        <p>上記の内容でよろしければ、PayPayで支払いを確定してください。</p>
+        <button type="button" class="btn btn-primary" id="start-paypay-button"
+                data-cart-data="{{ cart | tojson | safe }}"
+                data-total-amount="{{ total_price }}"
+                data-api-base-url="{{ url_for('users_order.paypay_create_qr').split('/paypay/create-qr')[0] }}"
+                data-callback-merchant-id="{{ session.pop('paypay_callback_merchant_id', '') }}">
+            PayPayで支払う
+        </button>
+
     
         <br>
         <a href="{{ url_for('users_order.cart_confirmation') }}" class="btn btn-secondary">カートに戻る</a>
