@@ -24,32 +24,35 @@ let lastQrCodeUrl = '';
 window.addEventListener('load', () => {
     if (initialMerchantId) {
         currentMerchantPaymentId = initialMerchantId;
-        qrModal.style.display = 'flex';
+        // CSSでdisplay: none; が初期設定されているので、モーダルを表示させる
+        qrModal.style.display = 'flex'; // 中央寄せのためflexにする
         paymentStatusMessage.textContent = "PayPayアプリからのリダイレクトを確認中...";
         pollPaymentStatus(currentMerchantPaymentId);
     }
-    // Flaskからのflashメッセージを表示（あれば）
-    // JavaScriptファイル内ではJinja2のget_flashed_messages()は使えません。
-    // そのため、flashメッセージはHTML側で処理する必要があります。
-    // あるいは、別途JSから取得するAPIエンドポイントを設ける必要があります。
+    // Flaskからのflashメッセージを表示（あれば）は、JavaScriptファイル内では直接扱えません。
+    // HTML側でJinja2を使って表示するか、別途APIエンドポイントを設けてJSから取得する必要があります。
 });
 
 // 「PayPayで支払う」ボタンのクリックイベント
 startPaypayButton.addEventListener('click', async (event) => {
+    // フォームのデフォルト送信を防止
     event.preventDefault();
 
+    // カートデータまたは合計金額が不正な場合のチェック
     if (cartData.length === 0 || totalAmount === 0) {
         alert('カートに商品がないか、合計金額が0円です。');
         return;
     }
 
+    // モーダルの表示と初期メッセージの設定
     paymentStatusMessage.textContent = "PayPay支払い情報を準備中...";
-    paymentStatusMessage.className = '';
-    qrCodeContainer.innerHTML = '';
-    deeplinkButton.style.display = 'none';
-    qrInstruction.style.display = 'none';
-    qrModal.style.display = 'flex';
+    paymentStatusMessage.className = ''; // クラスをリセット
+    qrCodeContainer.innerHTML = ''; // QRコードコンテナをクリア
+    deeplinkButton.style.display = 'none'; // ディープリンクボタンを非表示
+    qrInstruction.style.display = 'none'; // QRコード説明文を非表示
+    qrModal.style.display = 'flex'; // モーダルを表示 (CSSで中央寄せに設定するため 'flex')
 
+    // カートデータをPayPay APIの要求形式に変換
     const orderItems = cartData.map(item => ({
         name: item.name,
         quantity: item.quantity,
@@ -60,7 +63,8 @@ startPaypayButton.addEventListener('click', async (event) => {
     }));
     
     try {
-        const response = await fetch(`${API_BASE_URL}/users_order/paypay/create-qr`, { // ブループリントのパスを追加
+        // PayPay QRコード生成APIへのリクエスト
+        const response = await fetch(`${API_BASE_URL}/users_order/paypay/create-qr`, { // Flaskのブループリントパスを含む
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -74,6 +78,7 @@ startPaypayButton.addEventListener('click', async (event) => {
             })
         });
 
+        // HTTPエラーハンドリング
         if (!response.ok) {
             const errorData = await response.json();
             throw new Error(`QRコード生成エラー: ${errorData.details || response.statusText}`);
@@ -82,61 +87,76 @@ startPaypayButton.addEventListener('click', async (event) => {
         const data = await response.json();
         console.log("QR Creation Response:", data);
 
+        // PayPay APIレスポンスの成功判定とデータ処理
         if (data.resultInfo && data.resultInfo.code === 'SUCCESS' && data.data) {
-            currentMerchantPaymentId = data.data.merchantPaymentId;
-            lastQrCodeUrl = data.data.url;
+            currentMerchantPaymentId = data.data.merchantPaymentId; // 支払いIDを保存
+            lastQrCodeUrl = data.data.url; // 最後に生成されたQRコードURLを保存
 
-            let qrCodeHtml = '';
+            let qrCodeHtml = ''; // QRコード関連のHTMLを格納する変数
 
+            // ディープリンクURLが存在する場合
             if (data.data.deeplink) {
+                // データ属性にディープリンクURLを保存し、ボタンを表示
                 deeplinkButton.dataset.deeplink = data.data.deeplink;
                 deeplinkButton.style.display = 'block';
 
+                // QRコード画像とテキストリンクを両方表示
                 qrCodeHtml = `
                     <a href="${data.data.deeplink}" target="_blank" rel="noopener noreferrer" style="display: inline-block; cursor: pointer;">
-                        <img src="${data.data.url}" alt="PayPay QR Code">
+                        <img src="${data.data.url}" alt="PayPay QR Code" style="max-width: 200px; height: auto; margin: 20px auto; border: 1px solid #ddd;">
                     </a>
-                    <p>または直接リンク: <a href="${data.data.url}" target="_blank" rel="noopener noreferrer">${data.data.url}</a></p>
+                    <p style="word-break: break-all; font-size: 0.9em; margin-top: 10px;">
+                        または直接リンク: <a href="${data.data.url}" target="_blank" rel="noopener noreferrer">${data.data.url}</a>
+                    </p>
                 `;
                 qrInstruction.textContent = "スマホでPayPayアプリから開くか、QRコードをスキャンして支払いを完了してください。";
                 qrInstruction.style.display = 'block';
                 paymentStatusMessage.textContent = "PayPayアプリで支払い中...";
 
-            } else if (data.data.url) {
+            } else if (data.data.url) { // ディープリンクがない場合 (通常はQRコードのURLがある)
+                // QRコード画像とテキストリンクを両方表示
                 qrCodeHtml = `
-                    <img src="${data.data.url}" alt="PayPay QR Code">
-                    <p>または直接リンク: <a href="${data.data.url}" target="_blank" rel="noopener noreferrer">${data.data.url}</a></p>
+                    <img src="${data.data.url}" alt="PayPay QR Code" style="max-width: 200px; height: auto; margin: 20px auto; border: 1px solid #ddd;">
+                    <p style="word-break: break-all; font-size: 0.9em; margin-top: 10px;">
+                        または直接リンク: <a href="${data.data.url}" target="_blank" rel="noopener noreferrer">${data.data.url}</a>
+                    </p>
                 `;
                 qrInstruction.textContent = "QRコードをスキャンして支払いを完了してください。";
                 qrInstruction.style.display = 'block';
                 paymentStatusMessage.textContent = "QRコードをスキャンして支払い中...";
             } else {
+                 // QRコードもディープリンクも取得できなかった場合
                  paymentStatusMessage.textContent = "支払い情報の取得に失敗しました。";
                  console.error("No valid QR or Deeplink URL found:", data);
-                 return;
+                 return; // 処理を中断
             }
 
-            qrCodeContainer.innerHTML = qrCodeHtml;
+            qrCodeContainer.innerHTML = qrCodeHtml; // 生成したHTMLをコンテナに挿入
 
+            // QRコード画像内の<a>タグにクリックイベントリスナーを追加（ディープリンクがある場合のみ）
+            // これは、QRコード画像自体がディープリンクとして機能するようにするため
             if (data.data.deeplink) {
-                const qrLink = qrCodeContainer.querySelector('a:first-child');
+                const qrLink = qrCodeContainer.querySelector('a:first-child'); // 最初の<a>タグを選択
                 if (qrLink) {
                     qrLink.addEventListener('click', (e) => {
-                        e.preventDefault();
-                        window.location.href = deeplinkButton.dataset.deeplink;
+                        e.preventDefault(); // デフォルトのリンク動作を停止
+                        window.location.href = deeplinkButton.dataset.deeplink; // ディープリンクへ遷移
                         paymentStatusMessage.textContent = "PayPayアプリに移動しました。アプリで支払いを完了してください。";
                     });
                 }
             }
 
+            // 支払いステータスのポーリングを開始
             pollPaymentStatus(currentMerchantPaymentId);
 
         } else {
+            // PayPay APIがSUCCESSを返さなかった場合
             paymentStatusMessage.textContent = "QRコードの生成に失敗しました。";
             console.error("Failed to get QR code or Deeplink URL:", data);
         }
 
     } catch (error) {
+        // fetchまたはJSONパース中のエラー
         console.error("Checkout error:", error);
         paymentStatusMessage.textContent = `エラー: ${error.message}`;
     }
@@ -156,86 +176,71 @@ async function pollPaymentStatus(merchantPaymentId) {
     paymentStatusMessage.textContent = "支払いステータスを確認中...";
     paymentStatusMessage.className = '';
 
-    const pollStep = 5000;
-    const maxPollingTime = 240000;
-    const maxAttempts = maxPollingTime / pollStep; 
+    const pollStep = 5000; // ポーリング間隔 (5秒)
+    const maxPollingTime = 240000; // 最大ポーリング時間 (4分)
+    const maxAttempts = maxPollingTime / pollStep; // 最大試行回数
     let attempts = 0;
 
+    // 既存のポーリングがあればクリア
     if (pollInterval) {
         clearInterval(pollInterval);
     }
 
+    // ポーリング開始
     pollInterval = setInterval(async () => {
         attempts++;
+        // タイムアウト判定
         if (attempts > maxAttempts) {
             clearInterval(pollInterval);
             paymentStatusMessage.textContent = "タイムアウト: 支払いステータスを確認できませんでした。";
             paymentStatusMessage.classList.add('status-timeout');
-            // 必要に応じて、ここで支払いキャンセルや再試行のオプションを提示
+            // 必要に応じて、ここで支払いキャンセルや再試行のオプションを提示できます
             return;
         }
 
         try {
-            // ブループリントのパスを追加
+            // PayPay支払いステータス取得APIへのリクエスト
             const response = await fetch(`${API_BASE_URL}/users_order/paypay/order-status/${merchantPaymentId}`);
+            
+            // レート制限の場合
             if (response.status === 429) {
                 paymentStatusMessage.textContent = "PayPay APIのレート制限中。しばらくお待ちください...";
                 console.warn("PayPay API RATE_LIMIT encountered.");
                 return;
             }
+            // その他のHTTPエラー
             if (!response.ok) {
                 const errorData = await response.json();
                 throw new Error(`HTTP error! status: ${response.status} - ${errorData.message || response.statusText}`);
             }
+            
             const data = await response.json();
             console.log("Polling Status Response:", data);
 
+            // ステータス判定
             if (data.data && data.data.status) {
                 const status = data.data.status;
                 if (status === 'COMPLETED') {
-                    clearInterval(pollInterval);
+                    clearInterval(pollInterval); // ポーリング停止
                     paymentStatusMessage.textContent = "支払い完了！ありがとうございます！";
                     paymentStatusMessage.classList.add('status-completed');
-                    // 注文完了ページへのリダイレクトは、サーバーサイドでセッションを使って行うのが確実
-                    // クライアントサイドのリダイレクトも可能だが、二重処理にならないよう注意
-                    window.location.href = `{{ url_for('users_order.reservation_number') }}`; // Jinja2は外部JSでは使えない
-                    // この行はHTML内に直接スクリプトブロックを書くか、
-                    // サーバーからのレスポンスにリダイレクト先を含める必要があります。
-                    // 現状はHTMLに直接埋め込まれたスクリプトのままなので、この行は生きています。
-                    // 外部JSファイルにした場合、この行はエラーになります。
-                    // 外部JSにする場合は、以下のように修正する必要があります。
-                    // 例: window.location.href = `${API_BASE_URL}/users_order/reservation_number`;
-                    // ただし、order_idを渡す必要があるため、サーバーサイドのリダイレクトが理想的。
-                    // → 支払い完了時にサーバーがDBを更新し、session['last_order_id']を設定し、
-                    //   /paypay/order-status が成功レスポンスを返したら、
-                    //   JS側で /users_order/reservation_number へリダイレクトする。
-                    //   ただし、reservation_numberはsession.pop()を使うので、
-                    //   ポーリングが完了してリダイレクトする前にPayPayのcallbackが
-                    //   先に呼ばれてしまうとsession['last_order_id']が消えてしまう可能性があるので注意が必要。
-                    //   現状のusers_order.pyでは、get_payment_details成功時にsession['last_order_id']を設定しているので、
-                    //   そのタイミングでリダイレクトするのが良いでしょう。
-                    //   最も堅牢なのは、order-status APIがステータス更新後に直接リダイレクトURLを返すことです。
-                    //   しかし、現在 polling は status を返すだけなので、
-                    //   フロントエンドでリダイレクトをトリガーします。
-                    //   session['last_order_id'] が N/A になるのを防ぐため、
-                    //   サーバー側で payment_status が COMPLETED になった際に
-                    //   DBの status を更新し、フロントには成功を示す。
-                    //   そして、フロントは payment_selection から reservation_number にリダイレクト。
-                    //   その際、reservation_number は DB から merchant_payment_id をキーに order_id を取得するように変更するか、
-                    //   PayPayコールバック/ポーリング成功時にセッションに order_id を直接セットし直すか、検討が必要です。
-                    //   => 現状のusers_order.pyではpoll時にsession['last_order_id']を設定しているので、それを信頼してリダイレクトします。
-                    window.location.href = `/users_order/reservation_number`; // ブループリントのルートパスに修正
+                    
+                    // 支払い完了後、注文完了ページへリダイレクト
+                    // Flaskのブループリントパスに合わせて修正
+                    window.location.href = `/users_order/reservation_number`; 
 
                 } else if (status === 'CANCELED' || status === 'FAILED') {
-                    clearInterval(pollInterval);
+                    clearInterval(pollInterval); // ポーリング停止
                     paymentStatusMessage.textContent = "支払い失敗。もう一度お試しください。";
                     paymentStatusMessage.classList.add('status-failed');
-                    qrInstruction.style.display = 'none';
-                    deeplinkButton.style.display = 'none';
+                    qrInstruction.style.display = 'none'; // 説明文を非表示
+                    deeplinkButton.style.display = 'none'; // ディープリンクボタンを非表示
                 } else {
+                    // その他のステータスの場合、メッセージを更新してポーリング継続
                     paymentStatusMessage.textContent = `支払いステータス: ${status}...`;
                 }
             } else if (data.error) {
+                // APIからのエラーレスポンスの場合
                 clearInterval(pollInterval);
                 paymentStatusMessage.textContent = `エラー: ${data.message || data.error}`;
                 paymentStatusMessage.classList.add('status-failed');
@@ -243,6 +248,7 @@ async function pollPaymentStatus(merchantPaymentId) {
                 deeplinkButton.style.display = 'none';
             }
         } catch (error) {
+            // ポーリング中のネットワークエラーなど
             console.error("Polling error:", error);
             clearInterval(pollInterval);
             paymentStatusMessage.textContent = `ポーリング中にエラーが発生しました: ${error.message}`;
@@ -253,19 +259,21 @@ async function pollPaymentStatus(merchantPaymentId) {
     }, pollStep);
 }
 
-// モーダルを閉じるイベント
+// モーダルを閉じるイベント (Xボタン)
 closeModalButton.addEventListener('click', () => {
-    qrModal.style.display = 'none';
+    qrModal.style.display = 'none'; // モーダルを非表示にする
+    // ポーリングが実行中の場合は停止
     if (pollInterval) {
         clearInterval(pollInterval);
         pollInterval = null;
     }
 });
 
-// モーダル外をクリックして閉じる
+// モーダル外をクリックして閉じるイベント
 window.addEventListener('click', (event) => {
     if (event.target === qrModal) {
-        qrModal.style.display = 'none';
+        qrModal.style.display = 'none'; // モーダルを非表示にする
+        // ポーリングが実行中の場合は停止
         if (pollInterval) {
             clearInterval(pollInterval);
             pollInterval = null;
