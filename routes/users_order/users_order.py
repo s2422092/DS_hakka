@@ -39,6 +39,9 @@ def menu(store_id):
         return redirect(url_for('users_home.home'))
     
     menu_items = conn.execute("SELECT menu_id, menu_name, category, price FROM menus WHERE store_id = ? AND soldout = 0", (store_id,)).fetchall()
+    categories = conn.execute("""SELECT DISTINCT category FROM menus WHERE store_id = ? AND soldout = 0""", (store_id,)).fetchall()
+    categories = [row['category'] for row in categories if row['category']]  # Noneを除外
+
     conn.close()
 
     carts = session.get('carts', {})
@@ -46,11 +49,13 @@ def menu(store_id):
 
     return render_template(
         'users_order/menu.html',
-        store=store,  # storeオブジェクトをそのまま渡す
+        store=store,
         menu_items=menu_items,
         cart=current_cart,
-        u_name=session.get('u_name', 'ゲスト')
+        u_name=session.get('u_name', 'ゲスト'),
+        categories=categories
     )
+
 
 # add_to_cartから下の関数は、前回提示した完成版のままでOKです。
 # 念のため、以下に全コードを記載しておきます。
