@@ -249,8 +249,10 @@ def procedure():
     if 'store_id' not in session:
         flash("ログインしてください")
         return redirect(url_for('store.store_login'))
-
-    return render_template('stores_detail/procedure.html')
+    
+    store_id = session.get('store_id')
+    store_name = session.get('store_name', 'ゲスト')
+    return render_template('stores_detail/procedure.html', store_name=store_name)
 
 
 @stores_detail_bp.route('/paypay_linking')
@@ -260,9 +262,8 @@ def paypay_linking():
         flash("ログインしてください")
         return redirect(url_for('store.store_login'))
 
-    return render_template('stores_detail/paypay_linking.html')
-
-
+    store_name = session.get('store_name', 'ゲスト')
+    return render_template('stores_detail/paypay_linking.html', store_name=store_name)
 
 
 @stores_detail_bp.route('/store_info')
