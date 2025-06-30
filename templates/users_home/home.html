@@ -35,8 +35,13 @@
 
     <!-- 店舗リスト -->
     <main>
-        <h2>各店舗の情報</h2>
-        <ul>
+        <!-- タイトルと検索を横並びに -->
+        <div class="title-search-row">
+            <h2>各店舗の情報</h2>
+            <input type="search" id="store-search" placeholder="店舗名で検索..." />
+        </div>
+    
+        <ul id="store-list">
             {% if stores %}
                 {% for store in stores %}
                     <li>
@@ -51,5 +56,7 @@
             {% endif %}
         </ul>
     </main>
+    
+
 </body>
 </html>
