@@ -1,9 +1,49 @@
 # routes/users_order/users_order.py
 
-from flask import Blueprint, render_template, request, redirect, url_for, session, flash, jsonify
+# 標準ライブラリ
 import sqlite3
 import datetime
 from functools import wraps
+import os
+import json
+import logging
+import time # time.sleep() を使う可能性があるため残す
+import uuid # merchantPaymentId 生成に必要
+
+# サードパーティライブラリ
+from dotenv import load_dotenv # .env ファイルの読み込みに必要
+
+# Flask関連のインポート
+# Flask本体はアプリケーションのメインファイル (例: app.py) でインポートされるため、
+# ブループリントファイルでは通常はインポートしません。
+# request, jsonify, redirect, url_for, session, flash, Blueprint, render_template はFlaskからインポート
+from flask import (
+    Blueprint,
+    render_template,
+    request,
+    redirect,
+    url_for,
+    session,
+    flash,
+    jsonify
+)
+
+
+# .envファイルの読み込み
+load_dotenv()
+
+# ロギング設定
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+logger = logging.getLogger(__name__)
+
+# 環境変数の取得と検証
+_DEBUG = os.environ.get("_DEBUG", "False").lower() == "true"
+API_KEY = os.environ.get("API_KEY")
+API_SECRET = os.environ.get("API_SECRET")
+MERCHANT_ID = os.environ.get("MERCHANT_ID")
+# FRONTEND_PATHのデフォルト値を、Flaskサーバーがindex.htmlを配信するURLに合わせます。
+# 通常、この構成ではバックエンドとフロントエンドが同じポートで提供されます。
+FRONTEND_PATH = os.environ.get("REDIRECT_PATH", default="http://127.0.0.1:5003/users_order/payment_selection")
 
 # (Blueprint定義、get_db_connection, login_requiredデコレータは変更なし)
 users_order_bp = Blueprint('users_order', __name__, url_prefix='/users_order')
