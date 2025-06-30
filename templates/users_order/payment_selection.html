@@ -107,7 +107,7 @@
         <div class="store-info">
             <span class="name">{{ store_name }}</span>
         </div>
-
+    
         <div class="order-summary">
             <div class="cart-list">
                 {% for item in cart %}
@@ -124,34 +124,30 @@
                 合計: <span id="display-total-price">{{ total_price }}</span>円
             </div>
         </div>
-
+    
         <div class="payment-actions">
             <h3>お支払い方法</h3>
-            {# このフォームは削除またはコメントアウトし、JavaScriptで処理するボタンに置き換える #}
-            {# <form action="{{ url_for('users_order.create_order') }}" method="POST">
-                <input type="hidden" name="amount" value="{{ total_price }}">
-                <button type="submit" class="btn btn-paypay">PayPayで支払う</button>
-            </form> #}
-            
         </div>
-
-        {# このフォームの submit をJavaScriptでPayPay決済トリガーに変更する #}
-        {# 従来の「注文を確定する」ボタンもPayPay決済をトリガーするように変更 #}
-        <form id="confirm-order-form" action="#" method="POST"> {# actionを#に変更し、JSで制御 #}
+    
+        <form id="confirm-order-form" action="#" method="POST">
             <p>上記の内容でよろしければ、PayPayで支払いを確定してください。</p>
-            <button type="submit" class="btn btn-primary" id="start-paypay-button">PayPayで支払う</button>
+            <button type="submit" class="btn btn-primary" id="start-paypay-button"
+                    data-cart-data="{{ cart | tojson | safe }}" {# ★ 追加: カートデータをJSON文字列として渡す #}
+                    data-total-amount="{{ total_price }}"      {# ★ 追加: 合計金額を数値として渡す #}
+                    data-api-base-url="{{ url_for('users_order.paypay_create_qr').split('/paypay/create-qr')[0] }}" {# ★ 追加: APIベースURL #}
+                    data-callback-merchant-id="{{ session.pop('paypay_callback_merchant_id', '') }}" {# ★ 追加: リダイレクト後のID #}
+                    >PayPayで支払う</button>
         </form>
-
+    
         <br>
-        {# カートに戻るボタンはそのまま #}
         <a href="{{ url_for('users_order.cart_confirmation') }}" class="btn btn-secondary">カートに戻る</a>
     </main>
-
+    
     <div class="under-hedder">
         <a href="{{ url_for('users_order.cart_confirmation') }}">戻る</a>
         <a href="{{ url_for('users_order.reservation_number') }}" style="text-decoration:none; color: inherit;">リンク表示</a>
     </div>
-
+    
     <div id="qr-modal" class="modal">
         <div class="modal-content">
             <span class="close-button">&times;</span>
@@ -163,7 +159,8 @@
             <p id="qr-instruction" style="margin-top: 10px; display: none;"></p>
         </div>
     </div>
-
+    
+    {# ★ ここを修正: JavaScriptファイルを読み込む #}
     <script src="{{ url_for('static', filename='js/paypay.js') }}"></script>
 </body>
 </html>

@@ -194,9 +194,21 @@ def payment_selection():
     store = conn.execute("SELECT store_name FROM store WHERE store_id = ?", (store_id,)).fetchone()
     conn.close()
 
+    # ★★★ ここを修正 ★★★
+    # current_cartは辞書形式なので、values()でイテレータを取得し、
+    # list()でリストに変換することで、JavaScriptの配列として適切に扱えるようにします。
+    # また、Rowオブジェクトの場合は、dict()に変換することでtojsonが安全に処理できます。
+    cart_for_js = []
+    for item_key, item_value in current_cart.items():
+        # item_valueがsqlite3.Rowオブジェクトの場合は、dict()で通常の辞書に変換する
+        if isinstance(item_value, sqlite3.Row):
+            cart_for_js.append(dict(item_value))
+        else:
+            cart_for_js.append(item_value) # 既に辞書形式ならそのまま
+
     return render_template(
         'users_order/payment_selection.html',
-        cart=list(current_cart.values()),
+        cart=cart_for_js, # ★ 修正後のリストを渡す ★
         total_price=total_price,
         store_name=store['store_name'],
         u_name=session.get('u_name', 'ゲスト')
