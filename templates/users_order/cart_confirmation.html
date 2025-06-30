@@ -7,7 +7,6 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='css/users_order.css') }}">
 </head>
 <body>
-
     <header class="main-header">
         <div class="store-name">モバおる - {{ store_name }}</div>
         <div class="user-info">
@@ -16,20 +15,53 @@
     </header>
 
     <div class="sub-header">
-        <a href="{{ url_for('users_order.menu', store_id=store_id) }}">戻る</a>
-        <a href="">レジに進む</a>
+        <p>メニュー確認</p>
+        <a href="{{ url_for('users_order.back_to_home_and_clear_cart') }}">ホームに戻る</a>
+    </div>
+
+    <div class="under-hedder">
+        <a href="{{ url_for('users_order.menu', store_id=store_id) }}">メニューに戻る</a>
+        <a href="{{ url_for('users_order.payment_selection') }}">レジに進む</a>
     </div>
 
     <main class="container">
+        {% with messages = get_flashed_messages() %}
+          {% if messages %}
+            <ul class=flashes>
+            {% for message in messages %}
+              <li>{{ message }}</li>
+            {% endfor %}
+            </ul>
+          {% endif %}
+        {% endwith %}
+
         <div class="cart-list">
             {% if cart %}
-                <ul>
-                {% for item in cart %}
-                    <li>
-                        {{ item.name }} - {{ item.category }} - 数量: {{ item.quantity }} - 合計金額: {{ item.price * item.quantity }}円
+            <ul>
+                {% for menu_id, item in cart.items() %}
+                    <li class="cart-item">
+                        <div class="cart-item-details">
+                            <span class="item-name">{{ item.name }}</span>
+                            <span>{{ item.price }}円 / 個</span>
+                        </div>
+                        
+                        <form action="{{ url_for('users_order.update_cart_item') }}" method="post" class="cart-form">
+                            <input type="hidden" name="menu_id" value="{{ menu_id }}">
+                            <input type="number" name="quantity" value="{{ item.quantity }}" min="0" class="quantity-input">
+                            <button type="submit">更新</button>
+                        </form>
+
+                        <form action="{{ url_for('users_order.delete_cart_item') }}" method="post" class="cart-form">
+                            <input type="hidden" name="menu_id" value="{{ menu_id }}">
+                            <button type="submit" class="delete-btn">削除</button>
+                        </form>
+
+                        <div class="cart-item-price">
+                            計 {{ item.price * item.quantity }}円
+                        </div>
                     </li>
                 {% endfor %}
-                </ul>
+            </ul>
             {% else %}
                 <p>カートは空です。</p>
             {% endif %}
@@ -39,7 +71,5 @@
             {{ total_quantity }}点 合計 {{ total_price }}円
         </div>
     </main>
-    
-
 </body>
 </html>

@@ -16,9 +16,16 @@
     </header>
 
     <div class="sub-header">
-        <!-- 「ホームに戻る」は実際のホーム画面のルーティングに合わせて変更してください -->
-        <a href="#">ホームに戻る</a>
-        <span>リンクページ</span>
+        <P>予約番号</P>
+    </div>
+
+    <div class="under-hedder">
+        <a href="{{ url_for('users_home.home') }}">ホームに戻る</a>
+        <a href="{{ url_for('users_order.reservation_number') }}" style="text-decoration:none; color: inherit;">
+            <div class="link-display">
+                リンク表示
+            </div>
+        </a>
     </div>
 
     <main class="container">

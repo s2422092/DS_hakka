@@ -12,7 +12,6 @@
         <span class="username">
             ログイン中: {{ u_name if u_name else 'ゲスト' }}
         </span>
-        
         <div class="user-links">
             <a href="{{url_for('users_home.users_data')}}">ユーザー情報</a>
             <a href="{{url_for('users_home.logout')}}">ログアウト</a>
@@ -33,27 +32,31 @@
             </li>
         </ul>
     </div>
-    
+
     <!-- 店舗リスト -->
     <main>
-        <h2>各店舗の情報</h2>
-        <ul>
+        <!-- タイトルと検索を横並びに -->
+        <div class="title-search-row">
+            <h2>各店舗の情報</h2>
+            <input type="search" id="store-search" placeholder="店舗名で検索..." />
+        </div>
+    
+        <ul id="store-list">
             {% if stores %}
                 {% for store in stores %}
                     <li>
-                        <h3>
-                            <a href="{{ url_for('users_order.menu', store_id=store.id) }}">{{ store.name }}</a>
-
-
-                        </h3>
-                        <p>{{ store.description }}</p>
+                        <a href="{{ url_for('users_order.menu', store_id=store.id) }}" class="custom-link">
+                            <h3>{{ store.name }}</h3>
+                            <p>{{ store.description }}</p>
+                        </a>
                     </li>
                 {% endfor %}
             {% else %}
                 <li>店舗情報がありません。</li>
             {% endif %}
         </ul>
-        
     </main>
+    
+
 </body>
 </html>

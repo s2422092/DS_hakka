@@ -10,7 +10,6 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
-    <!-- ユーザー情報セッション -->
         <header class="site-header">
             <h1>{{ store_name }} - ホーム</h1>
             <div class="header-links">
@@ -19,7 +18,6 @@
                 <a href="{{ url_for('general.explamation') }}">ログアウト</a>
             </div>
         </header>
-    <!-- ユーザー情報セッション -->
 
     <nav class="main-nav">
         <ul>
@@ -38,25 +36,29 @@
     
 
     <main class="main-content">
-        <div class="stats-container">
-            <div class="stat-box">
-                <p>本日の売上</p>
-                <h2>{{ daily_sales | default('12,500') }} 円</h2>
-            </div>
-            <div class="stat-box">
-                <p>本日の注文数</p>
-                <h2>{{ daily_orders | default('35') }} 件</h2>
-            </div>
-            <div class="stat-box">
-                <p>今月の売上</p>
-                <h2>{{ monthly_sales | default('284,000') }} 円</h2>
-            </div>
+
+
+        <div class="main-content">
+            <h2>登録されている商品</h2>
+            {% if menus %}
+            <ul class="menu-list">
+                {% for menu in menus %}
+                <li class="menu-item">
+                    <div class="menu-name">{{ menu['menu_name'] }}</div>
+                    <div class="menu-info">
+                        <span class="price">{{ menu['price'] }}円</span>
+                        <span class="category">カテゴリ: {{ menu['category'] or '未分類' }}</span>
+                        {% if menu['soldout'] %}<span class="soldout">売り切れ</span>{% endif %}
+                    </div>
+                </li>
+                {% endfor %}
+            </ul>
+            {% else %}
+            <p>登録されている商品がありません。</p>
+            {% endif %}
         </div>
 
-        <div class="chart-container">
-            <h3>週間売上レポート</h3>
-            <canvas id="salesChart"></canvas>
-        </div>
+        
     </main>
 
   

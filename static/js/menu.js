@@ -1,65 +1,109 @@
-document.addEventListener("DOMContentLoaded", function () {
-    const cards = document.querySelectorAll(".menu-card");
+document.addEventListener('DOMContentLoaded', function () {
 
-    cards.forEach(card => {
-        const upBtn = card.querySelector(".qty-up-btn");
-        const downBtn = card.querySelector(".qty-down-btn");
-        const quantityInput = card.querySelector(".qty-input");
-        const addToCartBtn = card.querySelector(".add-to-cart-btn");
+    const addCartUrl = '/users_order/add_to_cart';
 
-        upBtn.addEventListener("click", () => {
-            let value = parseInt(quantityInput.value);
-            quantityInput.value = value + 1;
+    const categoryButtons = document.querySelectorAll('.category-btn');
+    const searchInput = document.getElementById('menu-search');
+    const menuCards = document.querySelectorAll('.menu-card');
+
+    // --- 数量操作・カート追加機能 ---
+    menuCards.forEach(card => {
+        const menuId = card.dataset.menuId;
+        const qtyInput = card.querySelector('.qty-input');
+
+        card.querySelector('.qty-up-btn').addEventListener('click', () => {
+            qtyInput.value = parseInt(qtyInput.value) + 1;
         });
 
-        downBtn.addEventListener("click", () => {
-            let value = parseInt(quantityInput.value);
-            if (value > 1) {
-                quantityInput.value = value - 1;
+        card.querySelector('.qty-down-btn').addEventListener('click', () => {
+            let currentQty = parseInt(qtyInput.value);
+            if (currentQty > 1) {
+                qtyInput.value = currentQty - 1;
             }
         });
 
-        addToCartBtn.addEventListener("click", () => {
-            const menuId = card.dataset.menuId;
-            const name = card.dataset.name;
-            const category = card.dataset.category;
-            const price = parseInt(card.dataset.price);
-            const quantity = parseInt(quantityInput.value);
-
-            fetch('/add_to_cart', {
+        card.querySelector('.add-to-cart-btn').addEventListener('click', () => {
+            const quantity = parseInt(qtyInput.value);
+            fetch(addCartUrl, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    'X-CSRFToken': getCookie('csrf_token')  // Flask-WTF使用時のみ
                 },
-                body: JSON.stringify({ menu_id: parseInt(menuId), name, category, price, quantity })
+                body: JSON.stringify({
+                    menu_id: menuId,
+                    quantity: quantity
+                })
             })
-            .then(res => res.json())
+            .then(response => response.json())
             .then(data => {
                 if (data.error) {
+                    displayFlashMessage(data.error, 'error');
                 } else {
-                    addToCartBtn.classList.add("added");
-                    addToCartBtn.textContent = "追加済み";
-                    addToCartBtn.disabled = true;
+                    displayFlashMessage(data.message, 'success');
+                    document.getElementById('cart-count').textContent = data.cart_count;
                 }
             })
-            .catch(() => alert('通信エラーが発生しました'));
+            .catch(error => {
+                console.error('Error:', error);
+                displayFlashMessage('通信エラーが発生しました。', 'error');
+            });
         });
     });
 
-    // CSRFトークンをCookieから取得する補助関数
-    function getCookie(name) {
-        let cookieValue = null;
-        if (document.cookie && document.cookie !== '') {
-            const cookies = document.cookie.split(';');
-            for (let i = 0; i < cookies.length; i++) {
-                const cookie = cookies[i].trim();
-                if (cookie.substring(0, name.length + 1) === (name + '=')) {
-                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-                    break;
-                }
+    // --- カテゴリ・検索によるフィルタ ---
+    function filterMenuItems() {
+        const activeCategory = document.querySelector('.category-btn.active')?.dataset.category || "all";
+        const keyword = searchInput.value.trim().toLowerCase();
+
+        menuCards.forEach(card => {
+            const category = card.querySelector('.item-category').textContent.trim();
+            const name = card.querySelector('.item-name').textContent.trim().toLowerCase();
+
+            const matchesCategory = activeCategory === "all" || category === activeCategory;
+            const matchesSearch = name.includes(keyword);
+
+            if (matchesCategory && matchesSearch) {
+                card.style.display = "";
+            } else {
+                card.style.display = "none";
             }
-        }
-        return cookieValue;
+        });
+    }
+
+    // カテゴリーボタンにクリックイベントを追加
+    categoryButtons.forEach(btn => {
+        btn.addEventListener('click', () => {
+            categoryButtons.forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            filterMenuItems();
+        });
+    });
+
+    // 検索バーの入力でフィルタを実行
+    if (searchInput) {
+        searchInput.addEventListener('input', filterMenuItems);
+    }
+
+    // 初期化：最初に「すべて」ボタンを選択状態にしておく
+    const allBtn = document.querySelector(".category-btn[data-category='all']");
+    if (allBtn) {
+        allBtn.classList.add("active");
+    }
+    filterMenuItems();
+
+    // --- フラッシュメッセージ表示用関数 ---
+    function displayFlashMessage(message, category) {
+        const container = document.getElementById('flash-message-container');
+        const messageDiv = document.createElement('div');
+        messageDiv.className = `flash ${category}`;
+        messageDiv.textContent = message;
+        container.appendChild(messageDiv);
+
+        setTimeout(() => {
+            messageDiv.style.opacity = '0';
+            setTimeout(() => {
+                messageDiv.remove();
+            }, 500);
+        }, 3000);
     }
 });

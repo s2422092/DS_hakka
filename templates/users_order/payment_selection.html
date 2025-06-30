@@ -3,54 +3,63 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>お支払い方法選択 - モバおる</title>
+    <title>お支払い方法の選択 - モバおる</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/users_order.css') }}">
 </head>
 <body>
 
     <header class="main-header">
-        <div class="store-name">モバおる - 〇〇食堂</div>
+        <div class="store-name">モバおる - {{ store_name }}</div>
         <div class="user-info">
-            <span>ユーザー名</span>
+            <span>{{ username }}</span>
         </div>
     </header>
 
     <div class="sub-header">
-        <a href="{{ url_for('users_order.cart_confirmation') }}">戻る</a>
+        <p>注文最終確認</p>
+        <a href="{{ url_for('users_order.back_to_home_and_clear_cart') }}">ホームに戻る</a>
     </div>
 
     <main class="container">
         <div class="store-info">
-            <span class="name">店舗名</span>
-            <span>住所</span>
+            <span class="name">{{ store_name }}</span>
         </div>
 
-        <div class="payment-container">
-            <div class="order-summary">
-                <div class="cart-list">
-                    <!-- Sample Item 1 -->
+        <div class="order-summary">
+            <div class="cart-list">
+                {% for item in cart %}
                     <div class="cart-item">
-                        <span>カテゴリー</span>
-                        <span>個数</span>
-                        <span>値段</span>
+                        <div class="cart-item-details">
+                            <span>{{ item.name }}</span>
+                            <span>{{ item.quantity }} 個</span>
+                        </div>
+                        <span>{{ item.price * item.quantity }}円</span>
                     </div>
-                    <!-- Sample Item 2 -->
-                    <div class="cart-item">
-                        <span>カテゴリー</span>
-                        <span>個数</span>
-                        <span>値段</span>
-                    </div>
-                </div>
-                <div class="cart-total">
-                    何点 合計 〜〜〜円
-                </div>
+                {% endfor %}
             </div>
-
-            <div class="payment-actions">
-                <a href="{{ url_for('users_order.pay_payment') }}" class="btn btn-paypay">paypayで支払う</a>
+            <div class="cart-total">
+                合計: {{ total_price }}円
             </div>
         </div>
+
+        <div class="payment-actions">
+            <h3>お支払い方法</h3>
+            <button class="btn btn-paypay" disabled>PayPay</button>
+        </div>
+
+        <form action="{{ url_for('users_order.create_order') }}" method="POST">
+            <p>上記の内容でよろしければ、注文を確定してください。</p>
+            <button type="submit" class="btn btn-primary">この内容で注文を確定する</button>
+        </form>
+
+        <br>
+        <a href="{{ url_for('users_order.cart_confirmation') }}" class="btn btn-secondary">カートに戻る</a>
     </main>
+
+    <div class="under-hedder">
+        <a href="{{ url_for('users_order.cart_confirmation') }}">戻る</a>
+        <a href="{{ url_for('users_order.reservation_number') }}" style="text-decoration:none; color: inherit;">リンク表示</a>
+    </div>
 
 </body>
 </html>

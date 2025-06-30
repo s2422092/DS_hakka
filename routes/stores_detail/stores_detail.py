@@ -3,13 +3,13 @@ import sqlite3
 import csv
 from werkzeug.utils import secure_filename
 import os
+from functools import wraps
 
 stores_detail_bp = Blueprint('stores_detail', __name__, url_prefix='/stores')
 
-# データベース接続をヘルパー関数として定義
 def get_db_connection():
-    # ユーザーが指定した絶対パスを使用
-    conn = sqlite3.connect('DS_hakka/app.db')
+    db_path = os.path.join(os.path.dirname(__file__), '..', '..', 'app.db')
+    conn = sqlite3.connect(db_path)
     conn.row_factory = sqlite3.Row
     return conn
 
@@ -23,6 +23,27 @@ def store_home():
     return render_template('stores_detail/store_home.html', store_name=store_name)
 
 
+@stores_detail_bp.route('/store_home_menu')
+def store_home_menu():
+    if 'store_id' not in session:
+        flash("ログインしてください")
+        return redirect(url_for('store.store_login'))
+
+    store_name = session.get('store_name', 'ゲスト')
+    store_id = session.get('store_id')
+
+    # 商品一覧を取得
+    conn = sqlite3.connect('app.db')
+    conn.row_factory = sqlite3.Row
+    cur = conn.cursor()
+    cur.execute("SELECT menu_name, price, category, soldout FROM menus WHERE store_id = ?", (store_id,))
+    menus = cur.fetchall()
+    conn.close()
+
+    return render_template('stores_detail/store_home_menu.html', store_name=store_name , menus=menus)
+
+
+
 @stores_detail_bp.route('/menu-registration', methods=['GET', 'POST'])
 def menu_registration():
     # ログインチェック
@@ -31,6 +52,7 @@ def menu_registration():
         return redirect(url_for('store.store_login'))
 
     store_id = session.get('store_id')
+    store_name = session.get('store_name', 'ゲスト')
     if not store_id:
         flash("ストアIDが見つかりません。ログインし直してください。", 'error')
         return redirect(url_for('store.store_login'))
@@ -155,7 +177,7 @@ def menu_registration():
                 flash('CSVファイルを選択するか、手動で商品名と値段を入力してください。', 'error')
                 return redirect(request.url)
 
-    return render_template('stores_detail/menu_registration.html')
+    return render_template('stores_detail/menu_registration.html' ,store_name=store_name)
 
 
 @stores_detail_bp.route('/menu-check')
@@ -186,12 +208,39 @@ def menu_check():
 
 @stores_detail_bp.route('/order-list')
 def order_list():
-    # ログインチェック
-    if 'store_id' not in session:
-        flash("ログインしてください")
-        return redirect(url_for('store.store_login'))
+    store_id = session.get('store_id')
+    store_name = session.get('store_name', 'ゲスト')
+    
+    conn = get_db_connection()
+    query = """
+        SELECT
+            o.order_id, o.datetime, o.total_amount, o.status,
+            u.u_name, m.menu_name, oi.quantity, oi.price_at_order
+        FROM orders AS o
+        JOIN order_items AS oi ON o.order_id = oi.order_id
+        JOIN menus AS m ON oi.menu_id = m.menu_id
+        JOIN users_table AS u ON o.user_id = u.id
+        WHERE o.store_id = ?
+        ORDER BY o.datetime DESC;
+    """
+    orders_raw = conn.execute(query, (store_id,)).fetchall()
+    conn.close()
 
-    return render_template('stores_detail/order_list.html')
+    orders_dict = {}
+    for row in orders_raw:
+        order_id = row['order_id']
+        if order_id not in orders_dict:
+            orders_dict[order_id] = {
+                'id': order_id, 'datetime': row['datetime'], 'status': row['status'],
+                'user_name': row['u_name'], 'total_amount': row['total_amount'],
+                'items_list': [] # ★★★ キー名を'items'から'items_list'に変更 ★★★
+            }
+        orders_dict[order_id]['items_list'].append({
+            'name': row['menu_name'], 'quantity': row['quantity'], 'price': row['price_at_order']
+        })
+    
+    orders_list = list(orders_dict.values())
+    return render_template('stores_detail/order_list.html', orders=orders_list, store_name=store_name)
 
 
 @stores_detail_bp.route('/procedure')

@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>メールアドレスの確認</title>
+</head>
+<body>
+<div class="container">
+    <h1>メールアドレスの確認</h1>
+    <form action="{{ url_for('users_login.re_enrollment') }}" method="post" class="re-enrollment-form">
+        <p>登録したメールアドレスを入力してください</p>
+        <label for="email">メールアドレス</label>
+        <input type="email" id="email" name="email" required>
+        <div class="button-area">
+            <!-- フォーム送信ボタンを利用 -->
+            <button type="submit" class="submit-button">次へ</button>
+        </div>
+    </form>
+</div>
+
+
+</body>
+</html>
