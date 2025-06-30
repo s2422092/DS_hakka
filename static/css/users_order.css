@@ -386,6 +386,10 @@ body {
     font-weight: bold;
     z-index: 1000;
     box-shadow: 0 -2px 5px rgba(0,0,0,0.1);
+    /* 横並びにする */
+    display: flex;
+    justify-content: space-around; /* or space-between / center */
+    align-items: center;
 }
 
 .under-hedder a {
