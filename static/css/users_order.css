@@ -416,20 +416,26 @@ body {
 
 .category-buttons {
     display: flex;
+    justify-content: flex-start;
+    gap: 8px;
     flex-wrap: wrap;
-    gap: 5px;
-    margin-top: 5px;
+    margin-bottom: 10px;
 }
 
 .category-btn {
-    background-color: #eee;
+    padding: 6px 12px;
     border: 1px solid #ccc;
-    padding: 4px 8px;
-    border-radius: 4px;
+    background-color: #f0f0f0;
     cursor: pointer;
+    border-radius: 4px;
+    font-size: 14px;
+    user-select: none;
+    transition: background-color 0.3s ease;
 }
 
-.category-btn:hover {
-    background-color: #ddd;
+.category-btn:hover,
+.category-btn.active {
+    background-color: #609e7e;
+    color: white;
+    border-color: #609e7e;
 }
-
