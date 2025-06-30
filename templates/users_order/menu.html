@@ -22,6 +22,11 @@
     <p>メニュー画面</p>
 </div>
 
+    
+<div class="filter-bar">
+    <input type="search" id="menu-search" placeholder="メニュー名で検索..." />
+</div>
+
 <div class="under-hedder">
     <a href="{{ url_for('users_order.back_to_home_and_clear_cart') }}">戻る</a>
     <a href="{{ url_for('users_order.cart_confirmation') }}">カート確認 (<span id="cart-count">{{ cart.values()|sum(attribute='quantity') }}</span>)</a>
