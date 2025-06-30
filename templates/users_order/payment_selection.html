@@ -13,20 +13,22 @@
         </div>
     
         <div class="order-summary">
-            <div class="cart-list">
+            <div class="cart-items-list">
                 {% for item in cart %}
-                    <div class="cart-item">
-                        <div class="cart-item-details">
-                            <span>{{ item.name }}</span>
-                            <span>{{ item.quantity }} 個</span>
-                        </div>
-                        <span>{{ item.price * item.quantity }}円</span>
-                    </div>
+                <div class="cart-item">
+                    <span class="item-name">{{ item.name }}</span>
+                    <span class="item-quantity">{{ item.quantity }}個</span>
+                    {# ★★★ ここを修正 ★★★ #}
+                    <span class="item-price">{{ item.unitPrice.amount * item.quantity }}円</span>
+                    {# ★★★ 修正ここまで ★★★ #}
+                </div>
                 {% endfor %}
             </div>
+            
             <div class="cart-total">
                 合計: <span id="display-total-price">{{ total_price }}</span>円
             </div>
+            
         </div>
     
         <div class="payment-actions">

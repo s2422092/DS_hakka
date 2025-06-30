@@ -172,6 +172,10 @@ def cart_confirmation():
         u_name=session.get('u_name', 'ゲスト')
     )
 
+# routes/users_order/users_order.py
+
+# ... (前略) ...
+
 @users_order_bp.route('/payment_selection')
 @login_required
 def payment_selection():
@@ -194,25 +198,32 @@ def payment_selection():
     store = conn.execute("SELECT store_name FROM store WHERE store_id = ?", (store_id,)).fetchone()
     conn.close()
 
-    # ★★★ ここを修正 ★★★
-    # current_cartは辞書形式なので、values()でイテレータを取得し、
-    # list()でリストに変換することで、JavaScriptの配列として適切に扱えるようにします。
-    # また、Rowオブジェクトの場合は、dict()に変換することでtojsonが安全に処理できます。
+    # ★★★ ここを修正します ★★★
+    # PayPay APIのorderItems形式に合うようにデータを変換します
     cart_for_js = []
     for item_key, item_value in current_cart.items():
-        # item_valueがsqlite3.Rowオブジェクトの場合は、dict()で通常の辞書に変換する
-        if isinstance(item_value, sqlite3.Row):
-            cart_for_js.append(dict(item_value))
-        else:
-            cart_for_js.append(item_value) # 既に辞書形式ならそのまま
+        # item_value は既に辞書形式であると想定されます
+        # PayPay APIに送信するために必要なフィールドのみを含め、形式を変換します
+        converted_item = {
+            'name': item_value['name'],
+            'quantity': item_value['quantity'],
+            'unitPrice': {
+                'amount': item_value['price'], # カートの 'price' を 'unitPrice.amount' にマッピング
+                'currency': 'JPY'             # 通貨は固定で 'JPY'
+            }
+            # 'menu_id' はPayPay APIのorderItemsには不要なので含めません
+        }
+        cart_for_js.append(converted_item)
 
     return render_template(
         'users_order/payment_selection.html',
-        cart=cart_for_js, # ★ 修正後のリストを渡す ★
+        cart=cart_for_js, # ★ 変換後のリストをテンプレートに渡す ★
         total_price=total_price,
         store_name=store['store_name'],
         u_name=session.get('u_name', 'ゲスト')
     )
+
+# ... (後略) ...
 
 # ★★★ ここからPayPay決済ロジックを統合 ★★★
 

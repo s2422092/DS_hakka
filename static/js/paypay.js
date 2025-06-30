@@ -55,11 +55,12 @@ if (startPaypayButton) { // ボタンが存在するか確認
             return;
         }
 
-        // PayPay APIのorderItems形式に合わせるため、priceを渡す
+        // PayPay APIのorderItems形式に合わせるため、Flaskから渡された unitPrice を使用
+        // Flask側で既に適切な形式に変換されていることを前提とします。
         const orderItems = cart.map(item => ({
-            name: item.name, // Jinja2テンプレートから渡されるアイテム名は既にプレフィックスなし
+            name: item.name, 
             quantity: item.quantity,
-            price: item.price // ここはunitPrice.amount になる値
+            unitPrice: item.unitPrice // Flaskで変換済みの unitPrice オブジェクトをそのまま使用
         }));
 
         // モーダルとメッセージを初期化
@@ -79,7 +80,7 @@ if (startPaypayButton) { // ボタンが存在するか確認
                     'Content-Type': 'application/json',
                 },
                 body: JSON.stringify({
-                    orderItems: orderItems,
+                    orderItems: orderItems, // 変換済みの orderItems を送信
                     amount: {
                         amount: totalAmount,
                         currency: 'JPY'
