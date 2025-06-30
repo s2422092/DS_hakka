@@ -260,3 +260,26 @@ def back_to_home_and_clear_cart():
     
     # ユーザーのホーム画面にリダイレクト
     return redirect(url_for('users_home.home'))
+
+
+from flask import Blueprint, render_template, session, redirect, url_for, flash
+
+users_order_bp = Blueprint('users_order', __name__, url_prefix='/users_order')
+
+@users_order_bp.route('/order_confirm')
+def order_confirm():
+    if 'cart' not in session or not session['cart']:
+        flash("カートが空です。", "error")
+        return redirect(url_for('users_order.cart_confirmation'))  # カート確認に戻す
+
+    cart = session['cart']
+    total_price = sum(item['price'] * item['quantity'] for item in cart)
+
+    store_name = session.get("store_name", "店舗名未設定")
+    username = session.get("username", "ゲスト")
+
+    return render_template("users_order/order_confirm.html",
+                           cart=cart,
+                           total_price=total_price,
+                           store_name=store_name,
+                           username=username)

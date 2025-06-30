@@ -44,10 +44,11 @@
 
         <div class="payment-actions">
             <h3>お支払い方法</h3>
-            <form action="{{ url_for('users_order.paypay_create_payment') }}" method="POST">
+            <form action="{{ url_for('users_order_paypay.paypay_create_payment') }}" method="POST">
                 <input type="hidden" name="amount" value="{{ total_price }}">
                 <button type="submit" class="btn btn-paypay">PayPayで支払う</button>
             </form>
+            
             
         </div>
 

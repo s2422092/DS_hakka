@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>注文確認 - モバおる</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/paypay.css') }}">
+</head>
+<body>
+
+    <header class="main-header">
+        <div class="store-name">モバおる - {{ store_name }}</div>
+        <div class="user-info">{{ username }}</div>
+    </header>
+
+    <main class="container">
+        <h2>注文内容の確認</h2>
+
+        <div class="cart-list">
+            {% for item in cart %}
+                <div class="cart-item">
+                    <span>{{ item.name }}（{{ item.quantity }}個）</span>
+                    <span>{{ item.price * item.quantity }}円</span>
+                </div>
+            {% endfor %}
+        </div>
+
+        <div class="total">
+            <strong>合計金額：{{ total_price }}円</strong>
+        </div>
+
+        <form action="{{ url_for('users_order_paypay.paypay_create_payment') }}" method="POST" class="pay-form">
+            <input type="hidden" name="amount" value="{{ total_price }}">
+            <button type="submit" class="btn-paypay">PayPayで支払う</button>
+        </form>
+
+        <div class="back-link">
+            <a href="{{ url_for('users_order.cart_confirmation') }}" class="btn-secondary">カートに戻る</a>
+        </div>
+    </main>
+
+</body>
+</html>
