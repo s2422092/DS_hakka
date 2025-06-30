@@ -24,13 +24,13 @@
 
     
 <div class="filter-bar">
-    <input type="search" id="menu-search" placeholder="メニュー名で検索..." />
     <div class="category-buttons">
         <button class="category-btn" data-category="all">すべて</button>
         {% for cat in categories %}
             <button class="category-btn" data-category="{{ cat }}">{{ cat }}</button>
         {% endfor %}
     </div>
+    <input type="search" id="menu-search" placeholder="メニュー名で検索..." />
 </div>
 
 
