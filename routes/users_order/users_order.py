@@ -321,3 +321,124 @@ def delete_cart_item():
         flash("商品をカートから削除しました。")
 
     return redirect(url_for('users_order.cart_confirmation'))
+
+
+import uuid
+import requests
+import time
+import hashlib
+import hmac
+import base64
+import json
+
+# あなたのテストキーを使用
+TEST_API_KEY = "a_Al3djIsQo4_fd3q"
+TEST_API_SECRET = "iAclVPnwJm1W9ZNVnqycTXtJzcqStIew9P1g0RW508c="
+TEST_MERCHANT_ID = "933772843478294528"
+
+@users_order_bp.route('/paypay_confirm')
+@login_required
+def paypay_confirm():
+    merchant_payment_id = request.args.get("merchantPaymentId")
+    if not merchant_payment_id:
+        flash("決済IDがありません")
+        return redirect(url_for('users_home.home'))
+
+    url_path = f"/v2/payments/{merchant_payment_id}"
+    full_url = "https://stg-api.paypay.ne.jp" + url_path
+
+    nonce = str(int(time.time()))
+    data_to_sign = f"{nonce}{url_path}"
+    hmac_digest = hmac.new(
+        TEST_API_SECRET.encode(),
+        msg=data_to_sign.encode(),
+        digestmod=hashlib.sha256
+    ).digest()
+    signature = base64.b64encode(hmac_digest).decode()
+
+    headers = {
+        "X-Api-Key": TEST_API_KEY,
+        "X-Request-ID": str(uuid.uuid4()),
+        "X-Requested-With": TEST_API_KEY,
+        "X-Assume-Merchant": TEST_MERCHANT_ID,
+        "X-Authorization": signature,
+        "X-Timestamp": nonce,
+    }
+
+    response = requests.get(full_url, headers=headers)
+    if response.status_code == 200:
+        result = response.json()
+        status = result['data']['status']
+        if status == "COMPLETED":
+            flash("決済が完了しました。")
+        else:
+            flash(f"決済ステータス: {status}")
+    else:
+        flash("決済確認に失敗しました。")
+
+    return redirect(url_for('users_order.reservation_number'))
+
+@users_order_bp.route('/paypay_create_payment', methods=['POST'])
+@login_required
+def paypay_create_payment():
+    if 'current_store_id' not in session:
+        return redirect(url_for('users_home.home'))
+
+    store_id = session['current_store_id']
+    carts = session.get('carts', {})
+    current_cart = carts.get(str(store_id), {})
+    total_price = sum(item['price'] * item['quantity'] for item in current_cart.values())
+
+    if total_price <= 0:
+        flash("金額が0円のため、PayPay決済は行えません。")
+        return redirect(url_for('users_order.payment_selection'))
+
+    # PayPay APIのエンドポイント
+    url_path = "/v2/payments"
+    full_url = "https://stg-api.paypay.ne.jp" + url_path
+
+    merchant_payment_id = str(uuid.uuid4())
+    payload = {
+        "merchantPaymentId": merchant_payment_id,
+        "amount": {
+            "amount": total_price,
+            "currency": "JPY"
+        },
+        "codeType": "ORDER_QR",
+        "orderDescription": "モバおるのご注文",
+        "isAuthorization": False,
+        "redirectUrl": url_for('users_order.paypay_confirm', _external=True),
+        "redirectType": "WEB_LINK"
+    }
+    body_str = json.dumps(payload, separators=(',', ':'))
+
+    nonce = str(int(time.time()))
+    data_to_sign = f"{nonce}{url_path}{body_str}"
+    hmac_digest = hmac.new(
+        TEST_API_SECRET.encode(),
+        msg=data_to_sign.encode(),
+        digestmod=hashlib.sha256
+    ).digest()
+    signature = base64.b64encode(hmac_digest).decode()
+
+    headers = {
+        "Content-Type": "application/json",
+        "X-Api-Key": TEST_API_KEY,
+        "X-Request-ID": merchant_payment_id,
+        "X-Requested-With": TEST_API_KEY,
+        "X-Assume-Merchant": TEST_MERCHANT_ID,
+        "X-Authorization": signature,
+        "X-Timestamp": nonce,
+    }
+
+    response = requests.post(full_url, headers=headers, data=body_str)
+
+    if response.status_code == 201:
+        data = response.json()
+        qr_url = data['data']['url']
+        return redirect(qr_url)
+    else:
+        error = response.json()
+        flash("PayPay決済の作成に失敗しました。")
+        print("PayPay API エラー:", error)
+        return redirect(url_for('users_order.payment_selection'))
