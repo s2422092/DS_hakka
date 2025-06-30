@@ -2,58 +2,34 @@
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>お支払い方法選択 - モバおる</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/users_order.css') }}">
-</head>
+    <title>お支払い方法の選択</title>
+    </head>
 <body>
+    <h1>ご注文内容の最終確認</h1>
+    <h2>{{ store_name }}</h2>
 
-    <header class="main-header">
-        <div class="store-name">モバおる - 〇〇食堂</div>
-        <div class="user-info">
-            <span>ユーザー名</span>
-        </div>
-    </header>
+    <h3>ご注文商品</h3>
+    <ul>
+        {% for item in cart %}
+            <li>{{ item.name }} x {{ item.quantity }} ... {{ item.price * item.quantity }}円</li>
+        {% endfor %}
+    </ul>
+    <hr>
+    <h3>お支払い合計: <strong>{{ total_price }}円</strong></h3>
 
-    <div class="sub-header">
-        <p>決済方法の選択</p>
-    </div>
+    <hr>
 
-    <div class="under-hedder">
-        <a href="{{ url_for('users_home.home') }}">戻る</a>
-        <a href="{{ url_for('users_order.pay_payment') }}">paypayで支払う</a>
-    </div>
-
-    <main class="container">
-        <div class="store-info">
-            <span class="name">店舗名</span>
-            <span>住所</span>
+    <h3>お支払い方法</h3>
+    <div>
+        <p>PayPay</p>
         </div>
 
-        <div class="payment-container">
-            <div class="order-summary">
-                <div class="cart-list">
-                    <!-- Sample Item 1 -->
-                    <div class="cart-item">
-                        <span>カテゴリー</span>
-                        <span>個数</span>
-                        <span>値段</span>
-                    </div>
-                    <!-- Sample Item 2 -->
-                    <div class="cart-item">
-                        <span>カテゴリー</span>
-                        <span>個数</span>
-                        <span>値段</span>
-                    </div>
-                </div>
-                <div class="cart-total">
-                    何点 合計 〜〜〜円
-                </div>
-            </div>
+    <form action="{{ url_for('users_order.create_order') }}" method="POST">
+        <p>上記の内容でよろしければ、注文を確定してください。</p>
+        <button type="submit">この内容で注文を確定する</button>
+    </form>
 
-         
-        </div>
-    </main>
-
+    <br>
+    <a href="{{ url_for('users_order.cart_confirmation') }}">カートに戻る</a>
 </body>
 </html>

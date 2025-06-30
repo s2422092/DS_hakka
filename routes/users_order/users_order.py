@@ -1,128 +1,235 @@
-from flask import Blueprint, render_template, request, redirect, url_for, session, flash
+# routes/users_order/users_order.py
+
+from flask import Blueprint, render_template, request, redirect, url_for, session, flash, jsonify
 import sqlite3
+import datetime
+from functools import wraps
 
+# (Blueprint定義、get_db_connection, login_requiredデコレータは変更なし)
+users_order_bp = Blueprint('users_order', __name__, url_prefix='/users_order')
 
-
-users_order_bp = Blueprint('users_order', __name__)
-
-@users_order_bp.route('/home_clear_cart')
-def home_clear_cart():
-    session.pop('cart', None)  # カート情報を消す
-    return redirect(url_for('users_home.home'))
-
-@users_order_bp.route('/menu/<int:store_id>', methods=['GET'])
-def menu(store_id):
+def get_db_connection():
     conn = sqlite3.connect('app.db')
-    cursor = conn.cursor()
-    cursor.execute("SELECT store_name FROM store WHERE store_id = ?", (store_id,))
-    store_name = cursor.fetchone()[0]
+    conn.row_factory = sqlite3.Row
+    return conn
 
-    cursor.execute("""
-        SELECT menu_id, menu_name, category, price 
-        FROM menus 
-        WHERE store_id = ?
-    """, (store_id,))
-    menu_items = cursor.fetchall()
+def login_required(f):
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        if 'id' not in session:
+            flash("この操作にはログインが必要です。")
+            return redirect(url_for('users_login.login'))
+        return f(*args, **kwargs)
+    return decorated_function
+
+# --- Routes ---
+
+@users_order_bp.route('/menu/<int:store_id>')
+@login_required
+def menu(store_id):
+    """選択された店舗のメニューページを表示する"""
+    session['current_store_id'] = store_id
+    
+    conn = get_db_connection()
+    # storeオブジェクト全体を取得するよう修正
+    store = conn.execute("SELECT * FROM store WHERE store_id = ?", (store_id,)).fetchone()
+    if store is None:
+        flash("指定された店舗は存在しません。")
+        conn.close()
+        return redirect(url_for('users_home.home'))
+    
+    menu_items = conn.execute("SELECT menu_id, menu_name, category, price FROM menus WHERE store_id = ? AND soldout = 0", (store_id,)).fetchall()
     conn.close()
+
+    carts = session.get('carts', {})
+    current_cart = carts.get(str(store_id), {})
 
     return render_template(
         'users_order/menu.html',
-        store_id=store_id,
-        store_name=store_name,
+        store=store,  # storeオブジェクトをそのまま渡す
         menu_items=menu_items,
+        cart=current_cart,
         u_name=session.get('u_name', 'ゲスト')
     )
 
-from flask import request, session, jsonify
-
+# add_to_cartから下の関数は、前回提示した完成版のままでOKです。
+# 念のため、以下に全コードを記載しておきます。
 @users_order_bp.route('/add_to_cart', methods=['POST'])
+@login_required
 def add_to_cart():
+    if 'current_store_id' not in session:
+        return jsonify({'error': '店舗を選択してください'}), 400
     data = request.get_json()
     try:
-        menu_id = int(data.get('menu_id'))
-        name = data.get('name')
-        category = data.get('category')
-        price = int(data.get('price'))
-        quantity = int(data.get('quantity', 1))
-    except (TypeError, ValueError):
-        return jsonify({'error': '不正なデータです'}), 400
-
-    if not all([menu_id, name, category, price]):
-        return jsonify({'error': '必要なデータがありません'}), 400
-
-    cart = session.get('cart', [])
-
-    for item in cart:
-        if item['menu_id'] == menu_id:
-            item['quantity'] += quantity
-            break
+        menu_id = int(data['menu_id'])
+        quantity = int(data['quantity'])
+    except (TypeError, ValueError, KeyError):
+        return jsonify({'error': '不正なデータ形式です'}), 400
+    store_id = session['current_store_id']
+    conn = get_db_connection()
+    menu_item = conn.execute("SELECT menu_name, price, store_id FROM menus WHERE menu_id = ?", (menu_id,)).fetchone()
+    conn.close()
+    if not menu_item or menu_item['store_id'] != store_id:
+        return jsonify({'error': '無効な商品です'}), 400
+    carts = session.get('carts', {})
+    store_id_str, menu_id_str = str(store_id), str(menu_id)
+    current_cart = carts.get(store_id_str, {})
+    if menu_id_str in current_cart:
+        current_cart[menu_id_str]['quantity'] += quantity
     else:
-        cart.append({
-            'menu_id': menu_id,
-            'name': name,
-            'category': category,
-            'price': price,
-            'quantity': quantity
-        })
-
-    session['cart'] = cart
+        current_cart[menu_id_str] = {
+            'menu_id': menu_id, 'name': menu_item['menu_name'],
+            'price': menu_item['price'], 'quantity': quantity
+        }
+    carts[store_id_str] = current_cart
+    session['carts'] = carts
     session.modified = True
-    return jsonify({'message': 'カートに追加しました', 'cart_count': sum(i['quantity'] for i in cart)})
+    total_items = sum(item['quantity'] for item in current_cart.values())
+    return jsonify({'message': 'カートに追加しました', 'cart_count': total_items})
 
-
-@users_order_bp.route('/cart_confirmation/<int:store_id>')
-def cart_confirmation(store_id):
-    # セッションからカート情報を取得（なければ空リスト）
-    cart = session.get('cart', [])
-
-    # 合計数量と合計金額を計算
-    total_quantity = sum(item['quantity'] for item in cart)
-    total_price = sum(item['quantity'] * item['price'] for item in cart)
-
-    # 店舗名をセッションから取得、なければDBから取得しセッションに保存
-    store_name = session.get('store_name', '')
-    if not store_name:
-        conn = sqlite3.connect('app.db')
-        cursor = conn.cursor()
-        cursor.execute("SELECT store_name FROM store WHERE store_id = ?", (store_id,))
-        row = cursor.fetchone()
-        conn.close()
-        if row:
-            store_name = row[0]
-            session['store_name'] = store_name
-        else:
-            flash("店舗情報が取得できませんでした。")
-            return redirect(url_for('users_home.home'))
-
-    # テンプレートに渡す
+@users_order_bp.route('/cart_confirmation')
+@login_required
+def cart_confirmation():
+    if 'current_store_id' not in session:
+        return redirect(url_for('users_home.home'))
+    store_id = session['current_store_id']
+    carts = session.get('carts', {})
+    current_cart = carts.get(str(store_id), {})
+    total_quantity = sum(item['quantity'] for item in current_cart.values())
+    total_price = sum(item['quantity'] * item['price'] for item in current_cart.values())
+    conn = get_db_connection()
+    store = conn.execute("SELECT store_name FROM store WHERE store_id = ?", (store_id,)).fetchone()
+    conn.close()
+    if not store:
+        return redirect(url_for('users_home.home'))
     return render_template(
         'users_order/cart_confirmation.html',
-        cart=cart,
+        cart=list(current_cart.values()),
         total_quantity=total_quantity,
         total_price=total_price,
-        store_name=store_name,
-        store_id=store_id,
+        store_name=store['store_name'],
+        store_id=store_id, # ★★★ この一行を追加してください ★★★
         u_name=session.get('u_name', 'ゲスト')
     )
 
+
 @users_order_bp.route('/payment_selection')
+@login_required
 def payment_selection():
+    """決済方法選択と最終確認ページ"""
+    if 'current_store_id' not in session:
+        flash("店舗が選択されていません。")
+        return redirect(url_for('users_home.home'))
+
+    store_id = session['current_store_id']
+    carts = session.get('carts', {})
+    current_cart = carts.get(str(store_id), {})
+
+    if not current_cart:
+        flash("カートが空です。")
+        return redirect(url_for('users_order.menu', store_id=store_id))
+
+    total_price = sum(item['quantity'] * item['price'] for item in current_cart.values())
     
-    return render_template('users_order/payment_selection.html')
+    conn = get_db_connection()
+    store = conn.execute("SELECT store_name FROM store WHERE store_id = ?", (store_id,)).fetchone()
+    conn.close()
 
+    return render_template(
+        'users_order/payment_selection.html',
+        cart=list(current_cart.values()),
+        total_price=total_price,
+        store_name=store['store_name'],
+        u_name=session.get('u_name', 'ゲスト')
+    )
 
-@users_order_bp.route('/pay_payment')
+@users_order_bp.route('/create_order', methods=['POST'])
+@login_required
+def create_order():
+    """注文をデータベースに保存する"""
+    if 'current_store_id' not in session:
+        return redirect(url_for('users_home.home'))
 
+    user_id = session['id']
+    store_id = session['current_store_id']
+    carts = session.get('carts', {})
+    current_cart = carts.get(str(store_id), {})
 
+    if not current_cart:
+        return redirect(url_for('users_order.menu', store_id=store_id))
 
+    total_price = sum(item['quantity'] * item['price'] for item in current_cart.values())
 
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    try:
+        current_time = datetime.datetime.now()
+        cursor.execute("""
+            INSERT INTO orders (user_id, store_id, status, datetime, payment_method, total_amount)
+            VALUES (?, ?, ?, ?, ?, ?)
+        """, (user_id, store_id, 'completed', current_time, 'PayPay', total_price))
+        
+        order_id = cursor.lastrowid
 
-def pay_payment():
-    return render_template('users_order/pay_payment.html')
+        order_items_data = [
+            (order_id, item['menu_id'], item['quantity'], item['price'])
+            for item in current_cart.values()
+        ]
+        
+        # order_itemsテーブルのprice_at_orderカラムに合わせて修正
+        cursor.executemany("""
+            INSERT INTO order_items (order_id, menu_id, quantity, price_at_order)
+            VALUES (?, ?, ?, ?)
+        """, order_items_data)
 
+        conn.commit()
 
+        if str(store_id) in session['carts']:
+            del session['carts'][str(store_id)]
+            session.modified = True
+            
+        session['last_order_id'] = order_id
+        
+        # ここで実際にPayPay APIを呼び出す処理が入ります
+        # 今回は成功したと仮定して、予約番号表示ページへリダイレクト
+        flash("注文が完了しました。")
+        return redirect(url_for('users_order.reservation_number'))
+
+    except sqlite3.Error as e:
+        conn.rollback()
+        flash(f"注文処理中にエラーが発生しました: {e}")
+        return redirect(url_for('users_order.cart_confirmation'))
+    finally:
+        conn.close()
 
 @users_order_bp.route('/reservation_number')
+@login_required
 def reservation_number():
-    return render_template('users_order/reservation_number.html')
+    """予約（注文）番号表示ページ"""
+    order_id = session.pop('last_order_id', 'N/A') # 一度表示したらセッションから消す
+    if order_id == 'N/A':
+        flash("不正なアクセスです。")
+        return redirect(url_for('users_home.home'))
+    return render_template('users_order/reservation_number.html', order_id=order_id)
 
+@users_order_bp.route('/clear_cart')
+@login_required
+def clear_cart():
+    """現在選択中の店舗のカートを空にする"""
+    # セッションに店舗IDとカート情報があるか確認
+    if 'current_store_id' in session and 'carts' in session:
+        store_id_str = str(session['current_store_id'])
+        
+        # 現在の店舗のカートが存在すれば削除
+        if store_id_str in session['carts']:
+            del session['carts'][store_id_str]
+            session.modified = True # セッションの変更をFlaskに通知
+            flash('現在のカートを空にしました。')
+    
+    # 処理が終わったら、今いるお店のメニューページにリダイレクトして戻る
+    # もしカート確認ページから呼ばれた場合も、一旦メニューに戻すのがシンプル
+    if 'current_store_id' in session:
+        return redirect(url_for('users_order.menu', store_id=session['current_store_id']))
+    else:
+        # 万が一店舗IDがセッションになければホームへ
+        return redirect(url_for('users_home.home'))
