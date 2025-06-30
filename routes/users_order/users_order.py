@@ -99,23 +99,27 @@ def cart_confirmation():
         return redirect(url_for('users_home.home'))
     store_id = session['current_store_id']
     carts = session.get('carts', {})
-    current_cart = carts.get(str(store_id), {})
+    current_cart = carts.get(str(store_id), {}) # ★★★ 変更点：辞書のまま保持 ★★★
+
     total_quantity = sum(item['quantity'] for item in current_cart.values())
     total_price = sum(item['quantity'] * item['price'] for item in current_cart.values())
+    
     conn = get_db_connection()
     store = conn.execute("SELECT store_name FROM store WHERE store_id = ?", (store_id,)).fetchone()
     conn.close()
     if not store:
         return redirect(url_for('users_home.home'))
+        
     return render_template(
         'users_order/cart_confirmation.html',
-        cart=list(current_cart.values()),
+        cart=current_cart, # ★★★ 変更点：辞書のままテンプレートに渡す ★★★
         total_quantity=total_quantity,
         total_price=total_price,
         store_name=store['store_name'],
-        store_id=store_id, # ★★★ この一行を追加してください ★★★
+        store_id=store_id,
         u_name=session.get('u_name', 'ゲスト')
     )
+
 
 
 @users_order_bp.route('/payment_selection')
@@ -260,3 +264,60 @@ def back_to_home_and_clear_cart():
     
     # ユーザーのホーム画面にリダイレクト
     return redirect(url_for('users_home.home'))
+
+@users_order_bp.route('/update_cart_item', methods=['POST'])
+@login_required
+def update_cart_item():
+    """カート内の商品の数量を更新する"""
+    if 'current_store_id' not in session:
+        return redirect(url_for('users_home.home'))
+
+    try:
+        menu_id_str = request.form['menu_id']
+        # 数量が1未満の場合は削除として扱う
+        new_quantity = int(request.form['quantity'])
+    except (KeyError, ValueError):
+        flash("不正なリクエストです。")
+        return redirect(url_for('users_order.cart_confirmation'))
+
+    store_id_str = str(session['current_store_id'])
+    carts = session.get('carts', {})
+
+    if store_id_str in carts and menu_id_str in carts[store_id_str]:
+        if new_quantity > 0:
+            carts[store_id_str][menu_id_str]['quantity'] = new_quantity
+            flash("数量を更新しました。")
+        else:
+            # 数量が0以下の場合は商品を削除
+            del carts[store_id_str][menu_id_str]
+            flash("商品をカートから削除しました。")
+        
+        session['carts'] = carts
+        session.modified = True
+    
+    return redirect(url_for('users_order.cart_confirmation'))
+
+
+@users_order_bp.route('/delete_cart_item', methods=['POST'])
+@login_required
+def delete_cart_item():
+    """カートから商品を削除する"""
+    if 'current_store_id' not in session:
+        return redirect(url_for('users_home.home'))
+
+    try:
+        menu_id_str = request.form['menu_id']
+    except KeyError:
+        flash("不正なリクエストです。")
+        return redirect(url_for('users_order.cart_confirmation'))
+
+    store_id_str = str(session['current_store_id'])
+    carts = session.get('carts', {})
+
+    if store_id_str in carts and menu_id_str in carts[store_id_str]:
+        del carts[store_id_str][menu_id_str]
+        session['carts'] = carts
+        session.modified = True
+        flash("商品をカートから削除しました。")
+
+    return redirect(url_for('users_order.cart_confirmation'))
