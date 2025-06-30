@@ -2,6 +2,8 @@ document.addEventListener('DOMContentLoaded', function () {
     const mapElement = document.getElementById('map');
     const locationData = mapElement.getAttribute('data-locations');
     const locations = JSON.parse(locationData);
+    // ★ 変更点 1: HTMLからURLのひな形を取得
+    const menuUrlTemplate = mapElement.getAttribute('data-menu-url-template');
 
     const map = L.map('map').setView([35.6769, 139.7661], 10);
 
@@ -13,7 +15,9 @@ document.addEventListener('DOMContentLoaded', function () {
     const markers = [];
 
     locations.forEach(loc => {
-        const menuUrl = `/menu/${loc.id}`;
+        // ★ 変更点 2: ひな形から正しいURLを生成
+        // url_forで生成された /menu/0 の '0' の部分を実際のIDで置換
+        const menuUrl = menuUrlTemplate.replace('/0', '/' + loc.id);
 
         // ポップアップの内容（装飾と絵文字付き）
         const popupContent = `
@@ -43,7 +47,7 @@ document.addEventListener('DOMContentLoaded', function () {
             this.closePopup();
         });
 
-        // クリックでメニュー画面へ
+        // ★ 変更点 3: クリックで生成した正しいURLに遷移
         marker.on('click', function () {
             window.location.href = menuUrl;
         });
