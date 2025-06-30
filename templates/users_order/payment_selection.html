@@ -3,106 +3,425 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>お支払い方法の選択 - モバおる</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/users_order.css') }}">
+    <title>ケーキショップ</title>
     <style>
-        /* ここにPayPayモーダル用のCSSスタイルを追加 */
-        /* cake_shop/index.html からコピーしたスタイルをベースに、調整 */
-        .modal {
-            display: none; /* Hidden by default */
-            position: fixed; /* Stay in place */
-            z-index: 1000; /* Sit on top */
-            left: 0;
-            top: 0;
-            width: 100%; /* Full width */
-            height: 100%; /* Full height */
-            overflow: auto; /* Enable scroll if needed */
-            background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
-            display: flex; /* 中央寄せ用 */
-            justify-content: center; /* 中央寄せ用 */
-            align-items: center; /* 中央寄せ用 */
-        }
-        .modal-content {
-            background-color: #fefefe;
-            padding: 20px;
-            border: 1px solid #888;
-            width: 80%; /* Could be more or less, depending on screen size */
-            max-width: 500px;
-            border-radius: 10px;
-            position: relative;
-            text-align: center;
-        }
-        .close-button {
-            color: #aaa;
-            float: right;
-            font-size: 28px;
-            font-weight: bold;
-            position: absolute;
-            top: 10px;
-            right: 20px;
-            cursor: pointer;
-        }
-        .close-button:hover,
-        .close-button:focus {
-            color: black;
-            text-decoration: none;
-            cursor: pointer;
-        }
-        #payment-status-message {
-            margin-top: 15px;
-            font-weight: bold;
-            color: #3498db;
-        }
-        .status-completed {
-            color: #27ae60;
-        }
-        .status-failed {
-            color: #e74c3c;
-        }
-        .status-timeout {
-            color: #f39c12;
-        }
-        #deeplink-button {
-            background-color: #FFCD00; /* PayPay yellow */
-            color: #333;
-            border: none;
-            padding: 12px 20px;
-            border-radius: 8px;
-            font-size: 1.1em;
-            cursor: pointer;
-            font-weight: bold;
-            transition: background-color 0.3s;
-        }
-        #deeplink-button:hover {
-            background-color: #E6B800; /* Darker yellow on hover */
-        }
-        #qr-code-container img {
-            max-width: 200px;
-            height: auto;
-            margin: 20px auto;
-            border: 1px solid #ddd;
-        }
-        #qr-code-container p {
-            word-break: break-all;
-            font-size: 0.9em;
-            margin-top: 10px;
-        }
+/* General Body and Container Styles */
+body {
+    font-family: 'Arial', sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #f8f8f8; /* Light gray background */
+    color: #333;
+    line-height: 1.6;
+}
+
+.container {
+    max-width: 800px;
+    margin: 20px auto;
+    padding: 30px;
+    background: #fff;
+    border-radius: 10px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+/* Header Styles */
+.main-header {
+    background-color: #4CAF50; /* Green */
+    color: white;
+    padding: 15px 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+.store-name {
+    font-size: 1.5em;
+    font-weight: bold;
+}
+
+.user-info span {
+    font-size: 1em;
+    opacity: 0.9;
+}
+
+.sub-header {
+    background-color: #e0e0e0;
+    padding: 10px 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid #ccc;
+    font-size: 0.9em;
+}
+
+.sub-header p {
+    margin: 0;
+    font-weight: bold;
+    color: #555;
+}
+
+.sub-header a {
+    color: #007bff;
+    text-decoration: none;
+    padding: 5px 10px;
+    border-radius: 5px;
+    background-color: #f0f0f0;
+    transition: background-color 0.2s ease;
+}
+
+.sub-header a:hover {
+    background-color: #e2e6ea;
+}
+
+/* Store Info */
+.store-info {
+    text-align: center;
+    margin-bottom: 25px;
+    padding-bottom: 15px;
+    border-bottom: 1px dashed #eee;
+}
+
+.store-info .name {
+    font-size: 2em;
+    font-weight: bold;
+    color: #333;
+}
+
+/* Order Summary */
+.order-summary {
+    margin-bottom: 30px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 20px;
+    background-color: #fdfdfd;
+}
+
+.cart-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.cart-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 0;
+    border-bottom: 1px solid #eee;
+}
+
+.cart-item:last-child {
+    border-bottom: none;
+}
+
+.cart-item-details span {
+    font-size: 1.1em;
+    margin-right: 15px;
+}
+
+.cart-total {
+    text-align: right;
+    font-size: 1.6em;
+    font-weight: bold;
+    margin-top: 20px;
+    padding-top: 15px;
+    border-top: 2px solid #eee;
+    color: #e67e22; /* Orange for total */
+}
+
+/* Payment Actions */
+.payment-actions h3 {
+    text-align: center;
+    margin-bottom: 20px;
+    color: #555;
+    font-size: 1.8em;
+}
+
+form {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+form p {
+    font-size: 1.1em;
+    margin-bottom: 20px;
+}
+
+.btn {
+    display: inline-block;
+    padding: 12px 25px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 1.1em;
+    text-decoration: none;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+    text-align: center;
+}
+
+.btn-primary {
+    background-color: #007bff; /* Blue for primary action */
+    color: white;
+}
+
+.btn-primary:hover {
+    background-color: #0056b3;
+    transform: translateY(-2px);
+}
+
+.btn-secondary {
+    background-color: #6c757d; /* Gray for secondary action */
+    color: white;
+    margin-top: 15px;
+}
+
+.btn-secondary:hover {
+    background-color: #5a6268;
+    transform: translateY(-2px);
+}
+
+/* Under Header (Bottom Navigation) */
+.under-hedder {
+    background-color: #333;
+    color: white;
+    padding: 15px 20px;
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    position: fixed;
+    bottom: 0;
+    width: 100%;
+    box-shadow: 0 -2px 5px rgba(0,0,0,0.1);
+    z-index: 999; /* Ensure it stays on top */
+}
+
+.under-hedder a {
+    color: white;
+    text-decoration: none;
+    font-size: 1.1em;
+    padding: 8px 15px;
+    border-radius: 5px;
+    transition: background-color 0.2s ease;
+}
+
+.under-hedder a:hover {
+    background-color: #555;
+}
+
+
+/* Modal Styles - Keep these mostly as they were in the inline style,
+   but consolidate here for better management.
+   The `display: flex; justify-content: center; align-items: center;`
+   is crucial for centering the modal content. */
+.modal {
+    display: none; /* Controlled by JavaScript */
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background-color: rgba(0,0,0,0.6); /* Slightly darker overlay */
+    /* Flexbox for centering */
+    display: flex; /* Initially 'none', but will be set to 'flex' by JS */
+    justify-content: center;
+    align-items: center;
+}
+
+.modal-content {
+    background-color: #fefefe;
+    padding: 20px 30px; /* More padding */
+    border: 1px solid #888;
+    width: 90%; /* Adjust width for better mobile display */
+    max-width: 500px;
+    border-radius: 12px; /* Slightly more rounded corners */
+    position: relative;
+    text-align: center;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.3); /* Add subtle shadow */
+}
+
+.close-button {
+    color: #aaa;
+    position: absolute;
+    top: 10px;
+    right: 20px;
+    font-size: 30px; /* Slightly larger */
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.close-button:hover,
+.close-button:focus {
+    color: #333; /* Darker on hover */
+    text-decoration: none;
+}
+
+#payment-status-message {
+    margin-top: 20px; /* More space */
+    font-weight: bold;
+    font-size: 1.2em; /* Slightly larger text */
+    color: #3498db;
+}
+
+.status-completed {
+    color: #27ae60; /* Green */
+}
+.status-failed {
+    color: #e74c3c; /* Red */
+}
+.status-timeout {
+    color: #f39c12; /* Orange */
+}
+
+#deeplink-button {
+    background-color: #FFCD00; /* PayPay yellow */
+    color: #333;
+    border: none;
+    padding: 15px 25px; /* Larger padding */
+    border-radius: 8px;
+    font-size: 1.2em; /* Larger font */
+    cursor: pointer;
+    font-weight: bold;
+    transition: background-color 0.3s ease;
+    margin-top: 20px; /* Space from above elements */
+    width: auto; /* Allow button to size itself */
+    display: inline-block; /* Treat as block but allow horizontal alignment */
+}
+
+#deeplink-button:hover {
+    background-color: #E6B800; /* Darker yellow on hover */
+}
+
+#qr-code-container {
+    margin: 25px 0; /* Space above and below QR code */
+}
+
+#qr-code-container img {
+    max-width: 200px;
+    height: auto;
+    border: 1px solid #eee; /* Lighter border for image */
+    border-radius: 5px; /* Slightly rounded corners for QR image */
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1); /* Subtle shadow for QR */
+}
+
+#qr-code-container p {
+    word-break: break-all;
+    font-size: 0.9em;
+    margin-top: 15px; /* More space */
+    color: #666;
+}
+
+#qr-code-container p a {
+    color: #007bff;
+    text-decoration: underline;
+}
+
+#qr-instruction {
+    font-size: 1em;
+    color: #777;
+    margin-top: 15px;
+    line-height: 1.4;
+}
+
+/* Responsive Adjustments */
+@media (max-width: 768px) {
+    .container {
+        margin: 10px;
+        padding: 20px;
+    }
+
+    .main-header, .sub-header, .under-hedder {
+        padding: 10px 15px;
+    }
+
+    .store-name {
+        font-size: 1.3em;
+    }
+
+    .user-info span {
+        font-size: 0.9em;
+    }
+
+    .sub-header a {
+        padding: 3px 8px;
+    }
+
+    .store-info .name {
+        font-size: 1.6em;
+    }
+
+    .cart-item-details span {
+        font-size: 1em;
+    }
+
+    .cart-total {
+        font-size: 1.4em;
+    }
+
+    .btn {
+        padding: 10px 20px;
+        font-size: 1em;
+    }
+
+    .under-hedder a {
+        font-size: 0.95em;
+        padding: 6px 12px;
+    }
+
+    .modal-content {
+        padding: 15px;
+    }
+
+    #deeplink-button {
+        padding: 12px 20px;
+        font-size: 1.1em;
+    }
+}
+
+@media (max-width: 480px) {
+    .main-header {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    .user-info {
+        margin-top: 5px;
+    }
+    .sub-header {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    .sub-header a {
+        margin-top: 10px;
+        width: 100%;
+        text-align: center;
+    }
+    .cart-item {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    .cart-item-details {
+        width: 100%;
+        margin-bottom: 5px;
+    }
+    .cart-total {
+        text-align: center;
+    }
+    .btn {
+        width: 100%;
+        box-sizing: border-box;
+    }
+    .modal-content {
+        width: 95%;
+    }
+    #qr-code-container img {
+        max-width: 150px;
+    }
+}
     </style>
 </head>
 <body>
-
-    <header class="main-header">
-        <div class="store-name">モバおる - {{ store_name }}</div>
-        <div class="user-info">
-            <span>{{ u_name }}</span> {# username を u_name に修正 #}
-        </div>
-    </header>
-
-    <div class="sub-header">
-        <p>注文最終確認</p>
-        <a href="{{ url_for('users_order.back_to_home_and_clear_cart') }}">ホームに戻る</a>
-    </div>
-
     <main class="container">
         <div class="store-info">
             <span class="name">{{ store_name }}</span>
