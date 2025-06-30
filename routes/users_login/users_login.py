@@ -109,3 +109,33 @@ def re_enrollment():
             return render_template('users_login/re_enrollment.html')
 
     return render_template('users_login/re_enrollment.html')
+#登録されたメールアドレスならパスワード変更画面へ移動させる
+@users_login_bp.route('/password_input', methods=['GET', 'POST'])
+def password_input():
+    if request.method == 'POST':
+        email = request.form.get('email')
+
+        # 入力チェック
+        if not email:
+            flash("メールアドレスを入力してください", "error")
+            return render_template('users_login/password_input.html')
+
+        try:
+            conn = sqlite3.connect('app.db')
+            cursor = conn.cursor()
+            cursor.execute("SELECT u_name FROM users_table WHERE email = ?", (email,))
+            user = cursor.fetchone()
+            conn.close()
+
+            if user:
+                session['email'] = email  # セッションにメールアドレスを保存
+                flash("パスワード変更画面へ移動します。", "success")
+                return redirect(url_for('users_login.password_change'))
+            else:
+                flash("このメールアドレスは登録されていません", "error")
+                return render_template('users_login/password_input.html')
+
+        except Exception as ex:
+            logging.error(f"エラー発生: {ex}")  # ログにエラーを記録
+            flash("システムエラーが発生しました。後ほどお試しください。", "error")
+            return render_template('users_login/password_input.html')
