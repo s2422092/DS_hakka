@@ -206,6 +206,7 @@ def menu_check():
     return render_template('stores_detail/menu_check.html', menus=menus_data)
 
 
+
 @stores_detail_bp.route('/order-list')
 def order_list():
     store_id = session.get('store_id')
