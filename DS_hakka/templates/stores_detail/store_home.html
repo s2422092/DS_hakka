@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ストア管理 - ホーム</title>
+
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/stores_detail.css') }}">
+    
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <!-- ユーザー情報セッション -->
+        <header class="site-header">
+            <h1>{{ store_name }} - ホーム</h1>
+            <div class="header-links">
+                <div class="store-name">ログイン中: {{ store_name if store_name else 'ゲスト' }}</div>
+                <a href="{{ url_for('stores_detail.store_info') }}">ストア情報</a>
+                <a href="{{ url_for('general.explamation') }}">ログアウト</a>
+            </div>
+        </header>
+    <!-- ユーザー情報セッション -->
+
+    <nav class="main-nav">
+        <ul>
+            <li><a href="{{ url_for('stores_detail.store_home') }}" class="active">ホーム</a></li>
+            <li><a href="{{ url_for('stores_detail.menu_registration') }}">商品登録</a></li>
+            <li><a href="{{ url_for('stores_detail.order_list') }}">注文リスト</a></li>
+            <li><a href="{{ url_for('stores_detail.paypay_linking') }}">paypayの紐付け</a></li>
+            <li><a href="{{ url_for('stores_detail.procedure') }}">手順ページ</a></li>
+        </ul>
+    </nav>
+
+    <div class="sub-navigation">
+        <a href="{{ url_for('stores_detail.store_home') }}" class="shortcut-link">ストアホーム</a>
+        <a href="{{ url_for('stores_detail.store_home_menu') }}" class="shortcut-link">商品ページ</a>
+    </div>
+    
+
+    <main class="main-content">
+        <div class="stats-container">
+            <div class="stat-box">
+                <p>本日の売上</p>
+                <h2>{{ daily_sales | default('12,500') }} 円</h2>
+            </div>
+            <div class="stat-box">
+                <p>本日の注文数</p>
+                <h2>{{ daily_orders | default('35') }} 件</h2>
+            </div>
+            <div class="stat-box">
+                <p>今月の売上</p>
+                <h2>{{ monthly_sales | default('284,000') }} 円</h2>
+            </div>
+        </div>
+
+        <div class="chart-container">
+            <h3>週間売上レポート</h3>
+            <canvas id="salesChart"></canvas>
+        </div>
+    </main>
+
+  
+
+</body>
+</html>
