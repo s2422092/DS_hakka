@@ -179,9 +179,6 @@ def payment_selection():
         paypay_api_base_url=paypay_api_base_url
     )
 
-# --- 変更点１：create_order ルートの変更 ---
-# このルートは他の決済方法で利用する場合や、PayPay決済前に注文情報を保存する場合などに残す
-# PayPay決済後のリダイレクトはフロントエンドのJavaScriptに任せるため、flashとredirectは削除
 @users_order_bp.route('/create_order', methods=['POST'])
 @login_required
 def create_order():
@@ -366,6 +363,7 @@ def create_qr():
     
     try:
         resp = client.Code.create_qr_code(data=payment_details)
+        
         logger.info(f"QR code creation response from PayPay: {resp}")
 
         if resp.get('resultInfo', {}).get('code') == 'SUCCESS' and not resp.get('data', {}).get('url'):
@@ -423,11 +421,6 @@ def order_status(merch_id):
     else:
         return jsonify({"data": {"status": status}}), 200
     
-
-# routes/users_order/users_order.py
-
-# ... (前略) ...
-
 @users_order_bp.route('/finalize_paypay_order', methods=['POST'])
 @login_required
 def finalize_paypay_order():
@@ -461,7 +454,6 @@ def finalize_paypay_order():
             VALUES (?, ?, ?, ?, ?, ?)
         """, (user_id, store_id, 'completed', current_time, 'PayPay', total_price))
         
-        # ★ここです！ データベースに挿入された注文のIDを取得
         order_id = cursor.lastrowid
 
         order_items_data = [
@@ -481,7 +473,7 @@ def finalize_paypay_order():
             del session['carts'][str(store_id)]
             session.modified = True
             
-        # ★ここです！ 取得した注文IDをセッションに保存
+        # 取得した注文IDをセッションに保存
         session['last_order_id'] = order_id
         session.modified = True
 
@@ -495,17 +487,22 @@ def finalize_paypay_order():
     finally:
         conn.close()
 
-# ... (後略) ...
-
-
-# routes/users_order/users_order.py
-
-# ... (前略) ...
-
 @users_order_bp.route('/reservation_number')
 @login_required
 def reservation_number():
+    """予約（注文）番号表示ページ"""
+    # セッションからlast_order_idとpaypay_merchant_payment_idを取得し、同時に削除
+    order_id = session.pop('last_order_id', 'N/A') 
+    merchant_payment_id = session.pop('paypay_merchant_payment_id', 'N/A')
     
-    return render_template('users_order/reservation_number.html', )
-
-# ... (後略) ...
+    # どちらか一方でも情報がない場合は不正なアクセスとみなす
+    if order_id == 'N/A' and merchant_payment_id == 'N/A':
+        flash("不正なアクセスです。")
+        return redirect(url_for('users_home.home'))
+    
+    # reservation_number.html に order_id と merchant_payment_id を渡す
+    return render_template(
+        'users_order/reservation_number.html',
+        order_id=order_id,
+        merchant_payment_id=merchant_payment_id
+    )
