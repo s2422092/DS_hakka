@@ -14,7 +14,7 @@
             <div class="header-links">
                 <div class="store-name">ログイン中: {{ store_name if store_name else 'ゲスト' }}</div>
                 <a href="{{ url_for('stores_detail.store_info') }}">ストア情報</a>
-                <a href="{{ url_for('general.explamation') }}">ログアウト</a>
+                <a href="{{ url_for('general.logout') }}">ログアウト</a>
             </div>
         </header>
     <!-- ユーザー情報セッション -->
