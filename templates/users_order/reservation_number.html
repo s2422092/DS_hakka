@@ -28,16 +28,20 @@
         </a>
     </div>
 
-    <main class="container">
-        <div class="reservation-box">
-            <div class="number-title">予約番号</div>
-            <div class="reservation-number">123</div>
-            <div class="thank-you-message">〇〇さん予約ありがとうございます</div>
-            <div class="order-details">
-                ここを注文した商品情報を記述
-            </div>
+    <div class="container">
+        <h1>注文が確定しました！</h1>
+        <p class="reservation-number-text">あなたの予約番号は: <strong class="order-id">{{ order_id }}</strong> です。</p>
+        
+        {% if merchant_payment_id and merchant_payment_id != 'N/A' %}
+        <p class="paypay-id-text">PayPay取引ID: <strong class="merchant-id">{{ merchant_payment_id }}</strong></p>
+        {% endif %}
+
+        <p class="info-text">この番号を控えて、商品をお受け取りください。</p>
+        
+        <div class="button-group">
+            <a href="{{ url_for('users_home.home') }}" class="button primary-button">ホームに戻る</a>
         </div>
-    </main>
+    </div>
 
 </body>
 </html>
