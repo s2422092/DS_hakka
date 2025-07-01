@@ -448,7 +448,7 @@
                             if (qrLink) {
                                 qrLink.addEventListener('click', (e) => {
                                     e.preventDefault(); 
-                                    window.location.href = deeplinkButton.dataset.deeplink; 
+                                    window.location.href = '{{ url_for("users_order.reservation_number") }}'; // ★ここです！
                                     paymentStatusMessage.textContent = "PayPayアプリに移動しました。アプリで支払いを完了してください。";
                                 });
                             }
