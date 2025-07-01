@@ -366,21 +366,29 @@ def create_qr():
         
         logger.info(f"QR code creation response from PayPay: {resp}")
 
-        if resp.get('resultInfo', {}).get('code') == 'SUCCESS' and not resp.get('data', {}).get('url'):
-            logger.error(f"PayPay QR code creation succeeded but 'url' field is missing in data. Full response: {json.dumps(resp, indent=2)}")
+        # --- QRコードURLが含まれているか確認 ---
+        qr_url = resp.get('data', {}).get('url')
+        if resp.get('resultInfo', {}).get('code') != 'SUCCESS' or not qr_url:
+            logger.error(f"PayPay QR code creation failed or 'url' field missing. Full response: {json.dumps(resp, indent=2)}")
             return jsonify({"error": "QRコードURLが見つかりません。", "details": resp}), 500
 
         if _DEBUG:
             logger.info(f"DEBUG: PayPay OPAに送信された支払い詳細: {json.dumps(payment_details, indent=2)}")
         
-        # セッションに merchantPaymentId を保存して、ポーリングと注文確定に利用できるようにする
+        # セッションに merchantPaymentId を保存
         session['paypay_merchant_payment_id'] = merchant_payment_id
         session.modified = True
 
-        return jsonify(resp)
+        # --- フロントエンドに返却するJSON構造 ---
+        return jsonify({
+            "qr_url": qr_url,
+            "merchant_payment_id": merchant_payment_id
+        })
+        
     except Exception as e:
         logger.exception(f"QRコード作成エラー: {e}")
         return jsonify({"error": "QRコードの作成に失敗しました", "details": str(e)}), 500
+
 
 def fetch_payment_details(merchant_id):
     """指定されたマーチャントIDの支払い詳細をPayPayから取得するヘルパー関数"""
