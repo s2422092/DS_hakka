@@ -31,7 +31,7 @@ MERCHANT_ID = os.environ.get("MERCHANT_ID")
 # フロントエンドのJavaScriptがPayPay APIを叩くためのベースURLをここでも定義
 # Flaskアプリのメインポートと同じになるはずです（例: 5010）
 # 通常、`request.url_root` を使って動的に取得する方が柔軟ですが、固定IP/ポートならこれでOK
-FRONTEND_BASE_URL_FOR_API = os.environ.get("FLASK_APP_BASE_URL", default="http://127.0.0.1:5010")
+FRONTEND_BASE_URL_FOR_API = os.environ.get("FLASK_APP_BASE_URL", default="http://127.0.0.1:5003")
 
 
 # 必須環境変数のチェック (これは app.py で行ってください。ここでは省略可)
