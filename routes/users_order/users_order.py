@@ -246,84 +246,6 @@ def create_order():
     finally:
         conn.close()
 
-# --- 変更点２：finalize_paypay_order ルートの追加 ---
-@users_order_bp.route('/finalize_paypay_order', methods=['POST'])
-@login_required
-def finalize_paypay_order():
-    """
-    PayPay決済が完了したことを確認した後、注文をデータベースに保存し、
-    セッションに`last_order_id`を設定する。
-    フロントエンドのポーリングが'COMPLETED'を検出した際に呼び出される。
-    """
-    user_id = session.get('id')
-    store_id = session.get('current_store_id')
-    
-    if not user_id or not store_id:
-        logger.error("finalize_paypay_order: セッションにユーザーIDまたは店舗IDがありません。")
-        return jsonify({"error": "セッション情報が見つかりません。再ログインしてください。"}), 401
-
-    carts = session.get('carts', {})
-    current_cart = carts.get(str(store_id), {})
-
-    if not current_cart:
-        logger.error(f"finalize_paypay_order: 店舗ID {store_id} とユーザー {user_id} のカートが空です。")
-        return jsonify({"error": "カートが空です。"}), 400
-
-    total_price = sum(item['quantity'] * item['price'] for item in current_cart.values())
-
-    conn = get_db_connection()
-    cursor = conn.cursor()
-    try:
-        current_time = datetime.datetime.now()
-        cursor.execute("""
-            INSERT INTO orders (user_id, store_id, status, datetime, payment_method, total_amount)
-            VALUES (?, ?, ?, ?, ?, ?)
-        """, (user_id, store_id, 'completed', current_time, 'PayPay', total_price))
-        
-        order_id = cursor.lastrowid
-
-        order_items_data = [
-            (order_id, item['menu_id'], item['quantity'], item['price'])
-            for item in current_cart.values()
-        ]
-        
-        cursor.executemany("""
-            INSERT INTO order_items (order_id, menu_id, quantity, price_at_order)
-            VALUES (?, ?, ?, ?)
-        """, order_items_data)
-
-        conn.commit()
-
-        # 注文が完了したので、セッションから現在の店舗のカート情報を削除
-        if str(store_id) in session['carts']:
-            del session['carts'][str(store_id)]
-            session.modified = True
-            
-        # ここでlast_order_idを確実に設定する
-        session['last_order_id'] = order_id
-        session.modified = True
-
-        logger.info(f"ユーザー {user_id} の注文 {order_id} がPayPay経由で正常に確定されました。")
-        return jsonify({"message": "注文が確定されました。", "order_id": order_id}), 200
-
-    except sqlite3.Error as e:
-        conn.rollback()
-        logger.exception(f"ユーザー {user_id} の注文確定中にエラーが発生しました: {e}")
-        return jsonify({"error": f"注文処理中にエラーが発生しました: {e}"}), 500
-    finally:
-        conn.close()
-
-@users_order_bp.route('/reservation_number')
-@login_required
-def reservation_number():
-    """予約（注文）番号表示ページ"""
-    # ここは変更なし。last_order_idが正しく設定されていれば問題なく動作するはず。
-    order_id = session.pop('last_order_id', 'N/A') # 一度表示したらセッションから消す
-    if order_id == 'N/A':
-        flash("不正なアクセスです。")
-        return redirect(url_for('users_home.home'))
-    return render_template('users_order/reservation_number.html', order_id=order_id)
-
 @users_order_bp.route('/clear_cart')
 @login_required
 def clear_cart():
@@ -500,3 +422,90 @@ def order_status(merch_id):
         return jsonify({"data": {"status": "PENDING"}}), 200
     else:
         return jsonify({"data": {"status": status}}), 200
+    
+
+# routes/users_order/users_order.py
+
+# ... (前略) ...
+
+@users_order_bp.route('/finalize_paypay_order', methods=['POST'])
+@login_required
+def finalize_paypay_order():
+    """
+    PayPay決済が完了したことを確認した後、注文をデータベースに保存し、
+    セッションに`last_order_id`を設定する。
+    フロントエンドのポーリングが'COMPLETED'を検出した際に呼び出される。
+    """
+    user_id = session.get('id')
+    store_id = session.get('current_store_id')
+    
+    if not user_id or not store_id:
+        logger.error("finalize_paypay_order: セッションにユーザーIDまたは店舗IDがありません。")
+        return jsonify({"error": "セッション情報が見つかりません。再ログインしてください。"}), 401
+
+    carts = session.get('carts', {})
+    current_cart = carts.get(str(store_id), {})
+
+    if not current_cart:
+        logger.error(f"finalize_paypay_order: 店舗ID {store_id} とユーザー {user_id} のカートが空です。")
+        return jsonify({"error": "カートが空です。"}), 400
+
+    total_price = sum(item['quantity'] * item['price'] for item in current_cart.values())
+
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    try:
+        current_time = datetime.datetime.now()
+        cursor.execute("""
+            INSERT INTO orders (user_id, store_id, status, datetime, payment_method, total_amount)
+            VALUES (?, ?, ?, ?, ?, ?)
+        """, (user_id, store_id, 'completed', current_time, 'PayPay', total_price))
+        
+        # ★ここです！ データベースに挿入された注文のIDを取得
+        order_id = cursor.lastrowid
+
+        order_items_data = [
+            (order_id, item['menu_id'], item['quantity'], item['price'])
+            for item in current_cart.values()
+        ]
+        
+        cursor.executemany("""
+            INSERT INTO order_items (order_id, menu_id, quantity, price_at_order)
+            VALUES (?, ?, ?, ?)
+        """, order_items_data)
+
+        conn.commit()
+
+        # 注文が完了したので、セッションから現在の店舗のカート情報を削除
+        if str(store_id) in session['carts']:
+            del session['carts'][str(store_id)]
+            session.modified = True
+            
+        # ★ここです！ 取得した注文IDをセッションに保存
+        session['last_order_id'] = order_id
+        session.modified = True
+
+        logger.info(f"ユーザー {user_id} の注文 {order_id} がPayPay経由で正常に確定されました。")
+        return jsonify({"message": "注文が確定されました。", "order_id": order_id}), 200
+
+    except sqlite3.Error as e:
+        conn.rollback()
+        logger.exception(f"ユーザー {user_id} の注文確定中にエラーが発生しました: {e}")
+        return jsonify({"error": f"注文処理中にエラーが発生しました: {e}"}), 500
+    finally:
+        conn.close()
+
+# ... (後略) ...
+
+
+# routes/users_order/users_order.py
+
+# ... (前略) ...
+
+@users_order_bp.route('/reservation_number')
+@login_required
+def reservation_number():
+    
+    return render_template('users_order/reservation_number.html', )
+
+# ... (後略) ...
