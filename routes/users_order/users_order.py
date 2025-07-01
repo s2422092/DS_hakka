@@ -5,6 +5,49 @@ import sqlite3
 import datetime
 from functools import wraps
 
+# --- PayPay関連のインポート ---
+import paypayopa
+import polling
+import uuid
+import os
+import json
+import logging
+import time
+from dotenv import load_dotenv # .envから環境変数を読み込むため
+
+# --- .envファイルの読み込みとPayPay設定 ---
+load_dotenv() # ファイルの先頭、またはPayPay関連コードの直前で一度だけ呼び出す
+
+# ロギング設定 (既存のものがあればそのまま、なければここに追加)
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+logger = logging.getLogger(__name__)
+
+# 環境変数の取得と検証
+# ここは app.py に書かれていたものと同じでOKです。
+_DEBUG = os.environ.get("_DEBUG", "False").lower() == "true"
+API_KEY = os.environ.get("API_KEY")
+API_SECRET = os.environ.get("API_SECRET")
+MERCHANT_ID = os.environ.get("MERCHANT_ID")
+# フロントエンドのJavaScriptがPayPay APIを叩くためのベースURLをここでも定義
+# Flaskアプリのメインポートと同じになるはずです（例: 5010）
+# 通常、`request.url_root` を使って動的に取得する方が柔軟ですが、固定IP/ポートならこれでOK
+FRONTEND_BASE_URL_FOR_API = os.environ.get("FLASK_APP_BASE_URL", default="http://127.0.0.1:5003")
+
+
+# 必須環境変数のチェック (これは app.py で行ってください。ここでは省略可)
+# if not API_KEY:
+#     logger.error("環境変数 'API_KEY' が設定されていません。")
+#     raise ValueError("環境変数 'API_KEY' が設定されていません。")
+# ... (API_SECRET, MERCHANT_IDも同様)
+
+
+# PayPay OPA クライアントの初期化
+# このクライアントインスタンスは、`users_order_bp`が定義された後に来る必要があります。
+client = paypayopa.Client(
+    auth=(API_KEY, API_SECRET),
+    production_mode=False) # production_modeをFalseに設定し、サンドボックス環境を使用
+client.set_assume_merchant(MERCHANT_ID)
+
 # (Blueprint定義、get_db_connection, login_requiredデコレータは変更なし)
 users_order_bp = Blueprint('users_order', __name__, url_prefix='/users_order')
 
@@ -144,12 +187,17 @@ def payment_selection():
     store = conn.execute("SELECT store_name FROM store WHERE store_id = ?", (store_id,)).fetchone()
     conn.close()
 
+    # BlueprintのURLプレフィックスとPayPay APIのベースURLを結合して渡す
+    # 例: http://127.0.0.1:5010/users_order
+    paypay_api_base_url = f"{FRONTEND_BASE_URL_FOR_API}{users_order_bp.url_prefix}/paypay"
+
     return render_template(
         'users_order/payment_selection.html',
         cart=list(current_cart.values()),
         total_price=total_price,
         store_name=store['store_name'],
-        u_name=session.get('u_name', 'ゲスト')
+        u_name=session.get('u_name', 'ゲスト'),
+        paypay_api_base_url=paypay_api_base_url
     )
 
 @users_order_bp.route('/create_order', methods=['POST'])
@@ -322,128 +370,103 @@ def delete_cart_item():
 
     return redirect(url_for('users_order.cart_confirmation'))
 
+# --- PayPay関連のAPIエンドポイントをusers_order_bpに追加 ---
 
-import uuid
-import requests
-import time
-import hashlib
-import hmac
-import base64
-import json
+@users_order_bp.route('/paypay/create-qr', methods=['POST'])
+def create_qr():
+    """PayPayのQRコード支払いを生成するエンドポイント (Blueprint内)"""
+    req = request.json
+    logger.info(f"Received create-qr request at /users_order/paypay/create-qr: {req}")
 
-# あなたのテストキーを使用
-TEST_API_KEY = "a_Al3djIsQo4_fd3q"
-TEST_API_SECRET = "iAclVPnwJm1W9ZNVnqycTXtJzcqStIew9P1g0RW508c="
-TEST_MERCHANT_ID = "933772843478294528"
+    merchant_payment_id = uuid.uuid4().hex
 
-@users_order_bp.route('/paypay_confirm')
-@login_required
-def paypay_confirm():
-    merchant_payment_id = request.args.get("merchantPaymentId")
-    if not merchant_payment_id:
-        flash("決済IDがありません")
-        return redirect(url_for('users_home.home'))
+    converted_order_items = []
+    for item in req["orderItems"]:
+        # ここでは 'price' が直接渡されることを想定
+        converted_order_items.append({
+            "name": item["name"],
+            "quantity": item["quantity"],
+            "unitPrice": {
+                "amount": item["price"], # 'price' をそのまま使用
+                "currency": "JPY"
+            }
+        })
 
-    url_path = f"/v2/payments/{merchant_payment_id}"
-    full_url = "https://stg-api.paypay.ne.jp" + url_path
-
-    nonce = str(int(time.time()))
-    data_to_sign = f"{nonce}{url_path}"
-    hmac_digest = hmac.new(
-        TEST_API_SECRET.encode(),
-        msg=data_to_sign.encode(),
-        digestmod=hashlib.sha256
-    ).digest()
-    signature = base64.b64encode(hmac_digest).decode()
-
-    headers = {
-        "X-Api-Key": TEST_API_KEY,
-        "X-Request-ID": str(uuid.uuid4()),
-        "X-Requested-With": TEST_API_KEY,
-        "X-Assume-Merchant": TEST_MERCHANT_ID,
-        "X-Authorization": signature,
-        "X-Timestamp": nonce,
-    }
-
-    response = requests.get(full_url, headers=headers)
-    if response.status_code == 200:
-        result = response.json()
-        status = result['data']['status']
-        if status == "COMPLETED":
-            flash("決済が完了しました。")
-        else:
-            flash(f"決済ステータス: {status}")
-    else:
-        flash("決済確認に失敗しました。")
-
-    return redirect(url_for('users_order.reservation_number'))
-
-@users_order_bp.route('/paypay_create_payment', methods=['POST'])
-@login_required
-def paypay_create_payment():
-    if 'current_store_id' not in session:
-        return redirect(url_for('users_home.home'))
-
-    store_id = session['current_store_id']
-    carts = session.get('carts', {})
-    current_cart = carts.get(str(store_id), {})
-    total_price = sum(item['price'] * item['quantity'] for item in current_cart.values())
-
-    if total_price <= 0:
-        flash("金額が0円のため、PayPay決済は行えません。")
-        return redirect(url_for('users_order.payment_selection'))
-
-    url_path = "/v2/payments"
-    full_url = "https://stg-api.paypay.ne.jp" + url_path
-    merchant_payment_id = str(uuid.uuid4())
-
-    payload = {
+    payment_details = {
         "merchantPaymentId": merchant_payment_id,
-        "amount": {
-            "amount": total_price,
-            "currency": "JPY"
-        },
         "codeType": "ORDER_QR",
-        "orderDescription": "モバおるのご注文",
-        "isAuthorization": False,
-        "redirectUrl": url_for('users_order.paypay_confirm', _external=True, merchantPaymentId=merchant_payment_id),
-        "redirectType": "WEB_LINK"
+        "orderItems": converted_order_items,
+        "amount": req["amount"],
+        # redirectUrlは、PayPayが決済後にリダイレクトするURL。
+        # 今回はポーリングでステータスを確認するため、ここでは予約番号表示ページに設定。
+        "redirectUrl": url_for('users_order.reservation_number', _external=True),
+        "redirectType": "WEB_LINK",
     }
-    body_str = json.dumps(payload, separators=(',', ':'), ensure_ascii=False)
+    
+    try:
+        resp = client.Code.create_qr_code(data=payment_details)
+        logger.info(f"QR code creation response from PayPay: {resp}")
 
-    # 署名の生成
-    nonce = str(int(time.time()))
-    data_to_sign = f"{nonce}{url_path}{body_str}"
-    hmac_digest = hmac.new(
-        TEST_API_SECRET.encode('utf-8'),
-        msg=data_to_sign.encode('utf-8'),
-        digestmod=hashlib.sha256
-    ).digest()
-    signature = base64.b64encode(hmac_digest).decode()
+        if resp.get('resultInfo', {}).get('code') == 'SUCCESS' and not resp.get('data', {}).get('url'):
+            logger.error(f"PayPay QR code creation succeeded but 'url' field is missing in data. Full response: {json.dumps(resp, indent=2)}")
+            return jsonify({"error": "QR code URL missing despite successful creation", "details": resp}), 500
 
-    headers = {
-        "Content-Type": "application/json",
-        "X-Api-Key": TEST_API_KEY,
-        "X-Request-ID": merchant_payment_id,
-        "X-Requested-With": TEST_API_KEY,
-        "X-Timestamp": nonce,
-        "Authorization": signature
-    }
+        if _DEBUG:
+            logger.info(f"DEBUG: Payment details sent to PayPay OPA: {json.dumps(payment_details, indent=2)}")
+        
+        # セッションに merchantPaymentId を保存して、create_order に引き継げるようにする
+        session['paypay_merchant_payment_id'] = merchant_payment_id
+        session.modified = True
 
-    # --- デバッグログ ---
-    print("送信先:", full_url)
-    print("送信ヘッダー:", headers)
-    print("署名対象文字列:", data_to_sign)
-    print("送信ボディ:", body_str)
+        return jsonify(resp)
+    except Exception as e:
+        logger.exception(f"Error creating QR code: {e}")
+        return jsonify({"error": "Failed to create QR code", "details": str(e)}), 500
 
-    response = requests.post(full_url, headers=headers, data=body_str.encode('utf-8'))
+def fetch_payment_details(merchant_id):
+    """指定されたマーチャントIDの支払い詳細をPayPayから取得するヘルパー関数"""
+    try:
+        resp = client.Code.get_payment_details(merchant_id)
+        logger.debug(f"Fetched payment details for {merchant_id}: {resp}")
 
-    if response.status_code == 201:
-        data = response.json()
-        qr_url = data['data']['url']
-        return redirect(qr_url)
+        if resp.get('resultInfo', {}).get('code') == 'RATE_LIMIT':
+            logger.warning(f"RATE_LIMIT error for {merchant_id}. Will retry. Link: {resp.get('resultInfo', {}).get('link')}")
+            return 'RATE_LIMIT_ERROR'
+        
+        if resp.get('data') is None:
+            error_code = resp.get('resultInfo', {}).get('code')
+            error_message = resp.get('resultInfo', {}).get('message')
+            if error_code:
+                logger.warning(f"PayPay API returned error for {merchant_id}: {error_code} - {error_message}. Assuming pending or temporary issue.")
+            else:
+                logger.warning(f"Payment details for {merchant_id} returned 'None' data. Assuming pending or not found.")
+            return 'PENDING_NO_DATA'
+            
+        return resp['data']['status']
+    except Exception as e:
+        logger.exception(f"Error fetching payment details for {merchant_id}: {e}")
+        return 'FETCH_ERROR'
+
+@users_order_bp.route('/paypay/order-status/<merch_id>', methods=['GET']) # OPTIONSは不要、GETのみ
+def order_status(merch_id):
+    """
+    指定されたマーチャントIDの支払いステータスをポーリングし、結果を返すエンドポイント。
+    支払いが完了(COMPLETED)または失敗(FAILED)するまで待機します。
+    """
+    logger.info(f"Checking order status for merchant ID: {merch_id} at /users_order/paypay/order-status")
+    
+    # ポーリングはフロントエンドからリクエストがあった時に一度だけ実行
+    # pollingライブラリはサーバーサイドで待機するので、
+    # 実際にはフロントエンドからのGETリクエストごとに `fetch_payment_details` を呼ぶべき
+    # ここではポーリング自体をバックエンドで完結させるのではなく、
+    # フロントエンドからの各リクエストで現在のステータスを返すように修正
+
+    status = fetch_payment_details(merch_id)
+    if status == 'FETCH_ERROR':
+        return jsonify({"error": "Failed to fetch payment details.", "status": "FAILED"}), 500
+    elif status == 'RATE_LIMIT_ERROR' or status == 'PENDING_NO_DATA':
+        # これらはまだ待機が必要な状態としてフロントエンドに伝える
+        return jsonify({"data": {"status": "PENDING"}}), 200 # またはより具体的なステータス
     else:
-        error = response.json()
-        flash("PayPay決済の作成に失敗しました。")
-        print("PayPay API エラー:", error)
-        return redirect(url_for('users_order.payment_selection'))
+        # COMPLETED, FAILED などPayPayから返された実際のステータスを返す
+        return jsonify({"data": {"status": status}}), 200
