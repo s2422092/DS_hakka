@@ -141,6 +141,8 @@ body {
     font-size: 1.4em;
 }
 
+
+/* =============================================== */
 /* --- 商品登録ページ --- */
 .template-download-area {
     display: flex;
@@ -195,6 +197,7 @@ body {
 .confirm-button:hover { background-color: #0056b3; }
 
 
+/* =============================================== */
 /* --- 確認ページ --- */
 .sub-nav {
     background-color: #708090;
@@ -259,28 +262,60 @@ body {
 .data-display-list .value { color: #555; word-break: break-all; }
 
 
+/* =============================================== */
 /* --- 注文リストページ --- */
 .order-list-container {
     display: flex;
     flex-direction: column;
     gap: 20px;
 }
+
 .order-item {
     background-color: #f8f9fa;
     border: 1px solid #e0e0e0;
     border-radius: 25px;
-    padding: 25px 30px;
+    padding: 20px; /* 少しパディングを調整 */
     box-shadow: 0 2px 8px rgba(0,0,0,0.06);
     display: flex;
-    justify-content: space-around;
+    justify-content: space-between; /* space-aroundから変更 */
     align-items: center;
+    text-align: center; /* 全体を中央揃えに */
 }
-.order-item span {
+
+.order-header {
+    background-color: #e9ecef;
+    font-weight: bold;
+}
+
+.order-item span, .order-item div {
     font-size: 1.1em;
     color: #555;
     font-weight: 500;
+    padding: 0 10px; /* 左右の余白 */
 }
 
+.col-id { flex-basis: 5%; }
+.col-items {
+    flex-basis: 35%;
+    text-align: left; /* 商品リストは左揃えに */
+}
+.col-name { flex-basis: 10%; }
+.col-amount { flex-basis: 10%; }
+.col-status { flex-basis: 10%; }
+.col-time { flex-basis: 20%; }
+
+.col-items ul {
+    margin: 0;
+    padding: 0;
+    list-style-type: none; /* リストの点を非表示に */
+}
+
+.no-orders {
+    justify-content: center;
+}
+
+
+/* =============================================== */
 /* --- 手順ページ --- */
 .instructions-content {
     text-align: left;
@@ -306,6 +341,7 @@ body {
     color: #333;
 }
 
+/* =============================================== */
 /* サブナビゲーション（ホーム＆登録ページのリンク） */
 .sub-navigation {
     display: flex;

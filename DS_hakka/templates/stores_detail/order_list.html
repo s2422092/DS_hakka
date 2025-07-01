@@ -7,17 +7,14 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='css/stores_detail.css') }}">
 </head>
 <body>
-    <!-- ユーザー情報セッション -->
-        <header class="site-header">
-            <h1>{{ store_name }} - 注文リスト</h1>
-            <div class="header-links">
-                <div class="store-name">ログイン中: {{ store_name if store_name else 'ゲスト' }}</div>
-                <a href="{{ url_for('stores_detail.store_info') }}">ストア情報</a>
-                <a href="{{ url_for('general.explamation') }}">ログアウト</a>
-            </div>
-        </header>
-    <!-- ユーザー情報セッション -->
-
+    <header class="site-header">
+        <h1>{{ store_name }} - 注文リスト</h1>
+        <div class="header-links">
+            <div class="store-name">ログイン中: {{ store_name if store_name else 'ゲスト' }}</div>
+            <a href="{{ url_for('stores_detail.store_info') }}">ストア情報</a>
+            <a href="{{ url_for('general.explamation') }}">ログアウト</a>
+        </div>
+    </header>
     <nav class="main-nav">
         <ul>
             <li><a href="{{ url_for('stores_detail.store_home') }}" >ホーム</a></li>
@@ -31,27 +28,28 @@
     <main class="main-content">
         <div class="order-list-container">
             <div class="order-item order-header">
-                <span>注文ID</span>
-                <span>注文商品 (数量)</span>
-                <span>注文者名</span>
-                <span>合計金額</span>
-                <span>注文状況</span>
-                <span>注文時間</span>
+                <span class="col-id">注文ID</span>
+                <span class="col-items">注文商品 (数量)</span>
+                <span class="col-name">注文者名</span>
+                <span class="col-amount">合計金額</span>
+                <span class="col-status">注文状況</span>
+                <span class="col-time">注文時間</span>
             </div>
 
             {% for order in orders %}
             <div class="order-item">
-                <span>{{ order.id }}</span>
-                <td>
+                <span class="col-id">{{ order.id }}</span>
+                <div class="col-items">
                     <ul>
-                    {% for item in order.items_list %}  <li>{{ item.name }} ({{ item.quantity }}個)</li>
+                    {% for item in order.items_list %}
+                        <li>{{ item.name }} ({{ item.quantity }}個)</li>
                     {% endfor %}
                     </ul>
-                </td>
-                <span>{{ order.user_name }}</span>
-                <span>{{ order.total_amount }}円</span>
-                <span>{{ order.status }}</span>
-                <span>{{ order.datetime }}</span>
+                </div>
+                <span class="col-name">{{ order.user_name }}</span>
+                <span class="col-amount">{{ order.total_amount }}円</span>
+                <span class="col-status">{{ order.status }}</span>
+                <span class="col-time">{{ order.datetime }}</span>
             </div>
             {% else %}
             <div class="order-item no-orders">
