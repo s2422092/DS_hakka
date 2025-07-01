@@ -23,32 +23,18 @@ logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(
 logger = logging.getLogger(__name__)
 
 # 環境変数の取得と検証
-# ここは app.py に書かれていたものと同じでOKです。
 _DEBUG = os.environ.get("_DEBUG", "False").lower() == "true"
 API_KEY = os.environ.get("API_KEY")
 API_SECRET = os.environ.get("API_SECRET")
 MERCHANT_ID = os.environ.get("MERCHANT_ID")
-# フロントエンドのJavaScriptがPayPay APIを叩くためのベースURLをここでも定義
-# Flaskアプリのメインポートと同じになるはずです（例: 5010）
-# 通常、`request.url_root` を使って動的に取得する方が柔軟ですが、固定IP/ポートならこれでOK
 FRONTEND_BASE_URL_FOR_API = os.environ.get("FLASK_APP_BASE_URL", default="http://127.0.0.1:5003")
 
-
-# 必須環境変数のチェック (これは app.py で行ってください。ここでは省略可)
-# if not API_KEY:
-#     logger.error("環境変数 'API_KEY' が設定されていません。")
-#     raise ValueError("環境変数 'API_KEY' が設定されていません。")
-# ... (API_SECRET, MERCHANT_IDも同様)
-
-
 # PayPay OPA クライアントの初期化
-# このクライアントインスタンスは、`users_order_bp`が定義された後に来る必要があります。
 client = paypayopa.Client(
     auth=(API_KEY, API_SECRET),
     production_mode=False) # production_modeをFalseに設定し、サンドボックス環境を使用
 client.set_assume_merchant(MERCHANT_ID)
 
-# (Blueprint定義、get_db_connection, login_requiredデコレータは変更なし)
 users_order_bp = Blueprint('users_order', __name__, url_prefix='/users_order')
 
 def get_db_connection():
@@ -74,7 +60,6 @@ def menu(store_id):
     session['current_store_id'] = store_id
     
     conn = get_db_connection()
-    # storeオブジェクト全体を取得するよう修正
     store = conn.execute("SELECT * FROM store WHERE store_id = ?", (store_id,)).fetchone()
     if store is None:
         flash("指定された店舗は存在しません。")
@@ -99,9 +84,6 @@ def menu(store_id):
         categories=categories
     )
 
-
-# add_to_cartから下の関数は、前回提示した完成版のままでOKです。
-# 念のため、以下に全コードを記載しておきます。
 @users_order_bp.route('/add_to_cart', methods=['POST'])
 @login_required
 def add_to_cart():
@@ -142,7 +124,7 @@ def cart_confirmation():
         return redirect(url_for('users_home.home'))
     store_id = session['current_store_id']
     carts = session.get('carts', {})
-    current_cart = carts.get(str(store_id), {}) # ★★★ 変更点：辞書のまま保持 ★★★
+    current_cart = carts.get(str(store_id), {})
 
     total_quantity = sum(item['quantity'] for item in current_cart.values())
     total_price = sum(item['quantity'] * item['price'] for item in current_cart.values())
@@ -155,15 +137,13 @@ def cart_confirmation():
         
     return render_template(
         'users_order/cart_confirmation.html',
-        cart=current_cart, # ★★★ 変更点：辞書のままテンプレートに渡す ★★★
+        cart=current_cart,
         total_quantity=total_quantity,
         total_price=total_price,
         store_name=store['store_name'],
         store_id=store_id,
         u_name=session.get('u_name', 'ゲスト')
     )
-
-
 
 @users_order_bp.route('/payment_selection')
 @login_required
@@ -188,24 +168,30 @@ def payment_selection():
     conn.close()
 
     # BlueprintのURLプレフィックスとPayPay APIのベースURLを結合して渡す
-    # 例: http://127.0.0.1:5010/users_order
     paypay_api_base_url = f"{FRONTEND_BASE_URL_FOR_API}{users_order_bp.url_prefix}/paypay"
 
     return render_template(
         'users_order/payment_selection.html',
-        cart=list(current_cart.values()),
+        cart=list(current_cart.values()), # JavaScriptで扱いやすいようにリストに変換して渡す
         total_price=total_price,
         store_name=store['store_name'],
         u_name=session.get('u_name', 'ゲスト'),
         paypay_api_base_url=paypay_api_base_url
     )
 
+# --- 変更点１：create_order ルートの変更 ---
+# このルートは他の決済方法で利用する場合や、PayPay決済前に注文情報を保存する場合などに残す
+# PayPay決済後のリダイレクトはフロントエンドのJavaScriptに任せるため、flashとredirectは削除
 @users_order_bp.route('/create_order', methods=['POST'])
 @login_required
 def create_order():
-    """注文をデータベースに保存する"""
+    """
+    注文をデータベースに保存する（PayPayとは独立した汎用的な注文作成ルート）。
+    このルートをPayPay決済の完了後に利用する場合は、
+    決済ステータスの確認後にJavaScriptから呼び出すようにしてください。
+    """
     if 'current_store_id' not in session:
-        return redirect(url_for('users_home.home'))
+        return jsonify({"error": "店舗が選択されていません。"}), 400
 
     user_id = session['id']
     store_id = session['current_store_id']
@@ -213,7 +199,75 @@ def create_order():
     current_cart = carts.get(str(store_id), {})
 
     if not current_cart:
-        return redirect(url_for('users_order.menu', store_id=store_id))
+        return jsonify({"error": "カートが空です。"}), 400
+
+    total_price = sum(item['quantity'] * item['price'] for item in current_cart.values())
+
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    try:
+        current_time = datetime.datetime.now()
+        cursor.execute("""
+            INSERT INTO orders (user_id, store_id, status, datetime, payment_method, total_amount)
+            VALUES (?, ?, ?, ?, ?, ?)
+        """, (user_id, store_id, 'pending', current_time, 'Unknown', total_price)) # ステータスと決済方法を汎用的に
+        
+        order_id = cursor.lastrowid
+
+        order_items_data = [
+            (order_id, item['menu_id'], item['quantity'], item['price'])
+            for item in current_cart.values()
+        ]
+        
+        cursor.executemany("""
+            INSERT INTO order_items (order_id, menu_id, quantity, price_at_order)
+            VALUES (?, ?, ?, ?)
+        """, order_items_data)
+
+        conn.commit()
+
+        # ここで`last_order_id`を設定するのは、このルートを直接呼ぶ場合のため。
+        # PayPay決済の場合は後述の`finalize_paypay_order`で設定します。
+        session['last_order_id'] = order_id
+        session.modified = True
+        
+        # 注文が完了したので、セッションから現在の店舗のカート情報を削除
+        if str(store_id) in session['carts']:
+            del session['carts'][str(store_id)]
+            session.modified = True
+            
+        logger.info(f"汎用注文 {order_id} が作成されました。")
+        return jsonify({"message": "注文が作成されました。", "order_id": order_id}), 200
+
+    except sqlite3.Error as e:
+        conn.rollback()
+        logger.exception(f"汎用注文作成中にエラーが発生しました: {e}")
+        return jsonify({"error": f"注文処理中にエラーが発生しました: {e}"}), 500
+    finally:
+        conn.close()
+
+# --- 変更点２：finalize_paypay_order ルートの追加 ---
+@users_order_bp.route('/finalize_paypay_order', methods=['POST'])
+@login_required
+def finalize_paypay_order():
+    """
+    PayPay決済が完了したことを確認した後、注文をデータベースに保存し、
+    セッションに`last_order_id`を設定する。
+    フロントエンドのポーリングが'COMPLETED'を検出した際に呼び出される。
+    """
+    user_id = session.get('id')
+    store_id = session.get('current_store_id')
+    
+    if not user_id or not store_id:
+        logger.error("finalize_paypay_order: セッションにユーザーIDまたは店舗IDがありません。")
+        return jsonify({"error": "セッション情報が見つかりません。再ログインしてください。"}), 401
+
+    carts = session.get('carts', {})
+    current_cart = carts.get(str(store_id), {})
+
+    if not current_cart:
+        logger.error(f"finalize_paypay_order: 店舗ID {store_id} とユーザー {user_id} のカートが空です。")
+        return jsonify({"error": "カートが空です。"}), 400
 
     total_price = sum(item['quantity'] * item['price'] for item in current_cart.values())
 
@@ -233,7 +287,6 @@ def create_order():
             for item in current_cart.values()
         ]
         
-        # order_itemsテーブルのprice_at_orderカラムに合わせて修正
         cursor.executemany("""
             INSERT INTO order_items (order_id, menu_id, quantity, price_at_order)
             VALUES (?, ?, ?, ?)
@@ -241,21 +294,22 @@ def create_order():
 
         conn.commit()
 
+        # 注文が完了したので、セッションから現在の店舗のカート情報を削除
         if str(store_id) in session['carts']:
             del session['carts'][str(store_id)]
             session.modified = True
             
+        # ここでlast_order_idを確実に設定する
         session['last_order_id'] = order_id
-        
-        # ここで実際にPayPay APIを呼び出す処理が入ります
-        # 今回は成功したと仮定して、予約番号表示ページへリダイレクト
-        flash("注文が完了しました。")
-        return redirect(url_for('users_order.reservation_number'))
+        session.modified = True
+
+        logger.info(f"ユーザー {user_id} の注文 {order_id} がPayPay経由で正常に確定されました。")
+        return jsonify({"message": "注文が確定されました。", "order_id": order_id}), 200
 
     except sqlite3.Error as e:
         conn.rollback()
-        flash(f"注文処理中にエラーが発生しました: {e}")
-        return redirect(url_for('users_order.cart_confirmation'))
+        logger.exception(f"ユーザー {user_id} の注文確定中にエラーが発生しました: {e}")
+        return jsonify({"error": f"注文処理中にエラーが発生しました: {e}"}), 500
     finally:
         conn.close()
 
@@ -263,6 +317,7 @@ def create_order():
 @login_required
 def reservation_number():
     """予約（注文）番号表示ページ"""
+    # ここは変更なし。last_order_idが正しく設定されていれば問題なく動作するはず。
     order_id = session.pop('last_order_id', 'N/A') # 一度表示したらセッションから消す
     if order_id == 'N/A':
         flash("不正なアクセスです。")
@@ -273,22 +328,17 @@ def reservation_number():
 @login_required
 def clear_cart():
     """現在選択中の店舗のカートを空にする"""
-    # セッションに店舗IDとカート情報があるか確認
     if 'current_store_id' in session and 'carts' in session:
         store_id_str = str(session['current_store_id'])
         
-        # 現在の店舗のカートが存在すれば削除
         if store_id_str in session['carts']:
             del session['carts'][store_id_str]
-            session.modified = True # セッションの変更をFlaskに通知
+            session.modified = True
             flash('現在のカートを空にしました。')
     
-    # 処理が終わったら、今いるお店のメニューページにリダイレクトして戻る
-    # もしカート確認ページから呼ばれた場合も、一旦メニューに戻すのがシンプル
     if 'current_store_id' in session:
         return redirect(url_for('users_order.menu', store_id=session['current_store_id']))
     else:
-        # 万が一店舗IDがセッションになければホームへ
         return redirect(url_for('users_home.home'))
     
 @users_order_bp.route('/back_to_home')
@@ -297,20 +347,15 @@ def back_to_home_and_clear_cart():
     """
     現在の店舗のカート情報をクリアし、ホーム画面に戻るためのルート
     """
-    # セッションに現在見ている店舗IDがあるか確認
     if 'current_store_id' in session:
         store_id_str = str(session['current_store_id'])
         
-        # 全体のカート情報（carts）があるか確認
         if 'carts' in session and store_id_str in session['carts']:
-            # 現在の店舗のカート情報だけを削除
             del session['carts'][store_id_str]
-            session.modified = True # セッションの変更をFlaskに通知
+            session.modified = True
     
-    # current_store_idもセッションから削除して、完全に店舗選択から抜ける
     session.pop('current_store_id', None)
     
-    # ユーザーのホーム画面にリダイレクト
     return redirect(url_for('users_home.home'))
 
 @users_order_bp.route('/update_cart_item', methods=['POST'])
@@ -322,7 +367,6 @@ def update_cart_item():
 
     try:
         menu_id_str = request.form['menu_id']
-        # 数量が1未満の場合は削除として扱う
         new_quantity = int(request.form['quantity'])
     except (KeyError, ValueError):
         flash("不正なリクエストです。")
@@ -336,7 +380,6 @@ def update_cart_item():
             carts[store_id_str][menu_id_str]['quantity'] = new_quantity
             flash("数量を更新しました。")
         else:
-            # 数量が0以下の場合は商品を削除
             del carts[store_id_str][menu_id_str]
             flash("商品をカートから削除しました。")
         
@@ -344,7 +387,6 @@ def update_cart_item():
         session.modified = True
     
     return redirect(url_for('users_order.cart_confirmation'))
-
 
 @users_order_bp.route('/delete_cart_item', methods=['POST'])
 @login_required
@@ -370,11 +412,11 @@ def delete_cart_item():
 
     return redirect(url_for('users_order.cart_confirmation'))
 
-# --- PayPay関連のAPIエンドポイントをusers_order_bpに追加 ---
+# --- PayPay関連のAPIエンドポイント ---
 
 @users_order_bp.route('/paypay/create-qr', methods=['POST'])
 def create_qr():
-    """PayPayのQRコード支払いを生成するエンドポイント (Blueprint内)"""
+    """PayPayのQRコード支払いを生成するエンドポイント"""
     req = request.json
     logger.info(f"Received create-qr request at /users_order/paypay/create-qr: {req}")
 
@@ -382,12 +424,11 @@ def create_qr():
 
     converted_order_items = []
     for item in req["orderItems"]:
-        # ここでは 'price' が直接渡されることを想定
         converted_order_items.append({
             "name": item["name"],
             "quantity": item["quantity"],
             "unitPrice": {
-                "amount": item["price"], # 'price' をそのまま使用
+                "amount": item["price"],
                 "currency": "JPY"
             }
         })
@@ -397,8 +438,6 @@ def create_qr():
         "codeType": "ORDER_QR",
         "orderItems": converted_order_items,
         "amount": req["amount"],
-        # redirectUrlは、PayPayが決済後にリダイレクトするURL。
-        # 今回はポーリングでステータスを確認するため、ここでは予約番号表示ページに設定。
         "redirectUrl": url_for('users_order.reservation_number', _external=True),
         "redirectType": "WEB_LINK",
     }
@@ -409,19 +448,19 @@ def create_qr():
 
         if resp.get('resultInfo', {}).get('code') == 'SUCCESS' and not resp.get('data', {}).get('url'):
             logger.error(f"PayPay QR code creation succeeded but 'url' field is missing in data. Full response: {json.dumps(resp, indent=2)}")
-            return jsonify({"error": "QR code URL missing despite successful creation", "details": resp}), 500
+            return jsonify({"error": "QRコードURLが見つかりません。", "details": resp}), 500
 
         if _DEBUG:
-            logger.info(f"DEBUG: Payment details sent to PayPay OPA: {json.dumps(payment_details, indent=2)}")
+            logger.info(f"DEBUG: PayPay OPAに送信された支払い詳細: {json.dumps(payment_details, indent=2)}")
         
-        # セッションに merchantPaymentId を保存して、create_order に引き継げるようにする
+        # セッションに merchantPaymentId を保存して、ポーリングと注文確定に利用できるようにする
         session['paypay_merchant_payment_id'] = merchant_payment_id
         session.modified = True
 
         return jsonify(resp)
     except Exception as e:
-        logger.exception(f"Error creating QR code: {e}")
-        return jsonify({"error": "Failed to create QR code", "details": str(e)}), 500
+        logger.exception(f"QRコード作成エラー: {e}")
+        return jsonify({"error": "QRコードの作成に失敗しました", "details": str(e)}), 500
 
 def fetch_payment_details(merchant_id):
     """指定されたマーチャントIDの支払い詳細をPayPayから取得するヘルパー関数"""
@@ -430,43 +469,34 @@ def fetch_payment_details(merchant_id):
         logger.debug(f"Fetched payment details for {merchant_id}: {resp}")
 
         if resp.get('resultInfo', {}).get('code') == 'RATE_LIMIT':
-            logger.warning(f"RATE_LIMIT error for {merchant_id}. Will retry. Link: {resp.get('resultInfo', {}).get('link')}")
+            logger.warning(f"RATE_LIMIT エラー {merchant_id}。リトライします。")
             return 'RATE_LIMIT_ERROR'
         
         if resp.get('data') is None:
             error_code = resp.get('resultInfo', {}).get('code')
             error_message = resp.get('resultInfo', {}).get('message')
             if error_code:
-                logger.warning(f"PayPay API returned error for {merchant_id}: {error_code} - {error_message}. Assuming pending or temporary issue.")
+                logger.warning(f"PayPay APIが {merchant_id} にエラーを返しました: {error_code} - {error_message}。保留または一時的な問題と見なします。")
             else:
-                logger.warning(f"Payment details for {merchant_id} returned 'None' data. Assuming pending or not found.")
+                logger.warning(f"{merchant_id} の支払い詳細が 'None' データとして返されました。保留または見つからないと見なします。")
             return 'PENDING_NO_DATA'
             
         return resp['data']['status']
     except Exception as e:
-        logger.exception(f"Error fetching payment details for {merchant_id}: {e}")
+        logger.exception(f"{merchant_id} の支払い詳細の取得中にエラーが発生しました: {e}")
         return 'FETCH_ERROR'
 
-@users_order_bp.route('/paypay/order-status/<merch_id>', methods=['GET']) # OPTIONSは不要、GETのみ
+@users_order_bp.route('/paypay/order-status/<merch_id>', methods=['GET'])
 def order_status(merch_id):
     """
     指定されたマーチャントIDの支払いステータスをポーリングし、結果を返すエンドポイント。
-    支払いが完了(COMPLETED)または失敗(FAILED)するまで待機します。
     """
-    logger.info(f"Checking order status for merchant ID: {merch_id} at /users_order/paypay/order-status")
+    logger.info(f"注文ステータスを確認中 (マーチャントID: {merch_id})")
     
-    # ポーリングはフロントエンドからリクエストがあった時に一度だけ実行
-    # pollingライブラリはサーバーサイドで待機するので、
-    # 実際にはフロントエンドからのGETリクエストごとに `fetch_payment_details` を呼ぶべき
-    # ここではポーリング自体をバックエンドで完結させるのではなく、
-    # フロントエンドからの各リクエストで現在のステータスを返すように修正
-
     status = fetch_payment_details(merch_id)
     if status == 'FETCH_ERROR':
-        return jsonify({"error": "Failed to fetch payment details.", "status": "FAILED"}), 500
+        return jsonify({"error": "支払い詳細の取得に失敗しました。", "status": "FAILED"}), 500
     elif status == 'RATE_LIMIT_ERROR' or status == 'PENDING_NO_DATA':
-        # これらはまだ待機が必要な状態としてフロントエンドに伝える
-        return jsonify({"data": {"status": "PENDING"}}), 200 # またはより具体的なステータス
+        return jsonify({"data": {"status": "PENDING"}}), 200
     else:
-        # COMPLETED, FAILED などPayPayから返された実際のステータスを返す
         return jsonify({"data": {"status": status}}), 200

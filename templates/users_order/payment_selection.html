@@ -276,9 +276,7 @@
             <button type="button" class="btn btn-primary" id="start-paypay-button"
                     data-cart-data='{{ cart | tojson }}'
                     data-total-amount="{{ total_price }}"
-                    {# ★★★ 変更箇所: paypay_api_base_url を渡す ★★★ #}
                     data-paypay-api-base-url="{{ paypay_api_base_url }}" 
-                    {# ★★★ 変更ここまで ★★★ #}
                     data-callback-merchant-id="{{ session.pop('paypay_callback_merchant_id', '') }}">
                 PayPayで支払う
             </button>
@@ -306,18 +304,9 @@
     </div>
     
     <script>
-        // static/js/paypay.js の内容をここに直接貼り付けるか、
-        // 別のファイルとしてリンクしてください。
-        // ただし、API_BASE_URL の取得方法が変わります。
-        
-        // ★★★ 変更点: API_BASE_URL をデータ属性から取得する ★★★
         const startPaypayButton = document.getElementById('start-paypay-button');
-        const API_BASE_URL = startPaypayButton ? startPaypayButton.dataset.paypayApiBaseUrl : 'http://127.0.0.1:5003/users_order/paypay'; // フォールバック
-
-        // HTML要素の取得 (一部は payment_selection.html に合わせて変更)
-        // const cakeListDiv = document.getElementById('cake-list'); // このページには不要
-        // const cartItemsUl = document.getElementById('cart-items'); // このページには不要
-        // const cartTotalSpan = document.getElementById('cart-total'); // このページには不要
+        // API_BASE_URL は /users_order/paypay の形式
+        const API_BASE_URL = startPaypayButton ? startPaypayButton.dataset.paypayApiBaseUrl : 'http://127.0.0.1:5003/users_order/paypay'; 
 
         const displayTotalPriceSpan = document.getElementById('display-total-price');
 
@@ -328,15 +317,11 @@
         const deeplinkButton = document.getElementById('deeplink-button');
         const qrInstruction = document.getElementById('qr-instruction');
 
-        let cart = []; // カート内のアイテムを保存する配列（このページでは主にデータ属性から取得）
-        let currentMerchantPaymentId = null; // ポーリングのために支払いIDを保存
-        let pollInterval = null; // ポーリングsetIntervalのIDを保持
-        let lastQrCodeUrl = ''; // 最後に生成されたQRコードURLを保存する変数
+        let cart = []; 
+        let currentMerchantPaymentId = null; 
+        let pollInterval = null; 
+        let lastQrCodeUrl = ''; 
 
-        // ケーキリスト表示やカート操作の関数は、このページでは不要なので削除
-        // fetchCakes, displayCakes, addToCart, removeFromCart, updateCartDisplay は削除
-
-        // 「PayPayで支払う」ボタンのクリックイベント
         if (startPaypayButton) { 
             startPaypayButton.addEventListener('click', async () => {
                 const cartDataJson = startPaypayButton.dataset.cartData;
@@ -361,26 +346,20 @@
                     return;
                 }
 
-                // orderItemsの形式は、PayPay APIの要件に合わせる
-                // Flask側で既に適切な形式に変換されていることを前提とします。
                 const orderItems = cart.map(item => ({
                     name: item.name, 
                     quantity: item.quantity,
-                    // priceは直接unitPrice.amountとして利用できるよう、Flaskから渡されることを想定
-                    price: item.price // priceキーが存在すると仮定
+                    price: item.price 
                 }));
 
-                // モーダルとメッセージを初期化
                 paymentStatusMessage.textContent = "PayPay支払い情報を準備中...";
                 paymentStatusMessage.className = '';
                 qrCodeContainer.innerHTML = '';
                 deeplinkButton.style.display = 'none'; 
                 qrInstruction.style.display = 'none'; 
-                qrModal.style.display = 'flex'; // Flexboxで中央寄せ
+                qrModal.style.display = 'flex'; 
 
-                // QRコード生成のためのバックエンド呼び出し
                 try {
-                    // ★★★ 変更点: API_BASE_URL を使用して正しいエンドポイントを叩く ★★★
                     const response = await fetch(`${API_BASE_URL}/create-qr`, { 
                         method: 'POST',
                         headers: {
@@ -443,16 +422,9 @@
 
                         qrCodeContainer.innerHTML = qrCodeHtml; 
 
-                        if (data.data.deeplink) {
-                            const qrLink = qrCodeContainer.querySelector('a:first-child'); 
-                            if (qrLink) {
-                                qrLink.addEventListener('click', (e) => {
-                                    e.preventDefault(); 
-                                    window.location.href = '{{ url_for("users_order.reservation_number") }}'; // ★ここです！
-                                    paymentStatusMessage.textContent = "PayPayアプリに移動しました。アプリで支払いを完了してください。";
-                                });
-                            }
-                        }
+                        // ディープリンクのaタグクリックイベントは削除。
+                        // ポーリングでPayPayの決済完了を待つのが正しいフロー。
+                        // ユーザーがPayPayアプリに移動したとしても、決済完了はポーリングで確認する。
 
                         // 支払いステータスをポーリング
                         pollPaymentStatus(currentMerchantPaymentId);
@@ -469,14 +441,18 @@
             });
         }
 
-
-        // ディープリンクボタンのクリックイベント
         if (deeplinkButton) { 
             deeplinkButton.addEventListener('click', () => {
                 const deeplinkUrl = deeplinkButton.dataset.deeplink; 
                 if (deeplinkUrl) {
                     window.location.href = deeplinkUrl;
                     paymentStatusMessage.textContent = "PayPayアプリに移動しました。アプリで支払いを完了してください。";
+                    // ★重要★ ディープリンクでアプリに飛んだ後も、バックグラウンドでポーリングを続ける
+                    // ユーザーがアプリで支払いを完了したら、このポーリングが成功を検知し、
+                    // reservation_numberページへリダイレクトします。
+                    if (currentMerchantPaymentId && !pollInterval) { // 念のため、まだポーリングが開始されていなければ開始
+                        pollPaymentStatus(currentMerchantPaymentId);
+                    }
                 }
             });
         }
@@ -503,7 +479,6 @@
                 }
 
                 try {
-                    // ★★★ 変更点: API_BASE_URL を使用して正しいエンドポイントを叩く ★★★
                     const response = await fetch(`${API_BASE_URL}/order-status/${merchantPaymentId}`);
                     if (!response.ok) {
                         throw new Error(`HTTP error! status: ${response.status}`);
@@ -515,22 +490,43 @@
                         const status = data.data.status;
                         if (status === 'COMPLETED') {
                             clearInterval(pollInterval);
-                            paymentStatusMessage.textContent = "支払い完了！ありがとうございます！";
+                            paymentStatusMessage.textContent = "支払い完了！注文を確定しています...";
                             paymentStatusMessage.classList.add('status-completed');
                             
-                            // 支払い完了後にリダイレクト
-                            window.location.href = '{{ url_for("users_order.reservation_number") }}';
+                            // ★★★ ここに新しい処理を追加 ★★★
+                            try {
+                                // API_BASE_URL は /users_order/paypay で終わるので、
+                                // /users_order/ にするために .replace('/paypay', '') を使う
+                                const finalizeResponse = await fetch(`${API_BASE_URL.replace('/paypay', '')}/finalize_paypay_order`, {
+                                    method: 'POST',
+                                    headers: {
+                                        'Content-Type': 'application/json',
+                                    },
+                                    // finalize_paypay_order はセッションからカート情報を取得するため、bodyは空でOK
+                                    body: JSON.stringify({}) 
+                                });
 
-                            // 以下の部分はリダイレクトされるため、通常は実行されない
-                            // if (lastQrCodeUrl) {
-                            //     const qrLinkText = document.createElement('p');
-                            //     qrLinkText.innerHTML = `決済に使用したQRコード: <a href="${lastQrCodeUrl}" target="_blank" rel="noopener noreferrer">${lastQrCodeUrl}</a>`;
-                            //     qrCodeContainer.appendChild(qrLinkText); 
-                            // }
-                            // qrInstruction.style.display = 'none'; 
-                            // deeplinkButton.style.display = 'none'; 
+                                if (!finalizeResponse.ok) {
+                                    const errorData = await finalizeResponse.json();
+                                    throw new Error(`注文確定エラー: ${errorData.error || finalizeResponse.statusText}`);
+                                }
 
-                        } else if (status === 'FAILED' || status === 'CANCELED') { // CANCELEDも追加
+                                const finalizeData = await finalizeResponse.json();
+                                console.log("Order Finalization Response:", finalizeData);
+                                
+                                // 注文確定が成功したら、reservation_number ページへリダイレクト
+                                window.location.href = '{{ url_for("users_order.reservation_number") }}';
+
+                            } catch (finalizeError) {
+                                console.error("注文確定に失敗しました:", finalizeError);
+                                paymentStatusMessage.textContent = `支払い完了後、注文確定中にエラーが発生しました: ${finalizeError.message}`;
+                                paymentStatusMessage.classList.add('status-failed');
+                                qrInstruction.style.display = 'none';
+                                deeplinkButton.style.display = 'none';
+                            }
+                            // ★★★ ここまで新しい処理を追加 ★★★
+
+                        } else if (status === 'FAILED' || status === 'CANCELED') {
                             clearInterval(pollInterval);
                             paymentStatusMessage.textContent = "支払い失敗。もう一度お試しください。";
                             paymentStatusMessage.classList.add('status-failed');
@@ -563,7 +559,6 @@
             }, 2000); 
         }
 
-        // モーダルを閉じるイベント
         closeModalButton.addEventListener('click', () => {
             qrModal.style.display = 'none';
             if (pollInterval) {
@@ -572,7 +567,6 @@
             }
         });
 
-        // モーダル外をクリックして閉じる
         window.addEventListener('click', (event) => {
             if (event.target === qrModal) {
                 qrModal.style.display = 'none';
@@ -582,10 +576,6 @@
                 }
             }
         });
-
-        // このページではケーキリストのフェッチやカート表示更新は行わない
-        // fetchCakes();
-        // updateCartDisplay();
     </script>
 </body>
 </html>
