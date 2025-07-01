@@ -29,11 +29,11 @@
                     </li>
                     <li>
                         <span class="label">値段:</span>
-                        <span class="value">{{ price }} 円</span>
+                        <span class="value">{{ product_price }} 円</span>
                     </li>
                     <li>
                         <span class="label">商品説明:</span>
-                        <span class="value">{{ description }}</span>
+                        <span class="value">{{ product_description }}</span>
                     </li>
                     {% if filename %}
                     <li>
@@ -44,8 +44,8 @@
                 </ul>
 
                 <input type="hidden" name="product_name" value="{{ product_name }}">
-                <input type="hidden" name="price" value="{{ price }}">
-                <input type="hidden" name="description" value="{{ description }}">
+                <input type="hidden" name="price" value="{{ product_price }}">
+                <input type="hidden" name="description" value="{{ product_description }}">
                 {% if filename %}
                 <input type="hidden" name="filename" value="{{ filename }}">
                 {% endif %}

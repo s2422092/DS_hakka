@@ -58,6 +58,16 @@ def menu_registration():
         return redirect(url_for('store.store_login'))
 
     if request.method == 'POST':
+        product_name = request.form.get('product_name')
+        product_price = request.form.get('product_price')
+        product_description = request.form.get('product_description')
+
+        # セッションに保存
+        session['product_name'] = product_name
+        session['product_price'] = product_price
+        session['product_description'] = product_description
+
+    # ...以降の処理...
         # CSVファイルアップロードの処理
         file = request.files.get('product_csv') 
 
@@ -146,9 +156,9 @@ def menu_registration():
 
         # CSVファイルがアップロードされていない場合、手動入力を試みる
         else: 
-            product_name = request.form.get('product_name')
-            product_price_str = request.form.get('product_price')
-            product_description = request.form.get('product_description', '') 
+            product_name = request.form.get('product_name','未入力')
+            product_price_str = request.form.get('product_price','未入力')
+            product_description = request.form.get('product_description','未入力')
 
             # 手動入力の必須フィールドチェック
             if product_name and product_price_str: 
@@ -188,6 +198,10 @@ def menu_check():
         return redirect(url_for('store.store_login'))
 
     store_id = session.get('store_id')
+    store_name = session.get('store_name', 'ゲスト')
+    product_name = session.get('product_name', '未入力')
+    product_price = session.get('product_price', '未入力')
+    product_description = session.get('product_description', '未入力')
     menus = []
     conn = None
     try:
@@ -203,7 +217,7 @@ def menu_check():
 
     # menusはsqlite3.Rowオブジェクトのリストなので、辞書形式に変換してテンプレートに渡す
     menus_data = [dict(menu) for menu in menus]
-    return render_template('stores_detail/menu_check.html', menus=menus_data)
+    return render_template('stores_detail/menu_check.html', menus=menus_data, store_name=store_name, product_name=product_name, product_price=product_price, product_description=product_description)
 
 
 @stores_detail_bp.route('/order-list')
