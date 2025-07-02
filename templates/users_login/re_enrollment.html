@@ -39,9 +39,14 @@
     </div>
 </div>
 
-<<<<<<< HEAD
-
-=======
->>>>>>> nambo-api
+<script>
+    // フラッシュメッセージを自動的に消すスクリプト
+    setTimeout(function() {
+        const flashMessages = document.querySelectorAll('.flash-messages');
+        flashMessages.forEach(function(message) {
+            message.style.display = 'none';
+        });
+    }, 5000); // 5秒後に非表示
+</script>
 </body>
 </html>
