@@ -76,6 +76,8 @@ def map_shop():
     return render_template('users_home/map_shop.html', stores=stores, u_name=u_name)
 
 
+from collections import defaultdict
+
 @users_home_bp.route('/payment_history')
 def payment_history():
     if 'id' not in session:
@@ -106,11 +108,17 @@ def payment_history():
     payment_history_list = conn.execute(query, (user_id,)).fetchall()
     conn.close()
 
+    # 注文IDごとにグルーピング
+    grouped_history = defaultdict(list)
+    for item in payment_history_list:
+        grouped_history[item['order_id']].append(item)
+
     return render_template(
         'users_home/payment_history.html',
         u_name=u_name,
-        history=payment_history_list
+        grouped_history=grouped_history  # ← ここを変更
     )
+
 
 @users_home_bp.route('/users_data')
 def users_data():

@@ -237,3 +237,77 @@ main ul li {
     font-size: 1em;
     color: #555;
 }
+
+
+/* 決済履歴のリスト全体 */
+.history-list-container {
+    margin-top: 30px;
+    border: 1px solid #ccc;
+    border-radius: 10px;
+    overflow: hidden;
+    font-family: Arial, sans-serif;
+}
+
+/* 各履歴行の共通スタイル */
+.history-item {
+    display: grid;
+    grid-template-columns: 1fr 2fr 2fr 1fr 2fr 2fr; /* 各列の比率 */
+    padding: 12px 15px;
+    align-items: center;
+    border-bottom: 1px solid #eee;
+    font-size: 0.95em;
+}
+
+/* ヘッダー行（太字＋背景色） */
+.history-header {
+    background-color: #f2f2f2;
+    font-weight: bold;
+}
+
+/* 偶数・奇数行の背景色 */
+.row-odd {
+    background-color: #ffffff;
+}
+
+.row-even {
+    background-color: #fafafa;
+}
+
+/* 注文履歴がないときの表示 */
+.no-history {
+    padding: 20px;
+    text-align: center;
+    color: #666;
+    background-color: #fefefe;
+    font-size: 1em;
+}
+
+
+.order-block {
+    border: 1px solid #ccc;
+    border-radius: 10px;
+    margin-bottom: 20px;
+    background-color: #fff;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    padding: 15px;
+}
+
+.order-header {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 10px;
+    font-weight: bold;
+    color: #333;
+}
+
+.order-item-row {
+    display: grid;
+    grid-template-columns: 2fr 2fr 1fr 1fr;
+    padding: 8px 0;
+    border-top: 1px solid #eee;
+    font-size: 0.95em;
+}
+
+.order-item-row:first-child {
+    border-top: none;
+}

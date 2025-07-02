@@ -12,71 +12,6 @@
 
     <link rel="stylesheet" href="{{ url_for('static', filename='css/users_home.css') }}">
 
-    <style>
-
-        /* (既存のスタイルは変更なし) */
-
-        .history-list-container {
-
-            width: 90%;
-
-            margin: 20px auto;
-
-        }
-
-        .history-item {
-
-            display: grid;
-
-            grid-template-columns: 1fr 2fr 2fr 1fr 1fr 2fr;
-
-            gap: 10px;
-
-            padding: 15px;
-
-            border-bottom: 1px solid #eee;
-
-            align-items: center;
-
-        }
-
-        .history-header {
-
-            font-weight: bold;
-
-            background-color: #f8f9fa;
-
-        }
-
-        .no-history {
-
-            text-align: center;
-
-            padding: 30px;
-
-            color: #777;
-
-        }
-
-
-
-        /* ▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼ 新しく追加するCSS ▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼▼ */
-
-        .row-even {
-
-            background-color: #ffffff; /* 偶数グループの色（白） */
-
-        }
-
-        .row-odd {
-
-            background-color: #f2f2f2; /* 奇数グループの色（薄い灰色） */
-
-        }
-
-        /* ▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲ ここまで追加 ▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲ */
-
-    </style>
 
 </head>
 
@@ -112,85 +47,34 @@
 
         <h1>決済履歴</h1>
 
-
-
         <div class="history-list-container">
-
-            <div class="history-item history-header">
-
-                <span>注文番号</span>
-
-                <span>店舗名</span>
-
-                <span>商品名</span>
-
-                <span>数量</span>
-
-                <span>金額（税込）</span>
-
-                <span>注文日時</span>
-
-            </div>
-
-
-
-            {# ループの前に、色を切り替えるための変数を初期化 #}
-
-            {% set color_class = 'row-odd' %}
-
-            
-
-            {% for item in history %}
-
-            
-
-                {# ループの最初ではない、かつ、前の行と注文IDが変わった瞬間に色を切り替える #}
-
-                {% if not loop.first and item.order_id != loop.previtem.order_id %}
-
-                    {% if color_class == 'row-odd' %}
-
-                        {% set color_class = 'row-even' %}
-
-                    {% else %}
-
-                        {% set color_class = 'row-odd' %}
-
-                    {% endif %}
-
-                {% endif %}
-
-
-
-                <div class="history-item {{ color_class }}">
-
-                    <span>{{ item['order_id'] }}</span>
-
-                    <span>{{ item['store_name'] }}</span>
-
-                    <span>{{ item['menu_name'] }}</span>
-
-                    <span>{{ item['quantity'] }}</span>
-
-                    <span>{{ item['price_at_order'] * item['quantity'] }}円</span>
-
-                    <span>{{ item['datetime'] }}</span>
-
-                </div>
-
-
-
+            {% if grouped_history %}
+                {% for order_id, items in grouped_history.items() %}
+                    <div class="order-block">
+                        <div class="order-header">
+                            <span class="order-id">注文番号: {{ order_id }}</span>
+                            <span class="order-datetime">{{ items[0]['datetime'] }}</span>
+                        </div>
+        
+                        <div class="order-details">
+                            {% for item in items %}
+                                <div class="order-item-row">
+                                    <span>{{ item['store_name'] }}</span>
+                                    <span>{{ item['menu_name'] }}</span>
+                                    <span>{{ item['quantity'] }}個</span>
+                                    <span>{{ item['price_at_order'] * item['quantity'] }}円</span>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                {% endfor %}
             {% else %}
-
                 <div class="no-history">
-
                     <p>決済履歴はまだありません。</p>
-
                 </div>
-
-            {% endfor %}
-
-            </div>
+            {% endif %}
+        </div>
+        
 
     </main>
 
