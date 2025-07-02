@@ -2,30 +2,65 @@
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
-    <title>PayPayログイン画面</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>モバオル - スマホで簡単スマート注文</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/general.css') }}">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;700&display=swap" rel="stylesheet">
 </head>
 <body>
 
-    <div class="hedder">
-        <h1>モバオル</h1>
-        <div class="nav-links">
-            <a href="{{url_for('users_login.login')}}">ログイン</a>
-            <a href="{{url_for('users_login.signup')}}">新規登録</a>       
-        </div>
-    </div>
+    <header class="site-header">
+        <div class="logo">モバオル</div>
+    </header>
 
-    <div class="subhedder">
-        <a href="{{url_for('store.store_login')}}">企業ログイン</a>
-        <a href="{{url_for('store.store_registration')}}">企業新規登録</a>
-    </div>
+    <main>
+        <section class="hero">
+            <div class="hero-overlay"></div>
+            <div class="hero-content">
+                <!-- ★★★ テキストを修正 ★★★ -->
+                <h1 class="hero-title">いつものお店を、もっと手軽に。</h1>
+                <p class="hero-subtitle">街の小さなお店もかんたん導入。スマホひとつで注文をもっとスマートに。</p>
+            </div>
+        </section>
 
-    <div class="container">
-        <h2>モバイルオーダーとは？</h2>
-        <p>「モバオル」は学内のカフェなどで事前にスマホから注文・決済ができる便利なサービスです。</p>
-        <p>今回は実際にみんなで「ロハスカフェ」に注文してみるデモを体験していただきます。</p>
-        <p>ログインまたは新規登録して、注文を始めましょう！</p>
-    </div>
+        <section class="selection-container">
+            <!-- 一般利用者向けカード -->
+            <div class="card user-card">
+                <img src="/static/images/27117522_s.jpg" alt="スマホでモバイルオーダーをしている様子" class="card-image">
+                <h2 class="card-title">ご利用のお客様</h2>
+                <!-- ★★★ テキストを修正 ★★★ -->
+                <p class="card-description">
+                    スマホで事前に注文しておけばお店に立ち寄るだけ。
+                    あなたの「お気に入り」をもっとスマートに利用しましょう。
+                </p>
+                <div class="card-actions">
+                    <a href="{{url_for('users_login.signup')}}" class="button primary">今すぐはじめる (無料)</a>
+                    <a href="{{url_for('users_login.login')}}" class="button secondary">ログインはこちら</a>
+                </div>
+            </div>
+
+            <!-- 店舗オーナー向けカード -->
+            <div class="card store-card">
+                <img src="/static/images/5149647_s.jpg" alt="カフェで働く店員の様子" class="card-image">
+                <h2 class="card-title">店舗のオーナー様</h2>
+                <!-- ★★★ テキストを修正 ★★★ -->
+                <p class="card-description">
+                    使いやすい管理画面でお店にモバイルオーダーを。
+                    お客様に新しい便利さを提供し、お店をより良くしましょう。
+                </p>
+                <div class="card-actions">
+                    <a href="{{url_for('store.store_registration')}}" class="button primary">店舗登録はこちら</a>
+                    <a href="{{url_for('store.store_login')}}" class="button secondary">店舗ログイン</a>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="site-footer-bottom">
+        <p>&copy; 2025 モバオル. All Rights Reserved.</p>
+    </footer>
 
 </body>
 </html>
