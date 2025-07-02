@@ -205,7 +205,7 @@ def download_template():
         return redirect(url_for('stores_detail.menu_registration'))
 
 # --- メニュー登録画面（表示）---
-@stores_detail_bp.route('/menu-registration', methods=['GET'])
+@stores_detail_bp.route('/menu_registration', methods=['GET'])
 def menu_registration():
     if 'store_id' not in session:
         flash("ログインしてください", "warning")
