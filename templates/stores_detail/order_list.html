@@ -7,7 +7,7 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='css/stores_detail.css') }}">
 </head>
 <body>
-    <!-- ユーザー情報セッション -->
+    <!-- ヘッダー -->
     <header class="site-header">
         <h1>{{ store_name }} - 注文リスト</h1>
         <div class="header-links">
@@ -16,21 +16,22 @@
             <a href="{{ url_for('general.explamation') }}">ログアウト</a>
         </div>
     </header>
-    <!-- ユーザー情報セッション -->
 
+    <!-- ナビゲーション -->
     <nav class="main-nav">
         <ul>
             <li><a href="{{ url_for('stores_detail.store_home') }}" >ホーム</a></li>
             <li><a href="{{ url_for('stores_detail.menu_registration') }}">商品登録</a></li>
             <li><a href="{{ url_for('stores_detail.order_list') }}" class="active">注文リスト</a></li>
-            <li><a href="{{ url_for('stores_detail.paypay_linking') }}">paypayの紐付け</a></li>
+            <li><a href="{{ url_for('stores_detail.paypay_linking') }}">PayPayの紐付け</a></li>
             <li><a href="{{ url_for('stores_detail.procedure') }}">手順ページ</a></li>
         </ul>
     </nav>
-    <div class="sub-navigation">
-        <input type="search" id="order-search" placeholder="商品名またはidで検索" />
-    </div>
 
+    <!-- サブナビゲーション:検索バー -->
+    <div class="sub-navigation">
+        <input type="search" id="order-search" placeholder="商品名またはIDで検索...">
+    </div>
 
     <main class="main-content">
         <div class="order-list-container">
@@ -58,7 +59,7 @@
                 <div>{{ order.user_name }}</div>
                 <div>{{ order.total_amount }}円</div>
             
-                <!-- 注文状況を選択して更新できるようにする -->
+                <!-- 注文状況選択フォーム -->
                 <div>
                     <form action="{{ url_for('stores_detail.update_order_status', order_id=order.id) }}" method="post">
                         <select name="status">
@@ -77,8 +78,29 @@
                 <p>現在、新しい注文はありません。</p>
             </div>
             {% endfor %}
-            
         </div>
     </main>
+
+    <!-- JavaScript -->
+    <script>
+        document.getElementById('order-search').addEventListener('input', function () {
+            const query = this.value.toLowerCase().trim(); // 検索入力を取得し、小文字化
+            const orders = document.querySelectorAll('.order-item'); // 全注文リストを取得
+            
+            orders.forEach(order => {
+                // 検索対象: 注文IDと注文商品の名前を取得
+                const orderId = order.querySelector(':nth-child(1)').textContent.toLowerCase(); // 注文ID
+                const items = order.querySelectorAll('ul li'); // 商品リスト
+                const itemNames = Array.from(items).map(item => item.textContent.toLowerCase());
+
+                // 条件判定: 入力がIDまたは商品の名前に含まれるかチェック
+                if (orderId.includes(query) || itemNames.some(name => name.includes(query))) {
+                    order.style.display = ''; // 表示
+                } else {
+                    order.style.display = 'none'; // 非表示
+                }
+            });
+        });
+    </script>
 </body>
 </html>
