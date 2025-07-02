@@ -8,36 +8,83 @@ body {
     line-height: 1.7;
 }
 
-/* ヘッダー */
+/* --- ヘッダー --- */
 .site-header {
     display: flex;
-    justify-content: center; /* ロゴを中央揃えに */
+    justify-content: space-between;
     align-items: center;
     background-color: #ffffff;
     padding: 15px 40px;
     border-bottom: 1px solid #e0e0e0;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-    position: sticky; /* スクロールしても上部に固定 */
+    box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+    position: sticky;
     top: 0;
-    z-index: 1000; /* 他の要素より手前に表示 */
+    z-index: 1000;
     width: 100%;
-    box-sizing: border-box; /* paddingを含めて幅100%に */
+    box-sizing: border-box;
 }
 
 .logo {
-    font-size: 2em; /* 少し大きく */
+    font-size: 1.8em;
     font-weight: 700;
-    color: #0a0909; /* テーマカラーのオレンジに */
-    text-shadow: 1px 1px 2px rgba(0,0,0,0.05); /* ほんの少し影をつける */
+    color: #2c3e50;
 }
 
+.header-nav {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.header-nav a {
+    text-decoration: none;
+    color: #555;
+    font-weight: 700;
+    font-size: 0.9em;
+    padding: 8px 12px;
+    border-radius: 6px;
+    transition: all 0.2s ease;
+}
+
+.header-nav a.login-button {
+    border: 2px solid;
+}
+
+/* 店舗様ログインボタン (青) */
+.header-nav a.store-login {
+    border-color: #007bff;
+    color: #007bff;
+}
+.header-nav a.store-login:hover {
+    background-color: rgba(0, 123, 255, 0.05);
+}
+
+/* ユーザーログインボタン (オレンジ) */
+.header-nav a.user-login {
+    border-color: #ed7112;
+    color: #ed7112;
+}
+.header-nav a.user-login:hover {
+    background-color: rgba(237, 113, 18, 0.05);
+}
+
+/* 新規登録ボタン */
+.header-nav a.signup-button {
+    background-color: #ed7112;
+    color: #ffffff;
+    border: 2px solid #ed7112;
+}
+.header-nav a.signup-button:hover {
+    background-color: #d1640f;
+    border-color: #d1640f;
+}
 
 /* メインコンテンツ */
 main {
     width: 100%;
     max-width: 1100px;
     margin: 0 auto;
-    padding: 20px;
+    padding: 40px 20px;
     box-sizing: border-box;
 }
 
@@ -46,21 +93,18 @@ main {
     position: relative;
     text-align: center;
     padding: 80px 20px;
-    margin-bottom: 50px;
     border-radius: 15px;
-    background-image: url('https://images.unsplash.com/photo-1497935586351-b67a49e012bf?q=80&w=2071&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D');
+    background-image: url('/static/images/32974269_s.jpg');
     background-size: cover;
-    background-position: center;
+    /* ★★★ ここを修正 ★★★ */
+    background-position: center 65%; /* 画像の表示位置を下にずらす */
     color: #ffffff;
     overflow: hidden;
 }
 
 .hero-overlay {
     position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
+    top: 0; left: 0; right: 0; bottom: 0;
     background-color: rgba(0, 0, 0, 0.5);
     z-index: 1;
 }
@@ -79,7 +123,7 @@ main {
 
 .hero-subtitle {
     font-size: 1.3em;
-    max-width: 600px;
+    max-width: 650px;
     margin: 0 auto;
     text-shadow: 1px 1px 4px rgba(0,0,0,0.7);
 }
@@ -90,6 +134,7 @@ main {
     justify-content: center;
     gap: 40px;
     flex-wrap: wrap;
+    padding: 40px 0;
 }
 
 /* カード共通スタイル */
@@ -157,7 +202,6 @@ main {
     background-color: #007bff;
     color: #ffffff;
 }
-
 .store-card .button.primary:hover {
     background-color: #0056b3;
     transform: scale(1.03);
@@ -168,22 +212,74 @@ main {
     background-color: #ed7112;
     color: #ffffff;
 }
-
 .user-card .button.primary:hover {
     background-color: #d1640f;
     transform: scale(1.03);
 }
 
-/* セカンダリボタン (ログインなど) */
+/* セカンダリボタン */
 .button.secondary {
     background-color: #ffffff;
     color: #333;
     border-color: #e0e0e0;
 }
-
 .button.secondary:hover {
     background-color: #f8f9fa;
     border-color: #ccc;
+}
+
+/* --- How it Works Section --- */
+.how-it-works-section {
+    padding: 60px 20px;
+    text-align: center;
+    background-color: #ffffff;
+    border-radius: 15px;
+    margin-top: 40px;
+    border-top: 1px solid #e9ecef;
+}
+
+.section-title {
+    font-size: 2em;
+    font-weight: 700;
+    margin-bottom: 50px;
+    color: #343a40;
+}
+
+.steps-container {
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    gap: 20px;
+    flex-wrap: wrap;
+}
+
+.step {
+    flex: 1;
+    max-width: 280px;
+    padding: 20px;
+}
+
+.step-icon {
+    font-size: 3em;
+    color: #ed7112;
+    margin-bottom: 20px;
+}
+
+.step-title {
+    font-size: 1.3em;
+    font-weight: 700;
+    margin-bottom: 10px;
+}
+
+.step-description {
+    font-size: 0.95em;
+    color: #666;
+}
+
+.step-arrow {
+    font-size: 2em;
+    color: #ced4da;
+    margin-top: 50px;
 }
 
 /* フッター */
@@ -197,17 +293,28 @@ main {
 }
 
 /* レスポンシブ対応 */
-@media (max-width: 768px) {
+@media (max-width: 992px) {
     .site-header {
-        padding: 15px 20px;
+        flex-direction: column;
+        gap: 15px;
+        padding: 15px;
     }
-    .hero-title {
-        font-size: 2em;
+    .header-nav {
+        flex-wrap: wrap;
+        justify-content: center;
     }
-    .hero-subtitle {
-        font-size: 1em;
+    .steps-container {
+        flex-direction: column;
+        align-items: center;
     }
-    .card {
-        max-width: 350px;
+    .step-arrow {
+        transform: rotate(90deg);
+        margin: 10px 0;
     }
+}
+
+@media (max-width: 768px) {
+    .hero-title { font-size: 2em; }
+    .hero-subtitle { font-size: 1em; }
+    .card { max-width: 350px; }
 }
