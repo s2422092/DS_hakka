@@ -1,9 +1,13 @@
-from flask import Blueprint, render_template, request, redirect, url_for, flash, session
+from flask import Blueprint, render_template, request, redirect, url_for, flash, session, send_file
 import sqlite3
 import csv
 from werkzeug.utils import secure_filename
 import os
 from functools import wraps
+import io
+import json
+import pandas as pd
+
 
 stores_detail_bp = Blueprint('stores_detail', __name__, url_prefix='/stores')
 
@@ -33,8 +37,7 @@ def store_home_menu():
     store_id = session.get('store_id')
 
     # 商品一覧を取得
-    conn = sqlite3.connect('app.db')
-    conn.row_factory = sqlite3.Row
+    conn = get_db_connection()
     cur = conn.cursor()
     cur.execute("SELECT menu_name, price, category, soldout FROM menus WHERE store_id = ?", (store_id,))
     menus = cur.fetchall()
@@ -43,167 +46,278 @@ def store_home_menu():
     return render_template('stores_detail/store_home_menu.html', store_name=store_name , menus=menus)
 
 
-
-@stores_detail_bp.route('/menu-registration', methods=['GET', 'POST'])
-def menu_registration():
-    # ログインチェック
-    if 'store_id' not in session:
-        flash("ログインしてください")
-        return redirect(url_for('store.store_login'))
-
-    store_id = session.get('store_id')
-    store_name = session.get('store_name', 'ゲスト')
-    if not store_id:
-        flash("ストアIDが見つかりません。ログインし直してください。", 'error')
-        return redirect(url_for('store.store_login'))
-
-    if request.method == 'POST':
-        # CSVファイルアップロードの処理
-        file = request.files.get('product_csv') 
-
-        # ファイルが選択され、かつファイル名がある場合、CSVとして処理
-        if file and file.filename != '': 
-            if file.filename.endswith('.csv'):
-                try:
-                    # UTF-8 BOM付きの可能性も考慮してdecode
-                    stream = file.stream.read().decode("utf-8-sig")
-                except UnicodeDecodeError:
-                    flash('CSVファイルの文字コードがUTF-8ではありません。UTF-8形式のCSVをアップロードしてください。', 'error')
-                    return redirect(request.url)
-
-                # CSVデータをDictReaderで読み込み
-                csv_data = csv.DictReader(stream.splitlines())
-
-                # CSVヘッダーの存在チェック
-                csv_headers_set = set(csv_data.fieldnames if csv_data.fieldnames else []) 
-                required_headers = {'menu_name', 'price'}
-
-                if not required_headers.issubset(csv_headers_set):
-                    missing_headers = required_headers - csv_headers_set
-                    flash(f'CSVファイルのヘッダーが無効です。必須ヘッダーが不足しています: {", ".join(missing_headers)}', 'error')
-                    return redirect(request.url)
-
-                conn = get_db_connection()
-                cursor = conn.cursor()
-                inserted_count = 0
-                error_rows = []
-
-                # CSVの各行を処理し、データベースに挿入
-                for i, row_dict in enumerate(csv_data):
-                    menu_name = row_dict.get('menu_name')
-                    category = row_dict.get('category', '')
-                    price_str = row_dict.get('price')
-                    soldout_str = row_dict.get('soldout', '0')
-
-                    # 必須フィールドの存在チェック
-                    if not menu_name or not price_str:
-                        error_rows.append(f"行 {i+2}: 必須フィールド (menu_name, price) が不足しているか空です。")
-                        continue
-
-                    # 価格の型変換とバリデーション
-                    try:
-                        price = int(price_str)
-                    except ValueError:
-                        error_rows.append(f"行 {i+2}: 価格が無効な数値です ('{price_str}')。")
-                        continue
-                    
-                    # soldoutの型変換とバリデーション
-                    try:
-                        soldout = int(soldout_str)
-                        if soldout not in [0, 1]:
-                            raise ValueError("0または1ではありません")
-                    except ValueError:
-                        error_rows.append(f"行 {i+2}: soldoutが無効な値です ('{soldout_str}')。0または1を入力してください。")
-                        continue
-
-                    # データベースへの挿入
-                    try:
-                        cursor.execute(
-                            "INSERT INTO menus (store_id, menu_name, category, price, soldout) VALUES (?, ?, ?, ?, ?)",
-                            (store_id, menu_name, category, price, soldout)
-                        )
-                        inserted_count += 1
-                    except sqlite3.Error as e:
-                        error_rows.append(f"行 {i+2}: データベースエラーが発生しました - {e}")
-                
-                conn.commit() # トランザクションをコミット
-                conn.close()
-
-                # 登録結果のフラッシュメッセージ
-                if inserted_count > 0:
-                    flash(f'{inserted_count}件のメニューを登録しました。', 'success')
-                if error_rows:
-                    for err in error_rows:
-                        flash(err, 'warning')
-                    if inserted_count == 0:
-                        flash('メニューの登録に失敗しました。詳細を警告メッセージで確認してください。', 'error')
-                
-                return redirect(url_for('stores_detail.menu_check'))
-
-            else:
-                flash('CSVファイルを選択してください。', 'error')
-                return redirect(request.url)
-
-        # CSVファイルがアップロードされていない場合、手動入力を試みる
-        else: 
-            product_name = request.form.get('product_name')
-            product_price_str = request.form.get('product_price')
-            product_description = request.form.get('product_description', '') 
-
-            # 手動入力の必須フィールドチェック
-            if product_name and product_price_str: 
-                try:
-                    product_price = int(product_price_str)
-                except ValueError:
-                    flash('値段が無効な数値です。', 'error')
-                    return redirect(request.url)
-
-                conn = get_db_connection()
-                cursor = conn.cursor()
-                try:
-                    # データベースへの挿入 (soldoutはデフォルト0)
-                    cursor.execute(
-                        "INSERT INTO menus (store_id, menu_name, category, price, soldout) VALUES (?, ?, ?, ?, ?)",
-                        (store_id, product_name, product_description, product_price, 0) 
-                    )
-                    conn.commit()
-                    flash(f'メニュー「{product_name}」を登録しました。', 'success')
-                    return redirect(url_for('stores_detail.menu_check'))
-                except sqlite3.Error as e:
-                    flash(f"メニューの登録中にデータベースエラーが発生しました: {e}", 'error')
-                finally:
-                    conn.close()
-            else:
-                flash('CSVファイルを選択するか、手動で商品名と値段を入力してください。', 'error')
-                return redirect(request.url)
-
-    return render_template('stores_detail/menu_registration.html' ,store_name=store_name)
-
-
-@stores_detail_bp.route('/menu-check')
-def menu_check():
-    # ストアIDがセッションにない場合はログインページにリダイレクト
-    if 'store_id' not in session:
-        flash("ログインしてください")
-        return redirect(url_for('store.store_login'))
-
-    store_id = session.get('store_id')
+# --- ヘルパー関数 ---
+def parse_menu_file(file):
+    """アップロードされたCSVまたはExcelファイルを解析して、辞書のリストを返す"""
+    filename = file.filename
     menus = []
-    conn = None
+    
     try:
-        conn = get_db_connection()
-        # 特定のstore_idに紐づくメニューのみを取得
-        cursor = conn.execute("SELECT menu_id, menu_name, category, price, soldout FROM menus WHERE store_id = ?", (store_id,))
-        menus = cursor.fetchall() # 結果をリストとして取得
-    except sqlite3.Error as e:
-        flash(f"メニューの取得中にエラーが発生しました: {e}", 'error')
-    finally:
-        if conn:
-            conn.close()
+        if filename.endswith('.csv'):
+            stream = io.StringIO(file.stream.read().decode("utf-8-sig"))
+            csv_data = csv.DictReader(stream)
+            required_headers = {'menu_name', 'price'}
+            if not required_headers.issubset(set(csv_data.fieldnames or [])):
+                return None, f'CSVヘッダーが無効です。必須ヘッダー({", ".join(required_headers)})がありません。'
+            menus = list(csv_data)
 
-    # menusはsqlite3.Rowオブジェクトのリストなので、辞書形式に変換してテンプレートに渡す
-    menus_data = [dict(menu) for menu in menus]
-    return render_template('stores_detail/menu_check.html', menus=menus_data)
+        elif filename.endswith(('.xlsx', '.xls')):
+            df = pd.read_excel(file.stream, dtype=str) # 全て文字列として読み込む
+            required_headers = {'menu_name', 'price'}
+            if not required_headers.issubset(set(df.columns)):
+                 return None, f'Excelヘッダーが無効です。必須ヘッダー({", ".join(required_headers)})がありません。'
+            df['category'] = df['category'].fillna('')
+            df['soldout'] = df['soldout'].fillna('0')
+            menus = df.to_dict('records')
+        else:
+            return None, '対応していないファイル形式です。.csvまたは.xlsxファイルをアップロードしてください。'
+        
+        return menus, None
+    except Exception as e:
+        return None, f"ファイルの読み込み中にエラーが発生しました: {e}"
+
+
+def validate_menu_data(menus_data):
+    """メニューデータのバリデーションを行う"""
+    validated_menus = []
+    errors = []
+    for i, row in enumerate(menus_data):
+        row_num_str = f"行 {i+2}" if len(menus_data) > 1 else "手動入力"
+        
+        menu_name = row.get('menu_name')
+        price_str = str(row.get('price', '')).strip()
+        soldout_str = str(row.get('soldout', '0')).strip()
+        category = row.get('category', '')
+
+        if not menu_name or not price_str:
+            errors.append(f"{row_num_str}: 必須項目 (menu_name, price) が空です。")
+            continue
+        
+        try:
+            price = int(float(price_str))
+            if price < 0:
+                raise ValueError
+        except (ValueError, TypeError):
+            errors.append(f"{row_num_str}: 価格の値 ('{price_str}') が不正です。0以上の数値を入力してください。")
+            continue
+
+        try:
+            soldout = int(float(soldout_str))
+            if soldout not in [0, 1]:
+                raise ValueError
+        except (ValueError, TypeError):
+            errors.append(f"{row_num_str}: 在庫の値 ('{soldout_str}') が不正です。0 (販売中) か 1 (売り切れ) で入力してください。")
+            continue
+        
+        validated_menus.append({
+            'menu_name': menu_name,
+            'category': category,
+            'price': price,
+            'soldout': soldout
+        })
+    return validated_menus, errors
+
+
+# --- ルート定義 ---
+
+@stores_detail_bp.route('/download-template')
+def download_template():
+    """商品登録用のExcelテンプレートファイルを生成してダウンロードさせる"""
+    try:
+        # テンプレート用のデータフレームを作成
+        template_data = {
+            'menu_name': ['日替わり弁当', '唐揚げ単品', '緑茶'],
+            'category': ['お弁当', '惣菜', 'ドリンク'],
+            'price': [800, 350, 150],
+            'soldout': [0, 0, 1] # 0: 販売中, 1: 売り切れ
+        }
+        df = pd.DataFrame(template_data)
+
+        # Excelファイルをメモリ上で作成
+        output = io.BytesIO()
+        df.to_excel(output, index=False, sheet_name='メニュー')
+        output.seek(0)
+
+        # ファイルとして送信
+        return send_file(
+            output,
+            mimetype='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+            as_attachment=True,
+            download_name='menu_template.xlsx'
+        )
+    except Exception as e:
+        flash(f"テンプレートファイルの生成中にエラーが発生しました: {e}", "error")
+        return redirect(url_for('stores_detail.menu_registration'))
+
+
+@stores_detail_bp.route('/menu-registration', methods=['GET'])
+def menu_registration():
+    if 'store_id' not in session:
+        flash("ログインしてください", "warning")
+        return redirect(url_for('store.store_login'))
+
+    store_id = session['store_id']
+    store_name = session.get('store_name', 'ゲスト')
+    
+    conn = get_db_connection()
+    try:
+        existing_menus = conn.execute(
+            "SELECT menu_id, menu_name, category, price, soldout FROM menus WHERE store_id = ? ORDER BY menu_id DESC",
+            (store_id,)
+        ).fetchall()
+    except sqlite3.Error as e:
+        flash(f"メニューの読み込み中にエラーが発生しました: {e}", "error")
+        existing_menus = []
+    finally:
+        conn.close()
+
+    return render_template(
+        'stores_detail/menu_registration.html',
+        store_name=store_name,
+        menus=[dict(row) for row in existing_menus]
+    )
+
+
+@stores_detail_bp.route('/menu-preview', methods=['POST'])
+def menu_preview():
+    if 'store_id' not in session:
+        flash("ログインしてください", "warning")
+        return redirect(url_for('store.store_login'))
+
+    menus_to_check = []
+    errors = []
+    file = request.files.get('product_csv')
+
+    # 1. ファイルアップロードの処理
+    if file and file.filename:
+        menus_data, file_error = parse_menu_file(file)
+        if file_error:
+            flash(file_error, 'error')
+            return redirect(url_for('stores_detail.menu_registration'))
+        menus_to_check, errors = validate_menu_data(menus_data)
+
+    # 2. 手動入力の処理 (ファイルがない場合)
+    else:
+        product_name = request.form.get('product_name')
+        product_price_str = request.form.get('product_price')
+
+        if product_name or product_price_str:
+            if not product_name or not product_price_str:
+                flash('手動で入力する場合、商品名と値段の両方が必須です。', 'error')
+                return redirect(url_for('stores_detail.menu_registration'))
+            
+            manual_data = [{
+                'menu_name': product_name,
+                'price': product_price_str,
+                'category': request.form.get('product_description', ''),
+                'soldout': '0'
+            }]
+            menus_to_check, errors = validate_menu_data(manual_data)
+        
+        # 3. ファイルも手動入力もない場合
+        else:
+            flash('登録するデータをアップロードするか、フォームに入力してください。', 'error')
+            return redirect(url_for('stores_detail.menu_registration'))
+
+    if errors:
+        for error in errors:
+            flash(error, 'warning')
+        if not menus_to_check:
+            flash('有効なデータがなかったため、プレビューできませんでした。', 'error')
+            return redirect(url_for('stores_detail.menu_registration'))
+
+    if not menus_to_check:
+        flash('登録するデータがありません。', 'info')
+        return redirect(url_for('stores_detail.menu_registration'))
+
+    session['menus_to_confirm'] = menus_to_check
+    return redirect(url_for('stores_detail.menu_check'))
+
+
+@stores_detail_bp.route('/menu-check', methods=['GET'])
+def menu_check():
+    if 'store_id' not in session:
+        flash("ログインしてください", "warning")
+        return redirect(url_for('store.store_login'))
+    
+    menus_to_check = session.get('menus_to_confirm', [])
+    if not menus_to_check:
+        flash('確認するメニューがありません。登録画面からやり直してください。', 'info')
+        return redirect(url_for('stores_detail.menu_registration'))
+
+    store_name = session.get('store_name', 'ゲスト')
+    return render_template(
+        'stores_detail/menu_check.html',
+        store_name=store_name,
+        menus_to_check=menus_to_check
+    )
+
+
+@stores_detail_bp.route('/menu-finalize', methods=['POST'])
+def menu_finalize():
+    if 'store_id' not in session:
+        flash("ログインしてください", "warning")
+        return redirect(url_for('store.store_login'))
+
+
+    store_id = session['store_id']
+    
+    menus_data_str = request.form.get('menus_data')
+    if not menus_data_str:
+        flash('登録データが見つかりませんでした。', 'error')
+        return redirect(url_for('stores_detail.menu_registration'))
+    
+    try:
+        menus_to_insert = json.loads(menus_data_str)
+    except json.JSONDecodeError:
+        flash('登録データの形式が不正です。', 'error')
+        return redirect(url_for('stores_detail.menu_registration'))
+
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    inserted_count = 0
+    try:
+        for menu in menus_to_insert:
+            cursor.execute(
+                "INSERT INTO menus (store_id, menu_name, category, price, soldout) VALUES (?, ?, ?, ?, ?)",
+                (store_id, menu['menu_name'], menu['category'], menu['price'], menu['soldout'])
+            )
+            inserted_count += 1
+        conn.commit()
+        flash(f'{inserted_count}件のメニューを登録しました。', 'success')
+    except sqlite3.Error as e:
+        conn.rollback()
+        flash(f"データベースへの登録中にエラーが発生しました: {e}", "error")
+    finally:
+        conn.close()
+        session.pop('menus_to_confirm', None)
+
+    return redirect(url_for('stores_detail.menu_registration'))
+
+
+@stores_detail_bp.route('/menu-delete/<int:menu_id>', methods=['POST'])
+def menu_delete(menu_id):
+    if 'store_id' not in session:
+        flash("ログインしてください", "warning")
+        return redirect(url_for('store.store_login'))
+    
+    store_id = session['store_id']
+    conn = get_db_connection()
+    try:
+        cursor = conn.cursor()
+        cursor.execute("DELETE FROM menus WHERE menu_id = ? AND store_id = ?", (menu_id, store_id))
+        conn.commit()
+        if cursor.rowcount > 0:
+            flash("メニューを削除しました。", "success")
+        else:
+            flash("削除対象のメニューが見つからないか、権限がありません。", "error")
+    except sqlite3.Error as e:
+        flash(f"削除中にエラーが発生しました: {e}", "error")
+    finally:
+        conn.close()
+
+    return redirect(url_for('stores_detail.menu_registration'))
+
 
 
 @stores_detail_bp.route('/order-list')
@@ -233,7 +347,7 @@ def order_list():
             orders_dict[order_id] = {
                 'id': order_id, 'datetime': row['datetime'], 'status': row['status'],
                 'user_name': row['u_name'], 'total_amount': row['total_amount'],
-                'items_list': [] # ★★★ キー名を'items'から'items_list'に変更 ★★★
+                'items_list': []
             }
         orders_dict[order_id]['items_list'].append({
             'name': row['menu_name'], 'quantity': row['quantity'], 'price': row['price_at_order']
@@ -245,7 +359,6 @@ def order_list():
 
 @stores_detail_bp.route('/procedure')
 def procedure():
-    # ログインチェック
     if 'store_id' not in session:
         flash("ログインしてください")
         return redirect(url_for('store.store_login'))
@@ -256,7 +369,6 @@ def procedure():
 
 @stores_detail_bp.route('/paypay_linking')
 def paypay_linking():
-    # ログインチェック
     if 'store_id' not in session:
         flash("ログインしてください")
         return redirect(url_for('store.store_login'))
@@ -267,19 +379,17 @@ def paypay_linking():
 
 @stores_detail_bp.route('/store_info')
 def store_info():
-    # ログインチェック
     if 'store_id' not in session:
         flash("ログインしてください")
         return redirect(url_for('store.store_login'))
 
     store_name = session.get('store_name', 'ゲスト')
 
-    # SQLiteからストア情報を取得
-    conn = sqlite3.connect('app.db')
-    conn.row_factory = sqlite3.Row  # dictのようにアクセスできる
+    conn = get_db_connection()
     cur = conn.cursor()
-    cur.execute("SELECT store_name, email, location, representative, description, created_at FROM store")
-    stores = cur.fetchall()
+    cur.execute("SELECT store_name, email, location, representative, description, created_at FROM store WHERE store_id = ?", (session['store_id'],))
+    store_data = cur.fetchone()
     conn.close()
 
-    return render_template('stores_detail/store_info.html', store_name=store_name, stores=stores)
+    return render_template('stores_detail/store_info.html', store_name=store_name, store=store_data)
+
