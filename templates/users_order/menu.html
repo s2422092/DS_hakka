@@ -5,6 +5,25 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>メニュー - モバおる</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/users_order.css') }}">
+    
+    <!-- ★★★ このページ専用のスタイルを追加 ★★★ -->
+    <style>
+        .add-to-cart-btn {
+            transition: all 0.3s ease;
+        }
+        .add-to-cart-btn.loading {
+            background-color: #777;
+            cursor: wait;
+        }
+        .add-to-cart-btn.success {
+            background-color: #28a745; /* 緑色 */
+            color: white;
+            transform: scale(1.05); /* 少し大きくする */
+        }
+        .add-to-cart-btn:disabled {
+            opacity: 0.7;
+        }
+    </style>
 </head>
 <body>
 
@@ -40,9 +59,6 @@
 </div>
 
 <main class="container">
-    <div class="filter-bar">
-        </div>
-
     <div class="menu-grid">
         {% for item in menu_items %}
         <div class="menu-card" data-menu-id="{{ item['menu_id'] }}">
