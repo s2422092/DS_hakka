@@ -44,9 +44,13 @@ def store_home_menu():
     cur = conn.cursor()
     cur.execute("SELECT menu_name, price, category, soldout FROM menus WHERE store_id = ?", (store_id,))
     menus = cur.fetchall()
+    menu_items = conn.execute("SELECT menu_id, menu_name, category, price FROM menus WHERE store_id = ? AND soldout = 0", (store_id,)).fetchall()
+    categories = conn.execute("""SELECT DISTINCT category FROM menus WHERE store_id = ? AND soldout = 0""", (store_id,)).fetchall()
+    categories = [row['category'] for row in categories if row['category']]  # Noneを除外
+
     conn.close()
 
-    return render_template('stores_detail/store_home_menu.html', store_name=store_name, menus=menus)
+    return render_template('stores_detail/store_home_menu.html', store_name=store_name, menus=menus,menu_items=menu_items, categories=categories)
 
 
 # --- ヘルパー関数（CSV/Excelファイルを読み込む）---
