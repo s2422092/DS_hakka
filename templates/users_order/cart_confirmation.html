@@ -12,7 +12,8 @@
     <header class="main-header">
         <div class="store-name">モバおる - {{ store_name }}</div>
         <div class="user-info">
-            <span>{{ u_name if u_name else "ゲスト" }}</span>
+            <span>ログイン中: {{ u_name if u_name else "ゲスト" }}</span>
+            <a href="{{ url_for('users_home.logout') }}" class="btn btn-danger btn-sm">ログアウト</a>
         </div>
     </header>
 
