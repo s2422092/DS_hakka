@@ -1,57 +1,75 @@
 document.addEventListener('DOMContentLoaded', function () {
     const mapElement = document.getElementById('map');
     const locationData = mapElement.getAttribute('data-locations');
-    const locations = JSON.parse(locationData);
-    // ★ 変更点 1: HTMLからURLのひな形を取得
+    let locations = JSON.parse(locationData);
     const menuUrlTemplate = mapElement.getAttribute('data-menu-url-template');
 
-    const map = L.map('map').setView([35.6769, 139.7661], 10);
+    // 地図中心を店舗の平均緯度経度に設定（あれば）
+    let centerLat = 35.6769; // デフォルト東京
+    let centerLng = 139.7661;
 
-    // タイルレイヤー
+    const map = L.map('map').setView([centerLat, centerLng], 10);
+
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
         attribution: '© OpenStreetMap contributors'
     }).addTo(map);
 
-    const markers = [];
+    let markers = [];
 
-    locations.forEach(loc => {
-        // ★ 変更点 2: ひな形から正しいURLを生成
-        // url_forで生成された /menu/0 の '0' の部分を実際のIDで置換
-        const menuUrl = menuUrlTemplate.replace('/0', '/' + loc.id);
+    function addMarkers(locs) {
+        // 既存マーカー削除
+        markers.forEach(m => map.removeLayer(m));
+        markers = [];
 
-        // ポップアップの内容（装飾と絵文字付き）
-        const popupContent = `
-            <div style="font-size: 1em; line-height: 1.5; max-width: 220px;">
-                <div style="font-size: 1.5em;">📍</div>
-                <a href="${menuUrl}" style="font-weight:bold; color:#007bff; text-decoration: none;">
-                    ${loc.store_name || '店舗名未登録'}
-                </a><br>
-                <span style="color:#444;">メール: ${loc.email || '未登録'}</span><br>
-                <span style="color:#444;">担当者: ${loc.representative || '不明'}</span><br>
-                <span style="color:#444;">説明: ${loc.description || 'なし'}</span><br>
-                <span style="font-size: 0.8em; color: gray;">※クリックでメニュー画面へ</span>
-            </div>
-        `;
+        locs.forEach(loc => {
+            const menuUrl = menuUrlTemplate.replace('/0', '/' + loc.id);
 
-        const marker = L.marker([loc.lat, loc.lng])
-            .addTo(map)
-            .bindPopup(popupContent);
+            const popupContent = `
+                <div style="font-size: 1em; line-height: 1.5; max-width: 220px;">
+                    <div style="font-size: 1.5em;">📍</div>
+                    <a href="${menuUrl}" style="font-weight:bold; color:#007bff; text-decoration: none;">
+                        ${loc.store_name || '店舗名未登録'}
+                    </a><br>
+                    <span style="color:#444;">メール: ${loc.email || '未登録'}</span><br>
+                    <span style="color:#444;">担当者: ${loc.representative || '不明'}</span><br>
+                    <span style="color:#444;">説明: ${loc.description || 'なし'}</span><br>
+                    <span style="font-size: 0.8em; color: gray;">※クリックでメニュー画面へ</span>
+                </div>
+            `;
 
-        // ホバーで開く
-        marker.on('mouseover', function () {
-            this.openPopup();
+            const marker = L.marker([loc.lat, loc.lng])
+                .addTo(map)
+                .bindPopup(popupContent);
+
+            marker.on('mouseover', function () { this.openPopup(); });
+            marker.on('mouseout', function () { this.closePopup(); });
+            marker.on('click', function () { window.location.href = menuUrl; });
+
+            markers.push(marker);
         });
+    }
 
-        // ホバー外れると閉じる
-        marker.on('mouseout', function () {
-            this.closePopup();
+    // 初期表示
+    addMarkers(locations);
+
+    // 検索機能
+    const searchInput = document.getElementById('store-search');
+    if (searchInput) {
+        searchInput.addEventListener('input', function () {
+            const keyword = this.value.trim().toLowerCase();
+            const filtered = locations.filter(loc => loc.store_name.toLowerCase().includes(keyword));
+            addMarkers(filtered);
+
+            // サイドバー店舗リストの表示切替（DOM操作）
+            const storeListItems = document.querySelectorAll('.store-list li');
+            storeListItems.forEach(li => {
+                const text = li.textContent.toLowerCase();
+                if (text.includes(keyword)) {
+                    li.style.display = '';
+                } else {
+                    li.style.display = 'none';
+                }
+            });
         });
-
-        // ★ 変更点 3: クリックで生成した正しいURLに遷移
-        marker.on('click', function () {
-            window.location.href = menuUrl;
-        });
-
-        markers.push(marker);
-    });
+    }
 });
