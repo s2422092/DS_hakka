@@ -456,3 +456,31 @@ body {
     margin-left: auto; /* 右側に移動させる */
 
 }
+
+
+
+.category-buttons {
+    display: flex;
+    justify-content: flex-start;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-bottom: 10px;
+}
+
+.category-btn {
+    padding: 6px 12px;
+    border: 1px solid #ccc;
+    background-color: #f0f0f0;
+    cursor: pointer;
+    border-radius: 4px;
+    font-size: 14px;
+    user-select: none;
+    transition: background-color 0.3s ease;
+}
+
+.category-btn:hover,
+.category-btn.active {
+    background-color: #00a2ff;
+    color: white;
+    border-color: #00a2ff;
+}

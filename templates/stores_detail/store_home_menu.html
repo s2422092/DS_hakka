@@ -8,6 +8,7 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='css/stores_detail.css') }}">
     
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="{{ url_for('static', filename='js/store_menu.js') }}"></script>
 </head>
 <body>
         <header class="site-header">
@@ -36,6 +37,14 @@
     
 
     <main class="main-content">
+
+        <div class="category-buttons">
+            <button class="category-btn" data-category="all">すべて</button>
+            {% for cat in categories %}
+                <button class="category-btn" data-category="{{ cat }}">{{ cat }}</button>
+            {% endfor %}
+        </div>
+
         <div class="sidebar">
             <input type="search" id="menu-search" placeholder="商品名で検索..." />
         </div>
@@ -45,12 +54,14 @@
             {% if menus %}
             <ul class="menu-list">
                 {% for menu in menus %}
-                <li class="menu-item">
-                    <div class="menu-name">{{ menu['menu_name'] }}</div>
+                <li class="menu-item menu-card" data-menu-id="{{ menu['menu_id'] }}">
+                    <div class="menu-name item-name">{{ menu['menu_name'] }}</div>
                     <div class="menu-info">
                         <span class="price">{{ menu['price'] }}円</span>
-                        <span class="category">カテゴリ: {{ menu['category'] or '未分類' }}</span>
-                        {% if menu['soldout'] %}<span class="soldout">売り切れ</span>{% endif %}
+                        <span class="category item-category">{{ menu['category'] or '未分類' }}</span>
+                        {% if menu['soldout'] %}
+                            <span class="soldout">売り切れ</span>
+                        {% endif %}
                     </div>
                 </li>
                 {% endfor %}
@@ -59,6 +70,7 @@
             <p>登録されている商品がありません。</p>
             {% endif %}
         </div>
+        
 
 
         
