@@ -76,6 +76,8 @@ def map_shop():
     return render_template('users_home/map_shop.html', stores=stores, u_name=u_name)
 
 
+from collections import defaultdict
+
 @users_home_bp.route('/payment_history')
 def payment_history():
     if 'id' not in session:
@@ -106,10 +108,52 @@ def payment_history():
     payment_history_list = conn.execute(query, (user_id,)).fetchall()
     conn.close()
 
+    # 注文IDごとにグルーピング
+    grouped_history = defaultdict(list)
+    for item in payment_history_list:
+        grouped_history[item['order_id']].append(item)
+
     return render_template(
         'users_home/payment_history.html',
         u_name=u_name,
-        history=payment_history_list
+        grouped_history=grouped_history  # ← ここを変更
+    )
+
+
+@users_home_bp.route('/details_payment_history/<int:order_id>')
+def details_payment_history(order_id):
+    if 'id' not in session:
+        flash("ログインしてください")
+        return redirect(url_for('users_login.login'))
+
+    user_id = session['id']
+    u_name = session.get('u_name', 'ゲスト')
+
+    conn = get_db_connection()
+    query = """
+        SELECT
+            o.order_id,
+            o.datetime,
+            o.total_amount,
+            o.status,
+            s.store_name,
+            m.menu_name,
+            oi.quantity,
+            oi.price_at_order
+        FROM orders AS o
+        JOIN store AS s ON o.store_id = s.store_id
+        JOIN order_items AS oi ON o.order_id = oi.order_id
+        JOIN menus AS m ON oi.menu_id = m.menu_id
+        WHERE o.user_id = ? AND o.order_id = ?
+        ORDER BY oi.order_item_id ASC;
+    """
+    payment_details = conn.execute(query, (user_id, order_id)).fetchall()
+    conn.close()
+
+    return render_template(
+        'users_home/details_payment_history.html',
+        u_name=u_name,
+        payment_details=payment_details
     )
 
 @users_home_bp.route('/users_data')

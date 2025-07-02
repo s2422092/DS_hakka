@@ -369,3 +369,34 @@ body {
     color: red;
     font-weight: bold;
 }
+
+/* 検索欄のスタイル */
+.sidebar {
+    position: absolute; /* 親の位置に関係なく配置を制御 */
+    right: 20px; /* 画面の右端から間隔を調整 */
+    top: 230px; /* 必要に応じて上からの位置を設定（ヘッダーなどを避ける） */
+    z-index: 100; /* 他の要素に重ならないように調整 */
+    width: 250px; /* 横幅を広げる */
+}
+
+/* 検索ボックスのスタイル */
+.sidebar input[type="search"] {
+    width: 100%; /* サイドバーいっぱいに広げる */
+    padding: 15px; /* 内側の余白を増やして高さを調整 */
+    font-size: 1.0em; /* フォントサイズを大きくする */
+    border: 1px solid #ccc; /* ボーダーラインを維持 */
+    border-radius: 10px; /* 角の丸みを調整 */
+    box-sizing: border-box; /* パディングを含めた総幅を使う */
+}
+
+/* 注文リストページの検索欄 */
+.sub-navigation input[type="search"] {
+    width: 250px; /* 横幅を広げる */
+    padding: 15px; /* 内側の余白を増やして高さを調整 */
+    font-size: 1.0em; /* フォントサイズを大きくする */
+    border: 1px solid #ccc; /* ボーダーラインを維持 */
+    border-radius: 10px; /* 角の丸みを調整 */
+    box-sizing: border-box; /* パディングを含めた総幅を使う */
+    margin-left: auto; /* 右側に移動させる */
+
+}
