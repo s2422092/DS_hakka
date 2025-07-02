@@ -452,7 +452,7 @@ def finalize_paypay_order():
         cursor.execute("""
             INSERT INTO orders (user_id, store_id, status, datetime, payment_method, total_amount)
             VALUES (?, ?, ?, ?, ?, ?)
-        """, (user_id, store_id, 'completed', current_time, 'PayPay', total_price))
+        """, (user_id, store_id, '注文受付中', current_time, 'PayPay', total_price))
         
         order_id = cursor.lastrowid
 
