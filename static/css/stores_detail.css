@@ -484,3 +484,33 @@ body {
     color: white;
     border-color: #00a2ff;
 }
+
+/* 商品別売上ランキング テーブルスタイル */
+.chart-container table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+    font-size: 0.95em;
+    color: #333;
+}
+
+.chart-container th,
+.chart-container td {
+    padding: 12px 15px;
+    text-align: center;
+    border-bottom: 1px solid #e0e0e0;
+}
+
+.chart-container th {
+    background-color: #f8f9fa;
+    font-weight: bold;
+    color: #444;
+}
+
+.chart-container tbody tr:hover {
+    background-color: #f1f9ff;
+}
+
+.chart-container tbody td {
+    font-size: 0.95em;
+}
