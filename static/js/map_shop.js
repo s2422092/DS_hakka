@@ -7,12 +7,6 @@ document.addEventListener('DOMContentLoaded', function () {
     // 地図中心を店舗の平均緯度経度に設定（あれば）
     let centerLat = 35.6769; // デフォルト東京
     let centerLng = 139.7661;
-    if (locations.length > 0) {
-        const sumLat = locations.reduce((acc, loc) => acc + loc.lat, 0);
-        const sumLng = locations.reduce((acc, loc) => acc + loc.lng, 0);
-        centerLat = sumLat / locations.length;
-        centerLng = sumLng / locations.length;
-    }
 
     const map = L.map('map').setView([centerLat, centerLng], 10);
 

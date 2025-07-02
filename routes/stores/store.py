@@ -37,6 +37,28 @@ def info_confirmed():
     return render_template('stores/info_confirmed.html', store=store_info)
 
 
+from geopy.geocoders import Nominatim
+import time
+
+geolocator = Nominatim(user_agent="store_locator")
+
+def get_lat_lng(place_name):
+    """
+    Nominatimを使って地名から緯度・経度を取得する。
+    連続リクエストを避けるため1秒スリープを入れる。
+    """
+    try:
+        location = geolocator.geocode(place_name, timeout=10)
+        time.sleep(1)  # リクエスト間隔を空ける
+        if location:
+            return location.latitude, location.longitude
+        else:
+            return None, None
+    except Exception as e:
+        print(f"Nominatim取得エラー: {e}")
+        return None, None
+
+
 @store_bp.route('/registration_complete', methods=['POST'])
 def registration_complete():
     store_info = session.get('store_info')
@@ -44,24 +66,16 @@ def registration_complete():
         flash("セッションが切れています。もう一度入力してください。")
         return redirect(url_for('store.store_registration'))
 
-    # 営業時間説明文
     weekend_info = "休業" if store_info['weekend_closed'] == '1' else f"{store_info['weekend_open']}〜{store_info['weekend_close']}"
     description = f"月〜金: {store_info['weekday_open']}〜{store_info['weekday_close']}, 土日祝: {weekend_info}"
 
-    # 緯度経度取得
-    geolocator = Nominatim(user_agent="store_locator")
-    try:
-        location_result = geolocator.geocode(store_info['location'], timeout=10)
-        latitude = location_result.latitude if location_result else None
-        longitude = location_result.longitude if location_result else None
-    except:
-        latitude = longitude = None
+    # 緯度経度取得関数を呼ぶ
+    latitude, longitude = get_lat_lng(store_info['location'])
 
     try:
         conn = sqlite3.connect('app.db')
         cursor = conn.cursor()
 
-        # store テーブルに挿入
         cursor.execute("""
             INSERT INTO store (store_name, email, password, location, representative, description)
             VALUES (?, ?, ?, ?, ?, ?)
@@ -75,7 +89,6 @@ def registration_complete():
         ))
         store_id = cursor.lastrowid
 
-        # locations テーブルに挿入
         if latitude and longitude:
             cursor.execute("""
                 INSERT INTO locations (location_title, travel_data_id, latitude, longitude)
@@ -92,7 +105,6 @@ def registration_complete():
         flash("このメールアドレスはすでに登録されています")
         return redirect(url_for('store.store_registration'))
 
-    # 緯度経度をテンプレートへ渡して表示
     return render_template('stores/registration_complete.html',
                            latitude=latitude,
                            longitude=longitude,
