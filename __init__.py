@@ -11,7 +11,7 @@ def create_app():
     from routes.users_home.users_home import users_home_bp
     from routes.users_login.users_login import users_login_bp
     from routes.users_order.users_order import users_order_bp
-    from routes.store_home_relation.store_home_relation import store_home_relation_bp
+    from routes.stores_home_relation.stores_home_relation import stores_home_relation_bp
 
 
     app.register_blueprint(general_bp)
@@ -20,7 +20,7 @@ def create_app():
     app.register_blueprint(users_home_bp)
     app.register_blueprint(users_login_bp)
     app.register_blueprint(users_order_bp)
-    app.register_blueprint(store_home_relation_bp)
+    app.register_blueprint(stores_home_relation_bp)
 
 
     return app
