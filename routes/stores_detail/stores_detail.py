@@ -243,6 +243,28 @@ def order_list():
     orders_list = list(orders_dict.values())
     return render_template('stores_detail/order_list.html', orders=orders_list, store_name=store_name)
 
+@stores_detail_bp.route('/update_status/<int:order_id>', methods=['POST'])
+def update_order_status(order_id):
+    new_status = request.form.get('status')
+    
+    conn = get_db_connection()
+    cursor = conn.cursor()
+
+    # `orders`テーブルの`status`を更新
+    cursor.execute("UPDATE orders SET status = ? WHERE order_id = ?", (new_status, order_id))
+
+    # 履歴ログの挿入（order_status_logがあれば）
+    cursor.execute("""
+        INSERT INTO order_status_log (order_id, status)
+        VALUES (?, ?)
+    """, (order_id, new_status))
+
+    conn.commit()
+    conn.close()
+
+    flash(f"注文 {order_id} の状態を「{new_status}」に更新しました")
+    return redirect(url_for('stores_detail.order_list'))
+
 
 @stores_detail_bp.route('/procedure')
 def procedure():
