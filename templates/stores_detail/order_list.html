@@ -42,19 +42,31 @@
                 <span>注文状況</span>
                 <span>注文時間</span>
             </div>
-
             {% for order in orders %}
             <div class="order-item">
                 <span>{{ order.id }}</span>
                 <td>
                     <ul>
-                    {% for item in order.items_list %}  <li>{{ item.name }} ({{ item.quantity }}個)</li>
+                    {% for item in order.items_list %}
+                        <li>{{ item.name }} ({{ item.quantity }}個)</li>
                     {% endfor %}
                     </ul>
                 </td>
                 <span>{{ order.user_name }}</span>
                 <span>{{ order.total_amount }}円</span>
-                <span>{{ order.status }}</span>
+            
+                <!-- 注文状況を選択して更新できるようにする -->
+                <td>
+                    <form action="{{ url_for('stores_detail.update_order_status', order_id=order.id) }}" method="post">
+                        <select name="status">
+                            {% for s in ['注文受付中', '受付完了', '商品作成中', '作成直前', '受け取り待ち'] %}
+                                <option value="{{ s }}" {% if order.status == s %}selected{% endif %}>{{ s }}</option>
+                            {% endfor %}
+                        </select>
+                        <button type="submit">更新</button>
+                    </form>
+                </td>
+            
                 <span>{{ order.datetime }}</span>
             </div>
             {% else %}
@@ -62,6 +74,7 @@
                 <p>現在、新しい注文はありません。</p>
             </div>
             {% endfor %}
+            
         </div>
     </main>
 </body>
