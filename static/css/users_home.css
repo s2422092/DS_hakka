@@ -237,3 +237,162 @@ main ul li {
     font-size: 1em;
     color: #555;
 }
+
+
+/* 決済履歴のリスト全体 */
+.history-list-container {
+    margin-top: 30px;
+    border: 1px solid #ccc;
+    border-radius: 10px;
+    overflow: hidden;
+    font-family: Arial, sans-serif;
+}
+
+/* 各履歴行の共通スタイル */
+.history-item {
+    display: grid;
+    grid-template-columns: 1fr 2fr 2fr 1fr 2fr 2fr; /* 各列の比率 */
+    padding: 12px 15px;
+    align-items: center;
+    border-bottom: 1px solid #eee;
+    font-size: 0.95em;
+}
+
+/* ヘッダー行（太字＋背景色） */
+.history-header {
+    background-color: #f2f2f2;
+    font-weight: bold;
+}
+
+/* 偶数・奇数行の背景色 */
+.row-odd {
+    background-color: #ffffff;
+}
+
+.row-even {
+    background-color: #fafafa;
+}
+
+/* 注文履歴がないときの表示 */
+.no-history {
+    padding: 20px;
+    text-align: center;
+    color: #666;
+    background-color: #fefefe;
+    font-size: 1em;
+}
+
+
+.order-block {
+    border: 1px solid #ccc;
+    border-radius: 10px;
+    margin-bottom: 20px;
+    background-color: #fff;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    padding: 15px;
+}
+
+.order-header {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 10px;
+    font-weight: bold;
+    color: #333;
+}
+
+.order-item-row {
+    display: grid;
+    grid-template-columns: 2fr 2fr 1fr 1fr;
+    padding: 8px 0;
+    border-top: 1px solid #eee;
+    font-size: 0.95em;
+}
+
+.order-item-row:first-child {
+    border-top: none;
+}
+
+.order-link {
+    text-decoration: none;
+    color: inherit;
+    display: block;
+    transition: transform 0.2s;
+}
+
+.order-link:hover {
+    transform: scale(1.01);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+/* ナビゲーションを左寄せにするクラス（決済履歴詳細用） */
+.gray-section.left-align-nav {
+    justify-content: flex-start; /* 左揃え */
+    padding-left: 20px; /* 左余白を適度に設定 */
+}
+
+/* 決済履歴詳細ページ：全体のコンテナ */
+.details-container {
+    width: 90%;
+    max-width: 1000px;
+    margin: 40px auto;
+    padding: 20px;
+    background-color: #ffffff;
+    border: 1px solid #ddd;
+    border-radius: 10px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    font-family: Arial, sans-serif;
+}
+
+/* タイトルとサブタイトル */
+.details-title {
+    font-size: 1.8em;
+    color: #333;
+    margin-bottom: 10px;
+    text-align: center;
+}
+
+.details-subtitle {
+    font-size: 1.1em;
+    color: #555;
+    margin-bottom: 30px;
+    text-align: center;
+}
+
+/* テーブル全体 */
+.details-table {
+    width: 100%;
+    border-collapse: collapse;
+    background-color: #fff;
+}
+
+/* テーブルヘッダー */
+.details-table thead {
+    background-color: #ed7112;
+    color: #fff;
+}
+
+.details-table th {
+    padding: 12px 15px;
+    text-align: left;
+    font-weight: bold;
+}
+
+/* テーブルボディ */
+.details-table td {
+    padding: 12px 15px;
+    border-top: 1px solid #eee;
+    font-size: 0.95em;
+    color: #333;
+}
+
+/* 偶数行の背景色 */
+.details-table tbody tr:nth-child(even) {
+    background-color: #f9f9f9;
+}
+
+/* 戻るリンクを左に寄せるためのセクション */
+.gray-section.left-align-nav {
+    justify-content: flex-start;
+    padding-left: 20px;
+}
+
