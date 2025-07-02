@@ -311,3 +311,15 @@ main ul li {
 .order-item-row:first-child {
     border-top: none;
 }
+
+.order-link {
+    text-decoration: none;
+    color: inherit;
+    display: block;
+    transition: transform 0.2s;
+}
+
+.order-link:hover {
+    transform: scale(1.01);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
