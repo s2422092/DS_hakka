@@ -480,7 +480,7 @@ body {
 
 .category-btn:hover,
 .category-btn.active {
-    background-color: #609e7e;
+    background-color: #00a2ff;
     color: white;
-    border-color: #609e7e;
+    border-color: #00a2ff;
 }
