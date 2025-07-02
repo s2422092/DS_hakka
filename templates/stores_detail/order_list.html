@@ -8,14 +8,14 @@
 </head>
 <body>
     <!-- ユーザー情報セッション -->
-        <header class="site-header">
-            <h1>{{ store_name }} - 注文リスト</h1>
-            <div class="header-links">
-                <div class="store-name">ログイン中: {{ store_name if store_name else 'ゲスト' }}</div>
-                <a href="{{ url_for('stores_detail.store_info') }}">ストア情報</a>
-                <a href="{{ url_for('general.explamation') }}">ログアウト</a>
-            </div>
-        </header>
+    <header class="site-header">
+        <h1>{{ store_name }} - 注文リスト</h1>
+        <div class="header-links">
+            <div class="store-name">ログイン中: {{ store_name if store_name else 'ゲスト' }}</div>
+            <a href="{{ url_for('stores_detail.store_info') }}">ストア情報</a>
+            <a href="{{ url_for('general.explamation') }}">ログアウト</a>
+        </div>
+    </header>
     <!-- ユーザー情報セッション -->
 
     <nav class="main-nav">
@@ -34,29 +34,32 @@
 
     <main class="main-content">
         <div class="order-list-container">
-            <div class="order-item order-header">
-                <span>注文ID</span>
-                <span>注文商品 (数量)</span>
-                <span>注文者名</span>
-                <span>合計金額</span>
-                <span>注文状況</span>
-                <span>注文時間</span>
+            <!-- ヘッダー行 -->
+            <div class="order-header">
+                <div>注文ID</div>
+                <div>注文商品 (数量)</div>
+                <div>注文者名</div>
+                <div>合計金額</div>
+                <div>注文状況</div>
+                <div>注文時間</div>
             </div>
+
+            <!-- 注文データ行 -->
             {% for order in orders %}
             <div class="order-item">
-                <span>{{ order.id }}</span>
-                <td>
+                <div>{{ order.id }}</div>
+                <div>
                     <ul>
                     {% for item in order.items_list %}
                         <li>{{ item.name }} ({{ item.quantity }}個)</li>
                     {% endfor %}
                     </ul>
-                </td>
-                <span>{{ order.user_name }}</span>
-                <span>{{ order.total_amount }}円</span>
+                </div>
+                <div>{{ order.user_name }}</div>
+                <div>{{ order.total_amount }}円</div>
             
                 <!-- 注文状況を選択して更新できるようにする -->
-                <td>
+                <div>
                     <form action="{{ url_for('stores_detail.update_order_status', order_id=order.id) }}" method="post">
                         <select name="status">
                             {% for s in ['注文受付中', '受付完了', '商品作成中', '作成直前', '受け取り待ち'] %}
@@ -65,9 +68,9 @@
                         </select>
                         <button type="submit">更新</button>
                     </form>
-                </td>
+                </div>
             
-                <span>{{ order.datetime }}</span>
+                <div>{{ order.datetime }}</div>
             </div>
             {% else %}
             <div class="order-item no-orders">
