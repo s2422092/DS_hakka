@@ -41,16 +41,16 @@
         <div class="stats-container">
             <div class="stat-box">
                 <p>本日の売上</p>
-                <h2>{{ daily_sales | default('12,500') }} 円</h2>
+                <h2>{{ daily_sales }} 円</h2>
             </div>
             <div class="stat-box">
                 <p>本日の注文数</p>
-                <h2>{{ daily_orders | default('35') }} 件</h2>
+                <h2>{{ daily_orders }} 件</h2>
             </div>
             <div class="stat-box">
                 <p>今月の売上</p>
-                <h2>{{ monthly_sales | default('284,000') }} 円</h2>
-            </div>
+                <h2>{{ monthly_sales }} 円</h2>
+            </div>            
         </div>
 
         <div class="chart-container">

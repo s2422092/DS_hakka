@@ -8,6 +8,7 @@ from functools import wraps
 import io
 import json
 import pandas as pd
+from datetime import datetime, date
 
 # --- Blueprint の定義（URLのプレフィックス /stores を付与）---
 stores_detail_bp = Blueprint('stores_detail', __name__, url_prefix='/stores')
@@ -34,7 +35,8 @@ def store_home():
 
     # 商品ごとの売上金額合計を取得
     cursor.execute("""
-        SELECT m.menu_name, m.category,oi.price_at_order ,quantity,SUM(oi.quantity * oi.price_at_order) AS total_sales
+        SELECT m.menu_name, m.category, oi.price_at_order, quantity,
+               SUM(oi.quantity * oi.price_at_order) AS total_sales
         FROM order_items oi
         JOIN orders o ON oi.order_id = o.order_id
         JOIN menus m ON oi.menu_id = m.menu_id
@@ -44,14 +46,37 @@ def store_home():
     """, (store_id,))
     product_sales = cursor.fetchall()
 
+    # 本日の売上と注文数
+    today_str = date.today().isoformat()
+    cursor.execute("""
+        SELECT COALESCE(SUM(total_amount), 0) AS daily_sales,
+               COUNT(*) AS daily_orders
+        FROM orders
+        WHERE store_id = ? AND DATE(datetime) = ? AND status != 'canceled'
+    """, (store_id, today_str))
+    today_stats = cursor.fetchone()
+    daily_sales = today_stats['daily_sales']
+    daily_orders = today_stats['daily_orders']
+
+    # 今月の売上
+    first_day_of_month = date.today().replace(day=1).isoformat()
+    cursor.execute("""
+        SELECT COALESCE(SUM(total_amount), 0) AS monthly_sales
+        FROM orders
+        WHERE store_id = ? AND DATE(datetime) >= ? AND status != 'canceled'
+    """, (store_id, first_day_of_month))
+    monthly_sales = cursor.fetchone()['monthly_sales']
+
     conn.close()
 
     return render_template(
         'stores_detail/store_home.html',
         store_name=store_name,
-        product_sales=product_sales
+        product_sales=product_sales,
+        daily_sales=f"{daily_sales:,}",
+        daily_orders=f"{daily_orders:,}",
+        monthly_sales=f"{monthly_sales:,}"
     )
-
 
 # --- 店舗メニュー一覧表示 ---
 @stores_detail_bp.route('/store_home_menu')
