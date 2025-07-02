@@ -34,7 +34,7 @@ def store_home():
 
     # 商品ごとの売上金額合計を取得
     cursor.execute("""
-        SELECT m.menu_name, m.category,oi.price_at_order ,SUM(oi.quantity * oi.price_at_order) AS total_sales
+        SELECT m.menu_name, m.category,oi.price_at_order ,quantity,SUM(oi.quantity * oi.price_at_order) AS total_sales
         FROM order_items oi
         JOIN orders o ON oi.order_id = o.order_id
         JOIN menus m ON oi.menu_id = m.menu_id

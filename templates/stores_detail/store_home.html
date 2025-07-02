@@ -60,7 +60,8 @@
                     <tr>
                         <th>商品名</th>
                         <th>カテゴリ</th>
-                        <th>単価</th>
+                        <th>単価(円)</th>
+                        <th>個数</th>
                         <th>売上金額（円）</th>
                     </tr>
                 </thead>
@@ -70,6 +71,7 @@
                         <td>{{ row['menu_name'] }}</td>
                         <td>{{ row['category'] }}</td>
                         <td>{{ row['price_at_order']}}</td>
+                        <td>{{ row['quantity']}}</td>
                         <td>{{ "{:,}".format(row['total_sales']) }}</td>
                     </tr>
                     {% endfor %}
