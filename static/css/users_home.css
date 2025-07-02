@@ -323,3 +323,9 @@ main ul li {
     transform: scale(1.01);
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
+
+/* ナビゲーションを左寄せにするクラス（決済履歴詳細用） */
+.gray-section.left-align-nav {
+    justify-content: flex-start; /* 左揃え */
+    padding-left: 20px; /* 左余白を適度に設定 */
+}
