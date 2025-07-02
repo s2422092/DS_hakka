@@ -92,7 +92,11 @@ def registration_complete():
         flash("このメールアドレスはすでに登録されています")
         return redirect(url_for('store.store_registration'))
 
-    return render_template('stores/registration_complete.html')
+    # 緯度経度をテンプレートへ渡して表示
+    return render_template('stores/registration_complete.html',
+                           latitude=latitude,
+                           longitude=longitude,
+                           location=store_info['location'])
 
 
 from werkzeug.security import check_password_hash
