@@ -26,8 +26,32 @@ def store_home():
         flash("ログインしてください")
         return redirect(url_for('store.store_login'))
 
+    store_id = session['store_id']
     store_name = session.get('store_name', 'ゲスト')
-    return render_template('stores_detail/store_home.html', store_name=store_name)
+
+    conn = get_db_connection()
+    cursor = conn.cursor()
+
+    # 商品ごとの売上金額合計を取得
+    cursor.execute("""
+        SELECT m.menu_name, m.category,oi.price_at_order ,SUM(oi.quantity * oi.price_at_order) AS total_sales
+        FROM order_items oi
+        JOIN orders o ON oi.order_id = o.order_id
+        JOIN menus m ON oi.menu_id = m.menu_id
+        WHERE o.store_id = ? AND o.status != 'canceled'
+        GROUP BY m.menu_name, m.category
+        ORDER BY total_sales DESC
+    """, (store_id,))
+    product_sales = cursor.fetchall()
+
+    conn.close()
+
+    return render_template(
+        'stores_detail/store_home.html',
+        store_name=store_name,
+        product_sales=product_sales
+    )
+
 
 # --- 店舗メニュー一覧表示 ---
 @stores_detail_bp.route('/store_home_menu')

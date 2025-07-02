@@ -54,9 +54,29 @@
         </div>
 
         <div class="chart-container">
-            <h3>週間売上レポート</h3>
-            <canvas id="salesChart"></canvas>
+            <h3>商品別売上ランキング</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>商品名</th>
+                        <th>カテゴリ</th>
+                        <th>単価</th>
+                        <th>売上金額（円）</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for row in product_sales %}
+                    <tr>
+                        <td>{{ row['menu_name'] }}</td>
+                        <td>{{ row['category'] }}</td>
+                        <td>{{ row['price_at_order']}}</td>
+                        <td>{{ "{:,}".format(row['total_sales']) }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
         </div>
+        
     </main>
 
   
