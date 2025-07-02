@@ -10,6 +10,7 @@ document.addEventListener('DOMContentLoaded', function () {
     menuCards.forEach(card => {
         const menuId = card.dataset.menuId;
         const qtyInput = card.querySelector('.qty-input');
+        const addToCartBtn = card.querySelector('.add-to-cart-btn'); // ボタン要素を取得
 
         card.querySelector('.qty-up-btn').addEventListener('click', () => {
             qtyInput.value = parseInt(qtyInput.value) + 1;
@@ -22,8 +23,15 @@ document.addEventListener('DOMContentLoaded', function () {
             }
         });
 
-        card.querySelector('.add-to-cart-btn').addEventListener('click', () => {
+        addToCartBtn.addEventListener('click', () => {
             const quantity = parseInt(qtyInput.value);
+            
+            // ★★★ UIフィードバック開始 ★★★
+            // ボタンを無効化し、スタイルを変更
+            addToCartBtn.disabled = true;
+            addToCartBtn.classList.add('loading');
+            addToCartBtn.textContent = '追加中...';
+
             fetch(addCartUrl, {
                 method: 'POST',
                 headers: {
@@ -36,16 +44,36 @@ document.addEventListener('DOMContentLoaded', function () {
             })
             .then(response => response.json())
             .then(data => {
+                addToCartBtn.classList.remove('loading'); // ローディングスタイルを削除
+
                 if (data.error) {
                     displayFlashMessage(data.error, 'error');
+                    // エラー時はボタンを元に戻す
+                    addToCartBtn.textContent = 'カートに追加';
+                    addToCartBtn.disabled = false;
                 } else {
                     displayFlashMessage(data.message, 'success');
                     document.getElementById('cart-count').textContent = data.cart_count;
+
+                    // ★★★ 成功時のUIフィードバック ★★★
+                    addToCartBtn.classList.add('success');
+                    addToCartBtn.textContent = '追加しました ✔';
+
+                    // 2秒後にボタンを元の状態に戻す
+                    setTimeout(() => {
+                        addToCartBtn.classList.remove('success');
+                        addToCartBtn.textContent = 'カートに追加';
+                        addToCartBtn.disabled = false;
+                    }, 2000);
                 }
             })
             .catch(error => {
                 console.error('Error:', error);
                 displayFlashMessage('通信エラーが発生しました。', 'error');
+                // エラー時はボタンを元に戻す
+                addToCartBtn.classList.remove('loading');
+                addToCartBtn.textContent = 'カートに追加';
+                addToCartBtn.disabled = false;
             });
         });
     });
