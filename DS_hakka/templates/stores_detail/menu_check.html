@@ -30,11 +30,9 @@
     </style>
 </head>
 <body>
-
     <header class="site-header">
         <h1>{{ store_name }} - 登録内容の確認</h1>
     </header>
-
     <main class="main-container">
         <h2>以下の内容でメニューを登録しますか？</h2>
         
@@ -55,7 +53,7 @@
                             <td>{{ menu.menu_name }}</td>
                             <td>{{ menu.category }}</td>
                             <td>{{ menu.price }}</td>
-                            <td>{{ '売り切れ' if menu.soldout == 1 else '販売中' }}</td>
+                            <td>{{ '売り切れ' if menu.soldout == 1 else '在庫あり' }}</td>
                         </tr>
                         {% endfor %}
                     </tbody>
@@ -64,7 +62,6 @@
                 <p>確認するデータがありません。</p>
             {% endif %}
         </div>
-
         <form action="{{ url_for('stores_detail.menu_finalize') }}" method="POST">
             <!-- テンプレートエンジン(Jinja2)のtojsonフィルタでPythonのリストをJSON文字列に変換 -->
             <input type="hidden" name="menus_data" value='{{ menus_to_check | tojson | safe }}'>
@@ -75,6 +72,5 @@
             </div>
         </form>
     </main>
-
 </body>
 </html>
