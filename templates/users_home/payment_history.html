@@ -63,6 +63,7 @@
                                         <span>{{ item['store_name'] }}</span>
                                         <span>{{ item['menu_name'] }}</span>
                                         <span>{{ item['quantity'] }}個</span>
+                                        <span class="order-status">状態: {{ items[0]['status'] }}</span>
                                         <span>{{ item['price_at_order'] * item['quantity'] }}円</span>
                                     </div>
                                 {% endfor %}

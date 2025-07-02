@@ -85,39 +85,43 @@ def payment_history():
         return redirect(url_for('users_login.login'))
 
     user_id = session['id']
-    u_name = session.get('u_name', 'ゲスト')
 
     conn = get_db_connection()
+    cursor = conn.cursor()
+
     query = """
         SELECT
-            o.order_id,
-            o.datetime,
-            o.total_amount,
-            o.status,
-            s.store_name,
-            m.menu_name,
-            oi.quantity,
-            oi.price_at_order
+            o.order_id, o.datetime, o.status,
+            s.store_name, m.menu_name,
+            oi.quantity, oi.price_at_order
         FROM orders AS o
-        JOIN store AS s ON o.store_id = s.store_id
         JOIN order_items AS oi ON o.order_id = oi.order_id
         JOIN menus AS m ON oi.menu_id = m.menu_id
+        JOIN store AS s ON o.store_id = s.store_id
         WHERE o.user_id = ?
-        ORDER BY o.datetime DESC, o.order_id ASC;
+        ORDER BY o.datetime DESC;
     """
-    payment_history_list = conn.execute(query, (user_id,)).fetchall()
+    rows = cursor.execute(query, (user_id,)).fetchall()
     conn.close()
 
-    # 注文IDごとにグルーピング
-    grouped_history = defaultdict(list)
-    for item in payment_history_list:
-        grouped_history[item['order_id']].append(item)
+    # grouped by order_id
+    grouped_history = {}
+    for row in rows:
+        order_id = row['order_id']
+        if order_id not in grouped_history:
+            grouped_history[order_id] = []
+        grouped_history[order_id].append({
+            'datetime': row['datetime'],
+            'status': row['status'],
+            'store_name': row['store_name'],
+            'menu_name': row['menu_name'],
+            'quantity': row['quantity'],
+            'price_at_order': row['price_at_order']
+        })
 
-    return render_template(
-        'users_home/payment_history.html',
-        u_name=u_name,
-        grouped_history=grouped_history  # ← ここを変更
-    )
+    return render_template('users_home/payment_history.html',
+                           grouped_history=grouped_history,
+                           u_name=session.get('u_name'))
 
 
 @users_home_bp.route('/details_payment_history/<int:order_id>')
