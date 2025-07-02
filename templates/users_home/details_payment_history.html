@@ -35,12 +35,11 @@
     </div>
 
 
-    <div>
-        <!---ここにクリックした決済履歴の詳細ページを表示させる-->
-        <h1>注文詳細 - 注文番号: {{ payment_details[0]['order_id'] }}</h1>
-        <p>注文日時: {{ payment_details[0]['datetime'] }}</p>
-
-        <table>
+    <div class="details-container">
+        <h1 class="details-title">注文詳細 - 注文番号: {{ payment_details[0]['order_id'] }}</h1>
+        <p class="details-subtitle">注文日時: {{ payment_details[0]['datetime'] }}</p>
+    
+        <table class="details-table">
             <thead>
                 <tr>
                     <th>商品名</th>
@@ -60,8 +59,8 @@
                 {% endfor %}
             </tbody>
         </table>
-
     </div>
+    
 
 
 </body>

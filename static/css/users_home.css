@@ -329,3 +329,70 @@ main ul li {
     justify-content: flex-start; /* 左揃え */
     padding-left: 20px; /* 左余白を適度に設定 */
 }
+
+/* 決済履歴詳細ページ：全体のコンテナ */
+.details-container {
+    width: 90%;
+    max-width: 1000px;
+    margin: 40px auto;
+    padding: 20px;
+    background-color: #ffffff;
+    border: 1px solid #ddd;
+    border-radius: 10px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    font-family: Arial, sans-serif;
+}
+
+/* タイトルとサブタイトル */
+.details-title {
+    font-size: 1.8em;
+    color: #333;
+    margin-bottom: 10px;
+    text-align: center;
+}
+
+.details-subtitle {
+    font-size: 1.1em;
+    color: #555;
+    margin-bottom: 30px;
+    text-align: center;
+}
+
+/* テーブル全体 */
+.details-table {
+    width: 100%;
+    border-collapse: collapse;
+    background-color: #fff;
+}
+
+/* テーブルヘッダー */
+.details-table thead {
+    background-color: #ed7112;
+    color: #fff;
+}
+
+.details-table th {
+    padding: 12px 15px;
+    text-align: left;
+    font-weight: bold;
+}
+
+/* テーブルボディ */
+.details-table td {
+    padding: 12px 15px;
+    border-top: 1px solid #eee;
+    font-size: 0.95em;
+    color: #333;
+}
+
+/* 偶数行の背景色 */
+.details-table tbody tr:nth-child(even) {
+    background-color: #f9f9f9;
+}
+
+/* 戻るリンクを左に寄せるためのセクション */
+.gray-section.left-align-nav {
+    justify-content: flex-start;
+    padding-left: 20px;
+}
+
