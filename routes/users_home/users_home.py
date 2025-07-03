@@ -53,7 +53,7 @@ def map_shop():
                s.email, s.representative,
                l.latitude, l.longitude
         FROM store s
-        JOIN locations l ON s.store_id = l.travel_data_id
+        JOIN locations l ON s.store_id = l.store_id
         ORDER BY s.store_id
     """)
 
