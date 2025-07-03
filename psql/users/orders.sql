@@ -4,7 +4,7 @@ CREATE TABLE orders (
     store_id INTEGER NOT NULL,
     status TEXT DEFAULT '注文受付中' CHECK (
         status IN (
-            '注文受付中', '受付完了', '商品作成中', '作成直前', '受け取り待ち', 'completed', 'canceled'
+            '注文受付中', '受付完了', '商品作成中', '作成直前', '受け取り待ち', '受け取り完了', 'キャンセル'
         )
     ),
     datetime DATETIME NOT NULL,
