@@ -13,8 +13,8 @@
             ログイン中: {{ u_name if u_name else 'ゲスト' }}
         </span>
         <div class="user-links">
-            <a href="{{url_for('users_home.users_data')}}">ユーザー情報</a>
-            <a href="{{url_for('users_home.logout')}}">ログアウト</a>
+            <a href="{{ url_for('users_home.users_data') }}">ユーザー情報</a>
+            <a href="{{ url_for('users_home.logout') }}">ログアウト</a>
         </div>
     </div>
 
@@ -44,9 +44,9 @@
         <ul id="store-list">
             {% if stores %}
                 {% for store in stores %}
-                    <li>
+                    <li class="store-item">
                         <a href="{{ url_for('users_order.menu', store_id=store.id) }}" class="custom-link">
-                            <h3>{{ store.name }}</h3>
+                            <h3 class="store-name">{{ store.name }}</h3>
                             <p>{{ store.description }}</p>
                         </a>
                     </li>
@@ -56,7 +56,26 @@
             {% endif %}
         </ul>
     </main>
-    
 
+    
+    <script>
+        // 検索ボックスと店舗リストの要素を取得
+        const storeSearchBox = document.getElementById('store-search');
+        const storeList = document.getElementById('store-list');
+        const storeItems = storeList.querySelectorAll('.store-item');
+
+        // 検索ボックスの入力イベントを監視
+        storeSearchBox.addEventListener('input', function() {
+            const searchKeyword = this.value.toLowerCase(); // 小文字で比較
+            storeItems.forEach(item => {
+                const storeName = item.querySelector('.store-name').textContent.toLowerCase(); // 店舗名を取得
+                if (storeName.includes(searchKeyword)) {
+                    item.style.display = ''; // キーワードが含まれている場合は表示
+                } else {
+                    item.style.display = 'none'; // キーワードが含まれない場合は非表示
+                }
+            });
+        });
+    </script>
 </body>
 </html>
