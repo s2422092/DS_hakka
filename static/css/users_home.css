@@ -396,3 +396,86 @@ main ul li {
     padding-left: 20px;
 }
 
+/* --- 注文詳細ページ用 --- */
+
+/* 注文詳細コンテナをチケット風に調整 */
+.details-container {
+    background-color: #fff;
+    border: 2px dashed #007bff;  /* 青色の破線 */
+    border-radius: 16px;
+    padding: 30px;
+    margin: 40px auto;
+    max-width: 800px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    text-align: center;
+}
+
+/* タイトルとサブタイトルを中央寄せ & 色分け */
+.details-title {
+    font-size: 1.8em;
+    color: #007bff;
+    margin-bottom: 15px;
+    font-weight: bold;
+}
+
+.details-subtitle {
+    font-size: 1.1em;
+    color: #555;
+    margin-bottom: 30px;
+}
+
+/* テーブルの装飾 */
+.details-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+    background-color: #ffffff;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+/* テーブルヘッダーのデザイン */
+.details-table thead {
+    background-color: #007bff;
+    color: #fff;
+}
+
+.details-table th {
+    padding: 12px 15px;
+    text-align: center;
+    font-weight: bold;
+}
+
+/* テーブルボディのデザイン */
+.details-table td {
+    padding: 12px 15px;
+    text-align: center;
+    border-top: 1px solid #ddd;
+    font-size: 1em;
+    color: #333;
+}
+
+/* 偶数行を薄い背景に */
+.details-table tbody tr:nth-child(even) {
+    background-color: #f9f9f9;
+}
+
+
+
+
+
+.gray-section.left-align-nav a:hover {
+    text-decoration: underline;
+}
+
+/* ユーザー名も調整（青系統にしたい場合） */
+.username {
+    color: #ffffff;
+    font-size: 1.2em;
+}
+
+
+
+.gray-section ul li.active a {
+    color: white;
+    text-decoration: underline;
+}

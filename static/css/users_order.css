@@ -553,3 +553,73 @@ body {
     color: white;
     border-color: #609e7e;
 }
+
+/* --- 予約完了ページ用 --- */
+.reservation-number-text {
+    font-size: 1.2em;
+    margin: 20px 0;
+    text-align: center;
+}
+
+.order-id {
+    color: #007bff;  /* 青色 */
+    font-size: 1.6em;
+    font-weight: bold;
+}
+
+/* PayPay取引ID もわかりやすくする場合 */
+.paypay-id-text {
+    font-size: 1em;
+    margin-top: 10px;
+    text-align: center;
+}
+
+.merchant-id {
+    color: #28a745;  /* 緑色 */
+    font-weight: bold;
+}
+
+/* 情報テキスト */
+.info-text {
+    font-size: 1em;
+    color: #555;
+    margin-top: 20px;
+    text-align: center;
+}
+
+/* ボタン類 */
+.button-group {
+    display: flex;
+    justify-content: center;
+    margin-top: 30px;
+}
+
+.primary-button {
+    background-color: #007bff;
+    color: white;
+    padding: 12px 20px;
+    border-radius: 8px;
+    text-decoration: none;
+    font-size: 1.1em;
+    font-weight: bold;
+    transition: background-color 0.3s;
+}
+
+.primary-button:hover {
+    background-color: #0056b3;
+}
+
+/* --- チケット風の発券表示 --- */
+.ticket-box {
+    background-color: #fff;  /* 白背景 */
+    border: 2px dashed #007bff;  /* 青色の破線枠 */
+    border-radius: 16px;
+    padding: 30px;
+    margin: 30px auto;
+    max-width: 500px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    text-align: center;
+}
+
+/* 内部要素はそのまま使えます */
+

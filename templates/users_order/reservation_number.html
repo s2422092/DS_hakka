@@ -30,17 +30,20 @@
 
     <div class="container">
         <h1>注文が確定しました！</h1>
-        <p class="reservation-number-text">あなたの予約番号は: <strong class="order-id">{{ order_id }}</strong> です。</p>
+        <div class="ticket-box">
+            <p class="reservation-number-text">あなたの予約番号は: <strong class="order-id">{{ order_id }}</strong> です。</p>
+            
+            {% if merchant_payment_id and merchant_payment_id != 'N/A' %}
+            <p class="paypay-id-text">PayPay取引ID: <strong class="merchant-id">{{ merchant_payment_id }}</strong></p>
+            {% endif %}
         
-        {% if merchant_payment_id and merchant_payment_id != 'N/A' %}
-        <p class="paypay-id-text">PayPay取引ID: <strong class="merchant-id">{{ merchant_payment_id }}</strong></p>
-        {% endif %}
-
-        <p class="info-text">この番号を控えて、商品をお受け取りください。</p>
-        
-        <div class="button-group">
-            <a href="{{ url_for('users_home.home') }}" class="button primary-button">ホームに戻る</a>
+            <p class="info-text">この番号を控えて、商品をお受け取りください。</p>
+            
+            <div class="button-group">
+                <a href="{{ url_for('users_home.home') }}" class="button primary-button">ホームに戻る</a>
+            </div>
         </div>
+        
     </div>
 
 </body>
