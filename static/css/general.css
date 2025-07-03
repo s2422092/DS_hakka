@@ -50,7 +50,6 @@ body {
     border: 2px solid;
 }
 
-/* 店舗様ログインボタン (青) */
 .header-nav a.store-login {
     border-color: #007bff;
     color: #007bff;
@@ -59,7 +58,6 @@ body {
     background-color: rgba(0, 123, 255, 0.05);
 }
 
-/* ユーザーログインボタン (オレンジ) */
 .header-nav a.user-login {
     border-color: #ed7112;
     color: #ed7112;
@@ -68,7 +66,6 @@ body {
     background-color: rgba(237, 113, 18, 0.05);
 }
 
-/* 新規登録ボタン */
 .header-nav a.signup-button {
     background-color: #ed7112;
     color: #ffffff;
@@ -96,8 +93,7 @@ main {
     border-radius: 15px;
     background-image: url('/static/images/32974269_s.jpg');
     background-size: cover;
-    /* ★★★ ここを修正 ★★★ */
-    background-position: center 65%; /* 画像の表示位置を下にずらす */
+    background-position: center 80%;
     color: #ffffff;
     overflow: hidden;
 }
@@ -185,6 +181,8 @@ main {
     padding: 0 30px 30px 30px;
 }
 
+/* ★★★ ここからボタンのスタイルを修正・追加 ★★★ */
+
 /* ボタン共通スタイル */
 .button {
     display: inline-block;
@@ -194,39 +192,55 @@ main {
     font-size: 1.1em;
     font-weight: 700;
     transition: all 0.3s ease;
-    border: 1px solid transparent;
+    border: 2px solid transparent; /* 枠線の太さを統一 */
 }
 
-/* プライマリボタン (店舗側) */
+/* プライマリボタン (店舗側) - 青・塗りつぶし */
 .store-card .button.primary {
     background-color: #007bff;
     color: #ffffff;
+    border-color: #007bff;
 }
 .store-card .button.primary:hover {
     background-color: #0056b3;
+    border-color: #0056b3;
     transform: scale(1.03);
 }
 
-/* プライマリボタン (ユーザー側) */
+/* プライマリボタン (ユーザー側) - オレンジ・塗りつぶし */
 .user-card .button.primary {
     background-color: #ed7112;
     color: #ffffff;
+    border-color: #ed7112;
 }
 .user-card .button.primary:hover {
     background-color: #d1640f;
+    border-color: #d1640f;
     transform: scale(1.03);
 }
 
-/* セカンダリボタン */
-.button.secondary {
+/* セカンダリボタン (店舗側) - 青・枠線 */
+.store-card .button.secondary {
     background-color: #ffffff;
-    color: #333;
-    border-color: #e0e0e0;
+    color: #007bff;
+    border-color: #007bff;
 }
-.button.secondary:hover {
-    background-color: #f8f9fa;
-    border-color: #ccc;
+.store-card .button.secondary:hover {
+    background-color: rgba(0, 123, 255, 0.05);
 }
+
+/* セカンダリボタン (ユーザー側) - オレンジ・枠線 */
+.user-card .button.secondary {
+    background-color: #ffffff;
+    color: #ed7112;
+    border-color: #ed7112;
+}
+.user-card .button.secondary:hover {
+    background-color: rgba(237, 113, 18, 0.05);
+}
+
+/* ★★★ ここまでボタンのスタイルを修正・追加 ★★★ */
+
 
 /* --- How it Works Section --- */
 .how-it-works-section {
@@ -236,6 +250,7 @@ main {
     border-radius: 15px;
     margin-top: 40px;
     border-top: 1px solid #e9ecef;
+    scroll-margin-top: 100px;
 }
 
 .section-title {

@@ -14,7 +14,6 @@
 </head>
 
 <body>
-
     <header class="site-header">
         <div class="logo">モバオル</div>
         <nav class="header-nav">
@@ -35,6 +34,21 @@
         </section>
 
         <section class="selection-container">
+
+                <!-- 店舗オーナー向けカード -->
+            <div class="card store-card">
+                <img src="/static/images/5149647_s.jpg" alt="カフェで働く店員の様子" class="card-image">
+                <h2 class="card-title">店舗のオーナー様</h2>
+                <p class="card-description">
+                    使いやすい管理画面で<br>お店にモバイルオーダーを。<br>
+                    お客様に新しい便利さを提供し利用者UPへ。
+                </p>
+                <div class="card-actions">
+                    <a href="{{url_for('store.store_registration')}}" class="button primary">店舗登録はこちら</a>
+                    <a href="{{url_for('store.store_login')}}" class="button secondary">店舗ログイン</a>
+                </div>
+            </div>
+
             <!-- 一般利用者向けカード -->
             <div class="card user-card">
                 <img src="/static/images/27117522_s.jpg" alt="スマホでモバイルオーダーをしている様子" class="card-image">
@@ -50,18 +64,7 @@
             </div>
 
             <!-- 店舗オーナー向けカード -->
-            <div class="card store-card">
-                <img src="/static/images/5149647_s.jpg" alt="カフェで働く店員の様子" class="card-image">
-                <h2 class="card-title">店舗のオーナー様</h2>
-                <p class="card-description">
-                    使いやすい管理画面で<br>お店にモバイルオーダーを。<br>
-                    お客様に新しい便利さを提供し利用者UPへ。
-                </p>
-                <div class="card-actions">
-                    <a href="{{url_for('store.store_registration')}}" class="button primary">店舗登録はこちら</a>
-                    <a href="{{url_for('store.store_login')}}" class="button secondary">店舗ログイン</a>
-                </div>
-            </div>
+
         </section>
 
         <section id="how-it-works" class="how-it-works-section">
