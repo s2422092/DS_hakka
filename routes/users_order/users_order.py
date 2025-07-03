@@ -492,15 +492,18 @@ def finalize_paypay_order():
 def reservation_number():
     """予約（注文）番号表示ページ"""
     # セッションからlast_order_idとpaypay_merchant_payment_idを取得し、同時に削除
-    order_id = session.pop('last_order_id', 'N/A') 
-    merchant_payment_id = session.pop('paypay_merchant_payment_id', 'N/A')
-    
-    # どちらか一方でも情報がない場合は不正なアクセスとみなす
+    order_id = session.get('last_order_id', 'N/A')
+    merchant_payment_id = session.get('paypay_merchant_payment_id', 'N/A')
+
+    # 不正アクセス判定だけ pop() で行い、データ表示には get() を使う
     if order_id == 'N/A' and merchant_payment_id == 'N/A':
         flash("不正なアクセスです。")
         return redirect(url_for('users_home.home'))
-    
-    # reservation_number.html に order_id と merchant_payment_id を渡す
+
+    # 必要ならここで pop() する（再アクセス時に消す）
+    # session.pop('last_order_id', None)
+    # session.pop('paypay_merchant_payment_id', None)
+
     return render_template(
         'users_order/reservation_number.html',
         order_id=order_id,
