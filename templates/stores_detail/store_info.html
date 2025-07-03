@@ -33,20 +33,18 @@
 <main>
     <h4>ストア情報</h4>
     <ul>
-        {% if stores %}
-            {% for store in stores %}
-                
-                    <p>店舗名: {{ store.store_name }}</p>
-                    <p>メール: {{ store.email }}</p>
-                    <p>所在地: {{ store.location }}</p>
-                    <p>代表者: {{ store.representative }}</p>
-                    <p>説明: {{ store.description }}</p>
-                    <p>登録日: {{ store.created_at }}</p>
-                
-            {% endfor %}
+        <!-- 店舗情報表示 -->
+        {% if store_data %}
+        <p>店舗名: {{ store_data.store_name }}</p>
+        <p>メール: {{ store_data.email }}</p>
+        <p>所在地: {{ store_data.location }}</p>
+        <p>代表者: {{ store_data.representative }}</p>
+        <p>説明: {{ store_data.description }}</p>
+        <p>登録日: {{ store_data.created_at }}</p>
         {% else %}
-            <li>ストア情報がありません。</li>
+        <p>ストア情報がありません。</p>
         {% endif %}
+
     </ul>
 </main>
 </body>

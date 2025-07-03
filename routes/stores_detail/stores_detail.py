@@ -456,4 +456,4 @@ def store_info():
     store_data = cur.fetchone()
     conn.close()
 
-    return render_template('stores_detail/store_info.html', store_name=store_name, store=store_data)
+    return render_template('stores_detail/store_info.html', store_name=store_name, store_data=store_data)
