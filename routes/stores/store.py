@@ -91,9 +91,10 @@ def registration_complete():
 
         if latitude and longitude:
             cursor.execute("""
-                INSERT INTO locations (location_title, travel_data_id, latitude, longitude)
+                INSERT INTO locations (location_title, store_id, latitude, longitude)
                 VALUES (?, ?, ?, ?)
             """, (store_info['location'], store_id, latitude, longitude))
+
 
         conn.commit()
         conn.close()
