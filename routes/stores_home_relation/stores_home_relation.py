@@ -38,4 +38,51 @@ def store_home_menu():
 
 
 
+@stores_home_relation_bp.route('/store_analysis')
+def store_analysis():
+    if 'store_id' not in session:
+        flash("ログインしてください")
+        return redirect(url_for('store.store_login'))
+    
+    store_name = session.get('store_name', 'ゲスト')
+    return render_template('stores_home_relation/store_analysis.html', store_name=store_name)
 
+
+@stores_home_relation_bp.route('/store_customer_history')
+def store_customer_history():
+    if 'store_id' not in session:
+        flash("ログインしてください")
+        return redirect(url_for('store.store_login'))
+
+    store_name = session.get('store_name', 'ゲスト')
+    return render_template('stores_home_relation/store_customer_history.html', store_name=store_name)
+
+
+@stores_home_relation_bp.route('/store_memo')
+def store_memo():
+    if 'store_id' not in session:
+        flash("ログインしてください")
+        return redirect(url_for('store.store_login'))
+
+    store_name = session.get('store_name', 'ゲスト')
+    return render_template('stores_home_relation/store_memo.html', store_name=store_name)
+
+
+@stores_home_relation_bp.route('/store_other')
+def store_other():
+    if 'store_id' not in session:
+        flash("ログインしてください")
+        return redirect(url_for('store.store_login'))
+
+    store_name = session.get('store_name', 'ゲスト')
+    return render_template('stores_home_relation/store_other.html', store_name=store_name)
+
+
+@stores_home_relation_bp.route('/store_reservation')
+def store_reservation():
+    if 'store_id' not in session:
+        flash("ログインしてください")
+        return redirect(url_for('store.store_login'))
+
+    store_name = session.get('store_name', 'ゲスト')
+    return render_template('stores_home_relation/store_reservation.html', store_name=store_name)
