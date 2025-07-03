@@ -33,12 +33,13 @@
     <div class="sub-navigation">
         <a href="{{ url_for('stores_detail.store_home') }}" class="shortcut-link">ストアホーム</a>
         <a href="{{ url_for('stores_home_relation.store_home_menu') }}" class="shortcut-link">商品ページ</a>
-        <a href="" class="shortcut-link">売り上げ予測分析</a>
-        <a href="" class="shortcut-link">顧客履歴</a>
-        <a href="" class="shortcut-link">ストアメモ</a>
-        <a href="" class="shortcut-link">予約受付</a>
-        <a href="" class="shortcut-link">そのほか</a>
+        <a href="{{ url_for('stores_home_relation.store_analysis') }}" class="shortcut-link">売り上げ予測分析</a>
+        <a href="{{ url_for('stores_home_relation.store_customer_history') }}" class="shortcut-link">顧客履歴</a>
+        <a href="{{ url_for('stores_home_relation.store_memo') }}" class="shortcut-link">ストアメモ</a>
+        <a href="{{ url_for('stores_home_relation.store_reservation') }}" class="shortcut-link">予約受付</a>
+        <a href="{{ url_for('stores_home_relation.store_other') }}" class="shortcut-link">そのほか</a>
     </div>
+    
     
 
     <main class="main-content">
