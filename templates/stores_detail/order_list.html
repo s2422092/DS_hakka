@@ -63,7 +63,7 @@
                 <div>
                     <form action="{{ url_for('stores_detail.update_order_status', order_id=order.id) }}" method="post">
                         <select name="status">
-                            {% for s in ['注文受付中', '受付完了', '商品作成中', '作成直前', '受け取り待ち'] %}
+                            {% for s in ['注文受付中', '受付完了', '商品作成中', '作成直前', '受け取り待ち','受け取り完了', 'キャンセル'] %}
                                 <option value="{{ s }}" {% if order.status == s %}selected{% endif %}>{{ s }}</option>
                             {% endfor %}
                         </select>

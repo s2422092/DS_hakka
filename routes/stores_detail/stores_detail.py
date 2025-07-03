@@ -405,7 +405,7 @@ def order_list():
 @stores_detail_bp.route('/update-order-status/<int:order_id>', methods=['POST'])
 def update_order_status(order_id):
     new_status = request.form.get('status')
-    valid_statuses = ['注文受付中', '受付完了', '商品作成中', '作成直前', '受け取り待ち', 'completed', 'canceled']
+    valid_statuses = ['注文受付中', '受付完了', '商品作成中', '作成直前', '受け取り待ち', '受け取り完了', 'キャンセル']
 
     if new_status not in valid_statuses:
         flash("無効なステータスです")
