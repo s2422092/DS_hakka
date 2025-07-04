@@ -1,62 +1,265 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
- "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="ja" lang="ja">
+<!DOCTYPE html>
+<html lang="ja">
 <head>
     <meta charset="UTF-8">
-    <title>店舗登録フォーム</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/stores.css') }}">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>店舗様向け 新規登録 - モバおる</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        /* --- ユーザー提供の参考CSSをベースに調整 --- */
+        body {
+            font-family: "Segoe UI", Meiryo, sans-serif;
+            background-color: #f9f9f9;
+            margin: 0;
+            padding: 2rem;
+            color: #333;
+            line-height: 1.6;
+        }
+
+        /* --- フォーム全体のコンテナ --- */
+        .form-container {
+            max-width: 600px;
+            margin: auto;
+            background-color: #fff;
+            padding: 2rem;
+            border-radius: 12px;
+            box-shadow: 0 0 12px rgba(0, 0, 0, 0.1);
+            text-align: left;
+        }
+
+        /* --- 見出し --- */
+        h1 {
+            text-align: center;
+            color: #333;
+            font-size: 2rem;
+            margin-bottom: 1rem;
+        }
+        .subtitle {
+            text-align: center;
+            color: #555;
+            margin-bottom: 2rem;
+            font-size: 1.1rem;
+        }
+
+        /* --- フォーム要素 --- */
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: bold;
+            color: #333;
+        }
+        input[type="text"],
+        input[type="email"],
+        input[type="password"],
+        input[type="time"] {
+            width: 100%;
+            padding: 0.75rem;
+            margin-top: 0.3rem;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            box-sizing: border-box;
+            transition: border-color 0.3s, box-shadow 0.3s;
+        }
+        input:focus {
+            outline: none;
+            border-color: #3498db; /* メインカラーの青 */
+            box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.2);
+        }
+        .helper-text {
+            font-size: 0.9em;
+            color: #8c6239; /* 注記用のテキストカラー */
+            margin-top: 0.4rem;
+        }
+        .password-wrapper {
+            position: relative;
+        }
+        #password-toggle {
+            position: absolute;
+            top: 50%;
+            right: 15px;
+            transform: translateY(-50%);
+            cursor: pointer;
+            color: #7f8c8d;
+        }
+
+        /* --- グループ化のためのスタイル --- */
+        fieldset {
+            border: 1px solid #dfe4ea;
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+        legend {
+            font-weight: bold;
+            color: #333;
+            padding: 0 0.5rem;
+        }
+        
+        /* --- チェックボックス --- */
+        .checkbox-label {
+            display: flex;
+            align-items: center;
+            font-weight: normal;
+            color: #333;
+            margin-top: 0.5rem;
+        }
+        .checkbox-label input {
+            margin-right: 8px;
+        }
+
+        /* --- ボタン --- */
+        button[type="submit"] {
+            margin-top: 1rem;
+            padding: 0.75rem 1.5rem;
+            width: 100%;
+            background-color: #3498db; /* メインカラーの青 */
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        button[type="submit"]:hover {
+            background-color: #2980b9; /* ホバー時の濃い青 */
+        }
+        .back-link-area {
+            text-align: center;
+            margin-top: 2rem;
+        }
+        .back-link {
+            background-color: #ffa500; /* 戻るボタンのオレンジ */
+            color: white;
+            font-weight: bold;
+            padding: 10px 20px;
+            border-radius: 8px;
+            text-decoration: none;
+            display: inline-block;
+            transition: background-color 0.3s;
+        }
+        .back-link:hover {
+            background-color: #e69500; /* ホバー時の濃いオレンジ */
+        }
+    </style>
 </head>
 <body>
-    <h1>店舗登録フォーム</h1>
-    <form action="{{ url_for('store.store_registration') }}" method="post">
-        <label for="store_name">店舗名:</label><br>
-        <input type="text" id="store_name" name="store_name" required><br><br>
 
-        <label for="email">メールアドレス:</label><br>
-        <input type="email" id="email" name="email" required><br><br>
+    <div class="form-container">
+        <h1>店舗様向け 新規登録</h1>
+        <p class="subtitle">モバオルへの掲載を始めましょう。まずは基本情報をご入力ください。</p>
 
-        <label for="password">パスワード:</label><br>
-        <input type="password" id="password" name="password" required><br><br>
+        <form action="{{ url_for('store.store_registration') }}" method="post">
+            
+            <fieldset>
+                <legend>アカウント情報</legend>
+                <div class="form-group">
+                    <label for="store_name">店舗名</label>
+                    <input type="text" id="store_name" name="store_name" placeholder="例：カフェ・ド・モバおる" required>
+                    <small class="helper-text">お客様に表示されるお店の名前です。</small>
+                </div>
 
-        <label for="location">所在地:</label><br>
-        <input type="text" id="location" name="location"><br><br>
+                <div class="form-group">
+                    <label for="email">メールアドレス</label>
+                    <input type="email" id="email" name="email" placeholder="example@mobaoru.com" required>
+                    <small class="helper-text">ログインや重要なお知らせの受信に使用します。</small>
+                </div>
 
-        <label for="representative">代表者名:</label><br>
-        <input type="text" id="representative" name="representative"><br><br>
-        
-        <label>営業時間:</label><br>
-        月〜金: 
-        <input type="time" name="weekday_open" required> 〜 
-        <input type="time" name="weekday_close" required><br>
+                <div class="form-group">
+                    <label for="password">パスワード</label>
+                    <div class="password-wrapper">
+                        <input type="password" id="password" name="password" placeholder="8文字以上の英数字" required>
+                        <i class="fas fa-eye" id="password-toggle"></i>
+                    </div>
+                    <small class="helper-text">セキュリティのため、8文字以上の英数字を組み合わせたものを推奨します。</small>
+                </div>
+            </fieldset>
 
-        土日祝: 
-        <input type="time" name="weekend_open" id="weekend_open" required> 〜 
-        <input type="time" name="weekend_close" id="weekend_close" required>
-        <label>
-        <input type="checkbox" id="weekend_closed" name="weekend_closed" value="1" onchange="toggleWeekendInputs()"> 休業
-        </label>
-        <br><br>
+            <fieldset>
+                <legend>店舗詳細</legend>
+                <div class="form-group">
+                    <label for="location">所在地</label>
+                    <input type="text" id="location" name="location" placeholder="例：東京都品川区西五反田1-1-1" required>
+                    <small class="helper-text">お客様がお店を見つけるための情報です。</small>
+                </div>
 
-        <script>
-        function toggleWeekendInputs() {
-        const closed = document.getElementById('weekend_closed').checked;
-        document.getElementById('weekend_open').disabled = closed;
-        document.getElementById('weekend_close').disabled = closed;
-        if (closed) {
-            document.getElementById('weekend_open').value = "00:00";
-            document.getElementById('weekend_close').value = "00:00";
-        }
-        }
-        </script>
+                <div class="form-group">
+                    <label for="representative">代表者名</label>
+                    <input type="text" id="representative" name="representative" placeholder="例：モバイル 太郎" required>
+                    <small class="helper-text">契約書などに記載される正式な代表者名をご入力ください。</small>
+                </div>
+            </fieldset>
 
+            <fieldset>
+                <legend>営業時間</legend>
+                <small class="helper-text" style="margin-bottom: 1rem; display: block;">お客様が注文を受け取れる時間を設定してください。</small>
+                
+                <div class="form-group">
+                    <label>月〜金:</label>
+                    <div style="display: flex; gap: 10px; align-items: center;">
+                        <input type="time" name="weekday_open" required>
+                        <span>〜</span>
+                        <input type="time" name="weekday_close" required>
+                    </div>
+                </div>
 
-        <button type="submit">確認</button>
-    </form>
+                <div class="form-group">
+                    <label>土日祝:</label>
+                    <div style="display: flex; gap: 10px; align-items: center;">
+                        <input type="time" name="weekend_open" id="weekend_open" required>
+                        <span>〜</span>
+                        <input type="time" name="weekend_close" id="weekend_close" required>
+                    </div>
+                    <label class="checkbox-label">
+                        <input type="checkbox" id="weekend_closed" name="weekend_closed" value="1" onchange="toggleWeekendInputs()"> 土日祝は休業
+                    </label>
+                </div>
+            </fieldset>
 
-    <div class="button-area">
-        <a href="{{ url_for('general.explamation') }}" class="back-link">← 戻る</a>
+            <button type="submit">確認画面へ進む</button>
+        </form>
+
+        <div class="back-link-area">
+            <a href="{{ url_for('general.explamation') }}" class="back-link">← 戻る</a>
+        </div>
     </div>
+
+    <script>
+        // --- 週末の営業時間を無効化/有効化する ---
+        function toggleWeekendInputs() {
+            const isClosed = document.getElementById('weekend_closed').checked;
+            const openInput = document.getElementById('weekend_open');
+            const closeInput = document.getElementById('weekend_close');
+
+            openInput.disabled = isClosed;
+            closeInput.disabled = isClosed;
+
+            // 休業にチェックを入れた場合、必須属性を外す
+            openInput.required = !isClosed;
+            closeInput.required = !isClosed;
+            
+            if (isClosed) {
+                // 休業の場合、値をリセット
+                openInput.value = "";
+                closeInput.value = "";
+            }
+        }
+
+        // --- パスワードの表示/非表示を切り替える ---
+        const passwordInput = document.getElementById('password');
+        const passwordToggle = document.getElementById('password-toggle');
+
+        passwordToggle.addEventListener('click', function() {
+            const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+            passwordInput.setAttribute('type', type);
+            this.classList.toggle('fa-eye-slash');
+        });
+
+        // ページ読み込み時に一度実行して初期状態を正しく設定
+        document.addEventListener('DOMContentLoaded', toggleWeekendInputs);
+    </script>
     
 </body>
 </html>
-
