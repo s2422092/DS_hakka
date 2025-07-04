@@ -1,21 +1,18 @@
 from flask import Blueprint, render_template, request, redirect, url_for, flash, session, current_app
-from werkzeug.security import generate_password_hash, check_password_hash
 import sqlite3
 import os
 import logging
-from functools import wraps
 
-users_login_bp = Blueprint('users_login', __name__,
-                           template_folder='../../templates/users_login', # template_folderを指定
-                           url_prefix='/users_login')
+users_login_bp = Blueprint(
+    'users_login', __name__,
+    template_folder='../../templates/users_login',
+    url_prefix='/users_login'
+)
 
 # --- データベース接続ヘルパー ---
 def get_db_connection():
-    """データベース接続を取得します。カラム名でアクセスできるように設定します。"""
-    # このファイルの場所から2階層上のディレクトリにあるapp.dbへのパスを構築
     db_path = os.path.join(os.path.dirname(__file__), '..', '..', 'app.db')
     conn = sqlite3.connect(db_path)
-    # カラム名でアクセスできるようにする
     conn.row_factory = sqlite3.Row
     return conn
 
@@ -32,8 +29,8 @@ def login():
         user = cursor.fetchone()
         conn.close()
 
-        # get_db_connection()でrow_factoryを設定したため、カラム名でアクセス可能
-        if user and check_password_hash(user['password_hash'], password):
+        # パスワードは平文で比較
+        if user and user['password'] == password:
             session['id'] = user['id']
             session['u_name'] = user['u_name']
             flash("ログインに成功しました", "success")
@@ -43,6 +40,7 @@ def login():
             return render_template('login.html')
 
     return render_template('login.html')
+
 
 # --- 新規登録ページ ---
 @users_login_bp.route('/signup', methods=['GET', 'POST'])
@@ -61,14 +59,15 @@ def signup():
             flash("パスワードが一致しません", "error")
             return render_template('signup.html')
 
-        password_hash = generate_password_hash(password1)
+        # パスワードは平文のまま保存
+        password = password1
 
         try:
             conn = get_db_connection()
             cursor = conn.cursor()
             cursor.execute(
-                "INSERT INTO users_table (u_name, email, password_hash) VALUES (?, ?, ?)",
-                (u_name, email, password_hash)
+                "INSERT INTO users_table (u_name, email, password) VALUES (?, ?, ?)",
+                (u_name, email, password)
             )
             conn.commit()
             conn.close()
@@ -121,7 +120,6 @@ def re_enrollment():
 # --- パスワード再設定: 新パスワード入力ページ ---
 @users_login_bp.route('/password_input', methods=['GET', 'POST'])
 def password_input():
-    # GETリクエスト時にセッションがない場合は、メールアドレス入力に戻す
     if 'reset_email' not in session:
         flash("有効なセッションがありません。もう一度メールアドレスを入力してください。", "error")
         return redirect(url_for('users_login.re_enrollment'))
@@ -139,24 +137,22 @@ def password_input():
             flash("入力されたパスワードが一致しません。", "error")
             return render_template('password_input.html')
 
-        password_hash = generate_password_hash(password_one)
-        
+        # 平文で保存
         try:
             conn = get_db_connection()
             cursor = conn.cursor()
             cursor.execute(
-                "UPDATE users_table SET password_hash = ? WHERE email = ?",
-                (password_hash, email)
+                "UPDATE users_table SET password = ? WHERE email = ?",
+                (password_one, email)
             )
             conn.commit()
-            
+
             if cursor.rowcount > 0:
                 flash("パスワードが正常に変更されました。ログインしてください。", "success")
-                session.pop('reset_email', None) # 使用済みのセッションを削除
+                session.pop('reset_email', None)
                 conn.close()
                 return redirect(url_for('users_login.login'))
             else:
-                # このケースは通常発生しにくいが、念のため
                 conn.close()
                 flash("パスワードの更新に失敗しました。再度お試しください。", "error")
                 return render_template('password_input.html')

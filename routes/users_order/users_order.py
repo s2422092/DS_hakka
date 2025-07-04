@@ -1,5 +1,3 @@
-# routes/users_order/users_order.py
-
 from flask import Blueprint, render_template, request, redirect, url_for, session, flash, jsonify
 import sqlite3
 import datetime
@@ -7,15 +5,15 @@ from functools import wraps
 
 # --- PayPay関連のインポート ---
 import paypayopa
-import polling
+# polling は現在このファイルでは使われていないため、削除しても問題ありません
 import uuid
 import os
-import json
+# json は現在このファイルでは使われていないため、削除しても問題ありません
 import logging
-import time
+# time は現在このファイルでは使われていないため、削除しても問題ありません
 from dotenv import load_dotenv # .envから環境変数を読み込むため
 from flask_cors import CORS
-
+from paypayopa import Client
 
 # --- .envファイルの読み込みとPayPay設定 ---
 load_dotenv() # ファイルの先頭、またはPayPay関連コードの直前で一度だけ呼び出す
@@ -37,9 +35,10 @@ client = paypayopa.Client(
     production_mode=False) # production_modeをFalseに設定し、サンドボックス環境を使用
 client.set_assume_merchant(MERCHANT_ID)
 
+
 users_order_bp = Blueprint('users_order', __name__, url_prefix='/users_order')
 
-CORS(users_order_bp)
+CORS(users_order_bp, supports_credentials=True) # supports_credentials=True を追加
 
 
 def get_db_connection():
@@ -58,6 +57,7 @@ def login_required(f):
 
 # --- Routes ---
 
+# (menu, add_to_cart, cart_confirmation などの既存ルートは変更なし)
 @users_order_bp.route('/menu/<int:store_id>')
 @login_required
 def menu(store_id):
@@ -172,8 +172,9 @@ def payment_selection():
     store = conn.execute("SELECT store_name FROM store WHERE store_id = ?", (store_id,)).fetchone()
     conn.close()
 
-    # BlueprintのURLプレフィックスとPayPay APIのベースURLを結合して渡す
-    paypay_api_base_url = f"{FRONTEND_BASE_URL_FOR_API}{users_order_bp.url_prefix}/paypay"
+    # JavaScript側でAPIのベースURLを正しく構築するために渡す
+    paypay_api_base_url = url_for('users_order.create_qr_code').rsplit('/', 1)[0]
+
 
     return render_template(
         'users_order/payment_selection.html',
@@ -184,6 +185,7 @@ def payment_selection():
         paypay_api_base_url=paypay_api_base_url
     )
 
+# (create_order, clear_cart, back_to_home, update_cart_item, delete_cart_item などの既存ルートは変更なし)
 @users_order_bp.route('/create_order', methods=['POST'])
 @login_required
 def create_order():
@@ -336,30 +338,34 @@ def delete_cart_item():
 
     return redirect(url_for('users_order.cart_confirmation'))
 
+# --- ▼▼▼ ここから下を編集 ▼▼▼ ---
 @users_order_bp.route('/paypay/create-qr', methods=['POST', 'OPTIONS'])
 def create_qr_code():
-    """PayPay支払い用のQRコードを生成するAPIエンドポイント"""
-    # 1. CORSプリフライトリクエストへの対応
+    """
+    PayPay支払い用のQRコードを生成するAPIエンドポイント。
+    フロントエンドからのリクエストを受け、PayPay APIと通信する役割を担います。
+    """
+    # --- STEP 1: CORSプリフライトリクエストへの対応 ---
     if request.method == 'OPTIONS':
         return jsonify(success=True), 200
 
-    # 2. API用の認証チェック
+    # --- STEP 2: ログイン状態の確認（API用の認証） ---
     if 'id' not in session:
-        logger.warning("認証されていないユーザーからのQRコード生成リクエストがありました。")
+        logger.warning("QRコード生成リクエストがありましたが、ユーザーが認証されていません。")
         return jsonify({'error': 'Authentication required', 'details': 'ログインしてください。'}), 401
 
-    # 3. リクエストボディからデータを取得
+    # --- STEP 3: フロントエンドからのデータ取得と検証 ---
     data = request.get_json()
     if not data or 'amount' not in data or 'orderItems' not in data:
+        logger.error(f"無効なリクエストボディです: {data}")
         return jsonify({'error': 'Invalid request body', 'details': 'リクエストに必要なデータが不足しています。'}), 400
 
-    # 4. 決済ごとにユニークなIDを生成
+    # --- STEP 4: 決済情報の一意なIDを生成 ---
     merchant_payment_id = f"mob-order-{uuid.uuid4()}"
-    
-    # このIDをセッションに保存しておくことで、支払い完了後の注文確定処理に利用できる
     session['paypay_merchant_payment_id'] = merchant_payment_id
+    session.modified = True
 
-    # 5. PayPay APIに送信するペイロードを構築
+    # --- STEP 5: PayPay APIに送信するデータを構築 ---
     payload = {
         "merchantPaymentId": merchant_payment_id,
         "amount": data['amount'],
@@ -371,45 +377,25 @@ def create_qr_code():
     }
 
     try:
-        # 6. PayPay APIを呼び出してQRコードを生成
-        logger.info(f"PayPay QR生成リクエスト: {payload}")
-        response = client.code.create(payload)
-        logger.info(f"PayPay QR生成レスポンス: {response}")
+        logger.info(f"PayPayへのQRコード生成リクエストを開始します (ID: {merchant_payment_id})")
 
-        # 7. 成功レスポンスをクライアントに返す
-        return jsonify(response)
+        # clientにCode属性があるか確認（デバッグ用）
+        if not hasattr(client, 'Code'):
+            raise AttributeError("PayPayクライアントに 'Code' 属性がありません。paypayopaのバージョンや初期化を確認してください。")
+
+        # QRコード生成呼び出し
+        paypay_response = client.Code.create_qr_code(payload)
+
+        logger.info(f"PayPayからのレスポンスを正常に受信しました (ID: {merchant_payment_id})")
+
+        return jsonify(paypay_response)
 
     except Exception as e:
-        # 8. エラーハンドリング
-        logger.error(f"PayPay QRコード生成中にエラーが発生: {e}")
+        logger.exception(f"PayPay QRコード生成中に予期せぬエラーが発生しました (ID: {merchant_payment_id}): {e}")
         return jsonify({"error": "Failed to create QR code", "details": str(e)}), 500
 
 
-
-def fetch_payment_details(merchant_id):
-    """指定されたマーチャントIDの支払い詳細をPayPayから取得するヘルパー関数"""
-    try:
-        resp = client.Code.get_payment_details(merchant_id)
-        logger.debug(f"Fetched payment details for {merchant_id}: {resp}")
-
-        if resp.get('resultInfo', {}).get('code') == 'RATE_LIMIT':
-            logger.warning(f"RATE_LIMIT エラー {merchant_id}。リトライします。")
-            return 'RATE_LIMIT_ERROR'
-        
-        if resp.get('data') is None:
-            error_code = resp.get('resultInfo', {}).get('code')
-            error_message = resp.get('resultInfo', {}).get('message')
-            if error_code:
-                logger.warning(f"PayPay APIが {merchant_id} にエラーを返しました: {error_code} - {error_message}。保留または一時的な問題と見なします。")
-            else:
-                logger.warning(f"{merchant_id} の支払い詳細が 'None' データとして返されました。保留または見つからないと見なします。")
-            return 'PENDING_NO_DATA'
-            
-        return resp['data']['status']
-    except Exception as e:
-        logger.exception(f"{merchant_id} の支払い詳細の取得中にエラーが発生しました: {e}")
-        return 'FETCH_ERROR'
-
+# (order_status, finalize_paypay_order, reservation_number などの既存ルートは変更なし)
 @users_order_bp.route('/paypay/order-status/<merch_id>', methods=['GET'])
 def order_status(merch_id):
     """
@@ -513,3 +499,26 @@ def reservation_number():
         order_id=order_id,
         merchant_payment_id=merchant_payment_id
     )
+
+
+def fetch_payment_details(merchant_payment_id):
+    try:
+        resp = client.Payment.get_payment_details(merchant_payment_id)
+        if resp.get('resultInfo', {}).get('code') == 'RATE_LIMIT':
+            logger.warning(f"RATE_LIMIT エラー {merchant_payment_id}。リトライします。")
+            return 'RATE_LIMIT_ERROR'
+
+        if resp.get('data') is None:
+            error_code = resp.get('resultInfo', {}).get('code')
+            error_message = resp.get('resultInfo', {}).get('message')
+            if error_code:
+                logger.warning(f"PayPay APIが {merchant_payment_id} にエラーを返しました: {error_code} - {error_message}。")
+            else:
+                logger.warning(f"{merchant_payment_id} の支払い詳細が 'None' データとして返されました。")
+            return 'PENDING_NO_DATA'
+
+        return resp['data']['status']
+
+    except Exception as e:
+        logger.exception(f"{merchant_payment_id} の支払い詳細の取得中にエラーが発生しました: {e}")
+        return 'FETCH_ERROR'
