@@ -347,10 +347,14 @@
                 }
 
                 const orderItems = cart.map(item => ({
-                    name: item.name, 
+                    name: item.name,
                     quantity: item.quantity,
-                    price: item.price 
+                    unitPrice: {
+                        amount: item.price,
+                        currency: "JPY"
+                    }
                 }));
+
 
                 paymentStatusMessage.textContent = "PayPay支払い情報を準備中...";
                 paymentStatusMessage.className = '';

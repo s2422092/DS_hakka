@@ -339,7 +339,6 @@ def delete_cart_item():
     return redirect(url_for('users_order.cart_confirmation'))
 
 # --- ▼▼▼ ここから下を編集 ▼▼▼ ---
-
 @users_order_bp.route('/paypay/create-qr', methods=['POST', 'OPTIONS'])
 def create_qr_code():
     """
@@ -380,11 +379,12 @@ def create_qr_code():
     try:
         logger.info(f"PayPayへのQRコード生成リクエストを開始します (ID: {merchant_payment_id})")
 
-        # clientにcode属性があるか確認（デバッグ用）
-        if not hasattr(client, 'code'):
-            raise AttributeError("PayPayクライアントに 'code' 属性がありません。paypayopaのバージョンや初期化を確認してください。")
+        # clientにCode属性があるか確認（デバッグ用）
+        if not hasattr(client, 'Code'):
+            raise AttributeError("PayPayクライアントに 'Code' 属性がありません。paypayopaのバージョンや初期化を確認してください。")
 
-        paypay_response = client.code.create(payload)
+        # QRコード生成呼び出し
+        paypay_response = client.Code.create_qr_code(payload)
 
         logger.info(f"PayPayからのレスポンスを正常に受信しました (ID: {merchant_payment_id})")
 
@@ -393,6 +393,7 @@ def create_qr_code():
     except Exception as e:
         logger.exception(f"PayPay QRコード生成中に予期せぬエラーが発生しました (ID: {merchant_payment_id}): {e}")
         return jsonify({"error": "Failed to create QR code", "details": str(e)}), 500
+
 
 # (order_status, finalize_paypay_order, reservation_number などの既存ルートは変更なし)
 @users_order_bp.route('/paypay/order-status/<merch_id>', methods=['GET'])
@@ -500,15 +501,19 @@ def reservation_number():
     )
 
 def fetch_payment_details(merchant_id):
-    """指定されたマーチャントIDの支払い詳細をPayPayから取得するヘルパー関数"""
     try:
-        resp = client.Code.get_payment_details(merchant_id)
+        # ここも client.get_payment_details などに修正
+        if not hasattr(client, 'get_payment_details'):
+            logger.error("PayPayクライアントに 'get_payment_details' メソッドがありません。")
+            return 'FETCH_ERROR'
+
+        resp = client.get_payment_details(merchant_id)
         logger.debug(f"Fetched payment details for {merchant_id}: {resp}")
 
         if resp.get('resultInfo', {}).get('code') == 'RATE_LIMIT':
             logger.warning(f"RATE_LIMIT エラー {merchant_id}。リトライします。")
             return 'RATE_LIMIT_ERROR'
-        
+
         if resp.get('data') is None:
             error_code = resp.get('resultInfo', {}).get('code')
             error_message = resp.get('resultInfo', {}).get('message')
@@ -517,8 +522,9 @@ def fetch_payment_details(merchant_id):
             else:
                 logger.warning(f"{merchant_id} の支払い詳細が 'None' データとして返されました。保留または見つからないと見なします。")
             return 'PENDING_NO_DATA'
-            
+
         return resp['data']['status']
+
     except Exception as e:
         logger.exception(f"{merchant_id} の支払い詳細の取得中にエラーが発生しました: {e}")
         return 'FETCH_ERROR'
