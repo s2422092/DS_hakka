@@ -14,6 +14,8 @@ import json
 import logging
 import time
 from dotenv import load_dotenv # .envから環境変数を読み込むため
+from flask_cors import CORS
+
 
 # --- .envファイルの読み込みとPayPay設定 ---
 load_dotenv() # ファイルの先頭、またはPayPay関連コードの直前で一度だけ呼び出す
@@ -36,6 +38,9 @@ client = paypayopa.Client(
 client.set_assume_merchant(MERCHANT_ID)
 
 users_order_bp = Blueprint('users_order', __name__, url_prefix='/users_order')
+
+CORS(users_order_bp)
+
 
 def get_db_connection():
     conn = sqlite3.connect('app.db')
@@ -331,56 +336,55 @@ def delete_cart_item():
 
     return redirect(url_for('users_order.cart_confirmation'))
 
-# --- PayPay関連のAPIエンドポイント ---
+@users_order_bp.route('/paypay/create-qr', methods=['POST', 'OPTIONS'])
+def create_qr_code():
+    """PayPay支払い用のQRコードを生成するAPIエンドポイント"""
+    # 1. CORSプリフライトリクエストへの対応
+    if request.method == 'OPTIONS':
+        return jsonify(success=True), 200
 
-@users_order_bp.route('/paypay/create-qr', methods=['POST'])
-def create_qr():
-    """PayPayのQRコード支払いを生成するエンドポイント"""
-    req = request.json
-    logger.info(f"Received create-qr request at /users_order/paypay/create-qr: {req}")
+    # 2. API用の認証チェック
+    if 'id' not in session:
+        logger.warning("認証されていないユーザーからのQRコード生成リクエストがありました。")
+        return jsonify({'error': 'Authentication required', 'details': 'ログインしてください。'}), 401
 
-    merchant_payment_id = uuid.uuid4().hex
+    # 3. リクエストボディからデータを取得
+    data = request.get_json()
+    if not data or 'amount' not in data or 'orderItems' not in data:
+        return jsonify({'error': 'Invalid request body', 'details': 'リクエストに必要なデータが不足しています。'}), 400
 
-    converted_order_items = []
-    for item in req["orderItems"]:
-        converted_order_items.append({
-            "name": item["name"],
-            "quantity": item["quantity"],
-            "unitPrice": {
-                "amount": item["price"],
-                "currency": "JPY"
-            }
-        })
+    # 4. 決済ごとにユニークなIDを生成
+    merchant_payment_id = f"mob-order-{uuid.uuid4()}"
+    
+    # このIDをセッションに保存しておくことで、支払い完了後の注文確定処理に利用できる
+    session['paypay_merchant_payment_id'] = merchant_payment_id
 
-    payment_details = {
+    # 5. PayPay APIに送信するペイロードを構築
+    payload = {
         "merchantPaymentId": merchant_payment_id,
+        "amount": data['amount'],
         "codeType": "ORDER_QR",
-        "orderItems": converted_order_items,
-        "amount": req["amount"],
+        "orderItems": data['orderItems'],
         "redirectUrl": url_for('users_order.reservation_number', _external=True),
         "redirectType": "WEB_LINK",
+        "isAuthorization": False,
     }
-    
+
     try:
-        resp = client.Code.create_qr_code(data=payment_details)
-        
-        logger.info(f"QR code creation response from PayPay: {resp}")
+        # 6. PayPay APIを呼び出してQRコードを生成
+        logger.info(f"PayPay QR生成リクエスト: {payload}")
+        response = client.code.create(payload)
+        logger.info(f"PayPay QR生成レスポンス: {response}")
 
-        if resp.get('resultInfo', {}).get('code') == 'SUCCESS' and not resp.get('data', {}).get('url'):
-            logger.error(f"PayPay QR code creation succeeded but 'url' field is missing in data. Full response: {json.dumps(resp, indent=2)}")
-            return jsonify({"error": "QRコードURLが見つかりません。", "details": resp}), 500
+        # 7. 成功レスポンスをクライアントに返す
+        return jsonify(response)
 
-        if _DEBUG:
-            logger.info(f"DEBUG: PayPay OPAに送信された支払い詳細: {json.dumps(payment_details, indent=2)}")
-        
-        # セッションに merchantPaymentId を保存して、ポーリングと注文確定に利用できるようにする
-        session['paypay_merchant_payment_id'] = merchant_payment_id
-        session.modified = True
-
-        return jsonify(resp)
     except Exception as e:
-        logger.exception(f"QRコード作成エラー: {e}")
-        return jsonify({"error": "QRコードの作成に失敗しました", "details": str(e)}), 500
+        # 8. エラーハンドリング
+        logger.error(f"PayPay QRコード生成中にエラーが発生: {e}")
+        return jsonify({"error": "Failed to create QR code", "details": str(e)}), 500
+
+
 
 def fetch_payment_details(merchant_id):
     """指定されたマーチャントIDの支払い詳細をPayPayから取得するヘルパー関数"""

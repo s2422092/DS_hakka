@@ -2,7 +2,6 @@ from __init__ import create_app
 
 app = create_app()
 
-
 # 🔒 セッションなどに必要なシークレットキーを設定
 app.secret_key = 'your_secret_key_here'  # ← 好きなランダムな文字列でOK
 
