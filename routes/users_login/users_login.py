@@ -32,8 +32,8 @@ def login():
         user = cursor.fetchone()
         conn.close()
 
-        # get_db_connection()でrow_factoryを設定したため、カラム名でアクセス可能
-        if user and check_password_hash(user['password_hash'], password):
+        # 平文パスワードで比較
+        if user and user['password'] == password:
             session['id'] = user['id']
             session['u_name'] = user['u_name']
             flash("ログインに成功しました", "success")
@@ -43,6 +43,7 @@ def login():
             return render_template('login.html')
 
     return render_template('login.html')
+
 
 # --- 新規登録ページ ---
 @users_login_bp.route('/signup', methods=['GET', 'POST'])
