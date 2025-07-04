@@ -360,11 +360,14 @@
                 qrModal.style.display = 'flex'; 
 
                 try {
-                    const response = await fetch(`${API_BASE_URL}/create-qr`, { 
+                        const response = await fetch(`${API_BASE_URL}/create-qr`, { 
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json',
                         },
+                        // ★★★ この行を追加 ★★★
+                        credentials: 'include', 
+                        // ★★★★★★★★★★★★★
                         body: JSON.stringify({
                             orderItems: orderItems, 
                             amount: {

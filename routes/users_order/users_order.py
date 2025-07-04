@@ -39,7 +39,8 @@ client.set_assume_merchant(MERCHANT_ID)
 
 users_order_bp = Blueprint('users_order', __name__, url_prefix='/users_order')
 
-CORS(users_order_bp)
+# どのサーバーからのアクセスを許可するかを指定します
+CORS(users_order_bp, resources={r"/*": {"origins": "http://localhost:5003"}}, supports_credentials=True)
 
 
 def get_db_connection():
@@ -339,49 +340,53 @@ def delete_cart_item():
 @users_order_bp.route('/paypay/create-qr', methods=['POST', 'OPTIONS'])
 def create_qr_code():
     """PayPay支払い用のQRコードを生成するAPIエンドポイント"""
-    # 1. CORSプリフライトリクエストへの対応
     if request.method == 'OPTIONS':
         return jsonify(success=True), 200
 
-    # 2. API用の認証チェック
     if 'id' not in session:
         logger.warning("認証されていないユーザーからのQRコード生成リクエストがありました。")
         return jsonify({'error': 'Authentication required', 'details': 'ログインしてください。'}), 401
 
-    # 3. リクエストボディからデータを取得
     data = request.get_json()
     if not data or 'amount' not in data or 'orderItems' not in data:
         return jsonify({'error': 'Invalid request body', 'details': 'リクエストに必要なデータが不足しています。'}), 400
 
-    # 4. 決済ごとにユニークなIDを生成
+    # --- ★★★ ここから修正・追加 ★★★ ---
+    # フロントエンドから受け取ったデータを、PayPayが要求する形式に変換します
+    converted_order_items = []
+    for item in data["orderItems"]:
+        converted_order_items.append({
+            "name": item["name"],
+            "quantity": item["quantity"],
+            "unitPrice": {  # 'price'を'unitPrice'オブジェクトに変換
+                "amount": item["price"],
+                "currency": "JPY"
+            }
+        })
+    # --- ★★★ ここまで修正・追加 ★★★ ---
+
     merchant_payment_id = f"mob-order-{uuid.uuid4()}"
-    
-    # このIDをセッションに保存しておくことで、支払い完了後の注文確定処理に利用できる
     session['paypay_merchant_payment_id'] = merchant_payment_id
 
-    # 5. PayPay APIに送信するペイロードを構築
     payload = {
         "merchantPaymentId": merchant_payment_id,
         "amount": data['amount'],
         "codeType": "ORDER_QR",
-        "orderItems": data['orderItems'],
+        "orderItems": converted_order_items,  # ★ 変換済みのデータを使用
         "redirectUrl": url_for('users_order.reservation_number', _external=True),
         "redirectType": "WEB_LINK",
         "isAuthorization": False,
     }
 
     try:
-        # 6. PayPay APIを呼び出してQRコードを生成
         logger.info(f"PayPay QR生成リクエスト: {payload}")
-        response = client.code.create(payload)
+        response = client.Code.create_qr_code(payload) # create_qr_code が正しいメソッド名でした
         logger.info(f"PayPay QR生成レスポンス: {response}")
-
-        # 7. 成功レスポンスをクライアントに返す
         return jsonify(response)
 
     except Exception as e:
-        # 8. エラーハンドリング
         logger.error(f"PayPay QRコード生成中にエラーが発生: {e}")
+        # エラーメッセージからKeyErrorの詳細を取得して返す
         return jsonify({"error": "Failed to create QR code", "details": str(e)}), 500
 
 
