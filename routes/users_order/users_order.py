@@ -13,7 +13,7 @@ import logging
 # time は現在このファイルでは使われていないため、削除しても問題ありません
 from dotenv import load_dotenv # .envから環境変数を読み込むため
 from flask_cors import CORS
-
+from paypayopa import Client
 
 # --- .envファイルの読み込みとPayPay設定 ---
 load_dotenv() # ファイルの先頭、またはPayPay関連コードの直前で一度だけ呼び出す
@@ -500,31 +500,25 @@ def reservation_number():
         merchant_payment_id=merchant_payment_id
     )
 
-def fetch_payment_details(merchant_id):
+
+def fetch_payment_details(merchant_payment_id):
     try:
-        # ここも client.get_payment_details などに修正
-        if not hasattr(client, 'get_payment_details'):
-            logger.error("PayPayクライアントに 'get_payment_details' メソッドがありません。")
-            return 'FETCH_ERROR'
-
-        resp = client.get_payment_details(merchant_id)
-        logger.debug(f"Fetched payment details for {merchant_id}: {resp}")
-
+        resp = client.Payment.get_payment_details(merchant_payment_id)
         if resp.get('resultInfo', {}).get('code') == 'RATE_LIMIT':
-            logger.warning(f"RATE_LIMIT エラー {merchant_id}。リトライします。")
+            logger.warning(f"RATE_LIMIT エラー {merchant_payment_id}。リトライします。")
             return 'RATE_LIMIT_ERROR'
 
         if resp.get('data') is None:
             error_code = resp.get('resultInfo', {}).get('code')
             error_message = resp.get('resultInfo', {}).get('message')
             if error_code:
-                logger.warning(f"PayPay APIが {merchant_id} にエラーを返しました: {error_code} - {error_message}。保留または一時的な問題と見なします。")
+                logger.warning(f"PayPay APIが {merchant_payment_id} にエラーを返しました: {error_code} - {error_message}。")
             else:
-                logger.warning(f"{merchant_id} の支払い詳細が 'None' データとして返されました。保留または見つからないと見なします。")
+                logger.warning(f"{merchant_payment_id} の支払い詳細が 'None' データとして返されました。")
             return 'PENDING_NO_DATA'
 
         return resp['data']['status']
 
     except Exception as e:
-        logger.exception(f"{merchant_id} の支払い詳細の取得中にエラーが発生しました: {e}")
+        logger.exception(f"{merchant_payment_id} の支払い詳細の取得中にエラーが発生しました: {e}")
         return 'FETCH_ERROR'
