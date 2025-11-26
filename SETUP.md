@@ -35,7 +35,7 @@ python app.py
 
 ## VS Codeでの設定
 
-1. `Cmd + Shift + P` (Mac) / `Ctrl + Shift + P` (Windows)
+1. `Cmd + Shift + P` (Mac)
 2. "Python: Select Interpreter" を選択
 3. `.venv` (Python 3.10.x) を選択
 
